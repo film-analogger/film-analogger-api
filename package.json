@@ -8,10 +8,10 @@
         "prettier": "^3.8.1"
     },
     "lint-staged": {
-        "*": "yarn lint"
+        "*.php": "yarn lint"
     },
     "scripts": {
         "prepare": "husky",
-        "lint": "prettier . --write"
+        "lint": "prettier --write"
     }
 }

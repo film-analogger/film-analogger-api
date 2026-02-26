@@ -6,7 +6,7 @@
 - [ ] setup pre commit and pre push hooks
     - [ ] commit :
         - [x] run commitizen on commit message
-        - [ ] run linter on staged files
+        - [x] run linter on staged files
     - [ ] pre-push : run
         - [ ] linter
         - [x] commitizen

@@ -3,3 +3,7 @@ build
 coverage
 **/*.yaml
 **/*.yml
+.husky
+.prettierignore
+.gitignore
+.git
