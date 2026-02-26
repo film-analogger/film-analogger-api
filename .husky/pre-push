@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-yarn prettier --check --max-warnings=0 
+php bin/phpunit

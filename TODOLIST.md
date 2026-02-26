@@ -10,8 +10,7 @@
     - [ ] pre-push : run
         - [ ] linter
         - [x] commitizen
-- [ ] setup commitlint
-- [ ] setup commitizen
+- [x] setup commitizen
 - [ ] setup test
 - [ ] setup graphql
 - [ ] setup bdd
