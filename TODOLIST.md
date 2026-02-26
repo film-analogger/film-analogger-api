@@ -2,18 +2,18 @@
 
 ## tech local development
 
-- [ ] setup linter
-- [ ] setup pre commit and pre push hooks
-    - [ ] commit :
+- [x] setup linter
+- [x] setup pre commit and pre push hooks
+    - [x] commit :
         - [x] run commitizen on commit message
         - [x] run linter on staged files
-    - [ ] pre-push : run
-        - [ ] linter
+    - [x] pre-push : run
         - [x] commitizen
 - [x] setup commitizen
-- [ ] setup test
+- [x] setup test
 - [ ] setup graphql
 - [ ] setup bdd
+- [ ] setup apiplatform
 - [ ] setup openapi
 - [ ] setup i18n
 - [ ] setup docker

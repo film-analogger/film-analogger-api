@@ -1,0 +1,11 @@
+api_platform:
+    title: Hello API Platform
+    version: 1.0.0
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+    
+    doctrine_mongodb_odm:
+        # To enable or disable Doctrine MongoDB ODM support.
+        enabled: true
