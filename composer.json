@@ -1,5 +1,6 @@
 {
     "type": "project",
+    "version": "0.0.0",
     "license": "proprietary",
     "minimum-stability": "stable",
     "prefer-stable": true,
@@ -14,8 +15,7 @@
         "symfony/runtime": "8.0.*",
         "symfony/yaml": "8.0.*"
     },
-    "require-dev": {
-    },
+    "require-dev": {},
     "config": {
         "allow-plugins": {
             "php-http/discovery": true,
