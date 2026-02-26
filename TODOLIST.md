@@ -5,11 +5,11 @@
 - [ ] setup linter
 - [ ] setup pre commit and pre push hooks
     - [ ] commit : 
-        - [ ] run commitlint on commit message
+        - [x] run commitizen on commit message
         - [ ] run linter on staged files
     - [ ] pre-push : run 
         - [ ] linter
-        - [ ] commitlint
+        - [x] commitizen
 - [ ] setup commitlint
 - [ ] setup commitizen
 - [ ] setup test
