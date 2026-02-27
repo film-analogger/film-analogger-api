@@ -5,7 +5,3 @@ api_platform:
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
-    
-    doctrine_mongodb_odm:
-        # To enable or disable Doctrine MongoDB ODM support.
-        enabled: true
