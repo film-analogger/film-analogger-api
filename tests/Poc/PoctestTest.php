@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace FilmAnalogger\FilmAnaloggerApi\Tests\Poc;
+
 use PHPUnit\Framework\TestCase;
 
 final class PoctestTest extends TestCase

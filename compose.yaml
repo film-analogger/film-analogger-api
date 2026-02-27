@@ -41,8 +41,7 @@ services:
 
 ###> doctrine/mongodb-odm-bundle ###
   db-mongodb:
-    image: mongo
-    hostname: mongodb
+    image: mongodb/mongodb-community-server:latest
     environment:
       MONGODB_INITDB_DATABASE: api
       MONGODB_INITDB_ROOT_USERNAME: api-platform

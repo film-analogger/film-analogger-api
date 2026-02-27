@@ -10,9 +10,9 @@ doctrine_mongodb:
         default:
             auto_mapping: true
             mappings:
-                App:
+                FilmAnalogger\FilmAnaloggerApi:
                     dir: '%kernel.project_dir%/src/Document'
-                    prefix: 'App\Document'
+                    prefix: 'FilmAnalogger\FilmAnaloggerApi\Document'
 
 when@prod:
     doctrine_mongodb:
