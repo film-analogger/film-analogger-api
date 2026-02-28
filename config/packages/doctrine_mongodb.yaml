@@ -10,6 +10,12 @@ doctrine_mongodb:
         default:
             auto_mapping: true
             mappings:
+                translatable:
+                    type: attribute # or annotation
+                    alias: GedmoTranslatable
+                    prefix: Gedmo\Translatable\Document
+                    dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/src/Translatable/Document"
+                    is_bundle: false
                 FilmAnalogger\FilmAnaloggerApi:
                     dir: '%kernel.project_dir%/src/Document'
                     prefix: 'FilmAnalogger\FilmAnaloggerApi\Document'

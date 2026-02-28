@@ -6,17 +6,20 @@ use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Repository\FilmRepository;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Gedmo\Translatable\Translatable;
+use Gedmo\Mapping\Annotation as Gedmo;
 
-#[ODM\Document]
+#[ODM\Document(repositoryClass: FilmRepository::class)]
 #[
     ApiResource(
         normalizationContext: ['groups' => [Film::SERIALIZATION_READ_GROUP]],
         denormalizationContext: ['groups' => [Film::SERIALIZATION_WRITE_GROUP]],
     ),
 ]
-class Film
+class Film implements Translatable
 {
     const SERIALIZATION_READ_GROUP = 'read-film';
     const SERIALIZATION_WRITE_GROUP = 'write-film';
@@ -30,9 +33,65 @@ class Film
     #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
     public string $name;
 
+    #[ODM\Field]
+    #[Assert\NotBlank]
+    #[Gedmo\Translatable]
+    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    public string $description;
+
+    #[ODM\Field]
+    #[Assert\NotBlank]
+    #[Assert\Choice(choices: ['C-41', 'E-6', 'B&W', 'ECN-2'], message: 'Choose a valid process.')]
+    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    public string $process;
+
+    #[ODM\Field]
+    #[
+        Assert\Choice(
+            choices: ['panchromatic', 'orthochromatic', 'chromogene'],
+            message: 'Choose a valid emulsion type.',
+        ),
+    ]
+    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    public ?string $emultionType = null;
+
+    #[ODM\Field]
+    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    public ?bool $inversible = null;
+
+    #[ODM\Field]
+    #[Assert\Url]
+    #[Gedmo\Translatable]
+    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    public ?string $officialDocumentationUrl = null;
+
+    #[ODM\Field]
+    #[Assert\NotBlank]
+    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    public int $sensibility;
+
+    #[ODM\Field]
+    #[Assert\CssColor]
+    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    public ?string $primaryColor = null;
+
+    #[ODM\Field]
+    #[Assert\CssColor]
+    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    public ?string $secondaryColor = null;
+
+    #[ODM\Field]
+    #[Assert\CssColor]
+    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    public ?string $tertiaryColor = null;
+
     #[ODM\ReferenceOne(targetDocument: Manufacturer::class)]
     #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
     public Manufacturer $manufacturer;
+
+    #[Gedmo\Locale]
+    #[Groups([Film::SERIALIZATION_READ_GROUP])]
+    private $locale;
 
     public function __construct() {}
 
@@ -49,5 +108,115 @@ class Film
     public function getManufacturer(): Manufacturer
     {
         return $this->manufacturer;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function setProcess(string $process): void
+    {
+        $this->process = $process;
+    }
+
+    public function getProcess(): string
+    {
+        return $this->process;
+    }
+
+    public function setEmultionType(?string $emultionType): void
+    {
+        $this->emultionType = $emultionType;
+    }
+
+    public function getEmultionType(): ?string
+    {
+        return $this->emultionType;
+    }
+
+    public function setInversible(?bool $inversible): void
+    {
+        $this->inversible = $inversible;
+    }
+
+    public function getInversible(): ?bool
+    {
+        return $this->inversible;
+    }
+
+    public function setOfficialDocumentationUrl(?string $officialDocumentationUrl): void
+    {
+        $this->officialDocumentationUrl = $officialDocumentationUrl;
+    }
+
+    public function getOfficialDocumentationUrl(): ?string
+    {
+        return $this->officialDocumentationUrl;
+    }
+
+    public function setSensibility(int $sensibility): void
+    {
+        $this->sensibility = $sensibility;
+    }
+
+    public function getSensibility(): int
+    {
+        return $this->sensibility;
+    }
+
+    public function setPrimaryColor(?string $primaryColor): void
+    {
+        $this->primaryColor = $primaryColor;
+    }
+
+    public function getPrimaryColor(): ?string
+    {
+        return $this->primaryColor;
+    }
+
+    public function setSecondaryColor(?string $secondaryColor): void
+    {
+        $this->secondaryColor = $secondaryColor;
+    }
+
+    public function getSecondaryColor(): ?string
+    {
+        return $this->secondaryColor;
+    }
+
+    public function setTertiaryColor(?string $tertiaryColor): void
+    {
+        $this->tertiaryColor = $tertiaryColor;
+    }
+
+    public function getTertiaryColor(): ?string
+    {
+        return $this->tertiaryColor;
+    }
+
+    public function setTranslatableLocale($locale)
+    {
+        $this->locale = $locale;
+    }
+
+    public function getLocale()
+    {
+        return $this->locale;
     }
 }

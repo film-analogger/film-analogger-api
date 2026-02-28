@@ -11,12 +11,12 @@
         - [x] commitizen
 - [x] setup commitizen
 - [x] setup test
-- [ ] setup graphql
-- [ ] setup bdd
-- [ ] setup apiplatform
-- [ ] setup openapi
-- [ ] setup i18n
-- [ ] setup docker
+- [x] setup graphql
+- [x] setup bdd
+- [x] setup apiplatform
+- [x] setup openapi
+- [x] setup i18n
+- [x] setup docker
 
 ## tech ci cd
 

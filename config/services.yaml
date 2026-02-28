@@ -7,6 +7,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    locale: en
+    availableLocales:
+        - en
+        - fr
 
 services:
     # default configuration for services in *this* file
@@ -19,5 +23,27 @@ services:
     FilmAnalogger\FilmAnaloggerApi\:
         resource: '../src/'
 
+    gedmo.mapping.driver.attribute:
+        class: Gedmo\Mapping\Driver\AttributeReader
+
+    # Gedmo Translatable Extension Listener
+    gedmo.listener.translatable:
+        class: Gedmo\Translatable\TranslatableListener
+        tags:
+            - { name: doctrine_mongodb.odm.event_listener, event: 'postLoad' }
+            - { name: doctrine_mongodb.odm.event_listener, event: 'postPersist' }
+            - { name: doctrine_mongodb.odm.event_listener, event: 'preFlush' }
+            - { name: doctrine_mongodb.odm.event_listener, event: 'onFlush' }
+            - { name: doctrine_mongodb.odm.event_listener, event: 'loadClassMetadata' }
+        calls:
+            - [ setAnnotationReader, [ '@gedmo.mapping.driver.attribute' ] ]
+            - [ setPersistDefaultLocaleTranslation, [ true ] ]
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    FilmAnalogger\FilmAnaloggerApi\EventListener\LocalEventListener:
+        arguments:
+            $translatableListener: '@gedmo.listener.translatable'
+            $defaultLocale: '%locale%'
+            $availableLocales: '%availableLocales%'
