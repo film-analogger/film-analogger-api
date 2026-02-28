@@ -28,7 +28,7 @@ services:
 
     # Gedmo Translatable Extension Listener
     gedmo.listener.translatable:
-        class: Gedmo\Translatable\TranslatableListener
+        class: FilmAnalogger\FilmAnaloggerApi\EventListener\TranslatableListener
         tags:
             - { name: doctrine_mongodb.odm.event_listener, event: 'postLoad' }
             - { name: doctrine_mongodb.odm.event_listener, event: 'postPersist' }

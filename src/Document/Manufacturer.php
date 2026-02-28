@@ -6,14 +6,15 @@ use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ODM\Document]
 #[
     ApiResource(
-        normalizationContext: ['groups' => [Manufacturer::SERIALIZATION_READ_GROUP]],
-        denormalizationContext: ['groups' => [Manufacturer::SERIALIZATION_WRITE_GROUP]],
+        normalizationContext: ['groups' => [SerializationGroups::MANUFACTURER_READ_GROUP]],
+        denormalizationContext: ['groups' => [SerializationGroups::MANUFACTURER_WRITE_GROUP]],
     ),
 ]
 class Manufacturer
@@ -22,22 +23,27 @@ class Manufacturer
     const SERIALIZATION_WRITE_GROUP = 'write-manufacturer';
 
     #[ODM\Id]
-    #[Groups([Manufacturer::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_READ_GROUP])]
+    #[Groups([SerializationGroups::MANUFACTURER_READ_GROUP, SerializationGroups::FILM_READ_GROUP])]
     private ?string $id = null;
 
     #[ODM\Field]
     #[Assert\NotBlank]
     #[
         Groups([
-            Manufacturer::SERIALIZATION_READ_GROUP,
-            Manufacturer::SERIALIZATION_WRITE_GROUP,
-            Film::SERIALIZATION_READ_GROUP,
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+            SerializationGroups::FILM_READ_GROUP,
         ]),
     ]
     public string $name;
 
     #[ODM\ReferenceMany(targetDocument: Film::class, mappedBy: 'manufacturer', storeAs: 'id')]
-    #[Groups([Manufacturer::SERIALIZATION_READ_GROUP, Manufacturer::SERIALIZATION_WRITE_GROUP])]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
     public Collection $films;
 
     public function __construct()

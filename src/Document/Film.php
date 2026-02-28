@@ -3,10 +3,10 @@
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
 use ApiPlatform\Metadata\ApiResource;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Repository\FilmRepository;
+use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Translatable\Translatable;
@@ -15,34 +15,38 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ODM\Document(repositoryClass: FilmRepository::class)]
 #[
     ApiResource(
-        normalizationContext: ['groups' => [Film::SERIALIZATION_READ_GROUP]],
-        denormalizationContext: ['groups' => [Film::SERIALIZATION_WRITE_GROUP]],
+        normalizationContext: [
+            'groups' => [
+                SerializationGroups::FILM_READ_GROUP,
+                SerializationGroups::TRANSLATABLE_READ_GROUP,
+            ],
+        ],
+        denormalizationContext: ['groups' => [SerializationGroups::FILM_WRITE_GROUP]],
     ),
 ]
 class Film implements Translatable
 {
-    const SERIALIZATION_READ_GROUP = 'read-film';
-    const SERIALIZATION_WRITE_GROUP = 'write-film';
+    use TranslatableTrait;
 
     #[ODM\Id]
-    #[Groups([Film::SERIALIZATION_READ_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP])]
     private ?string $id = null;
 
     #[ODM\Field]
     #[Assert\NotBlank]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public string $name;
 
     #[ODM\Field]
     #[Assert\NotBlank]
     #[Gedmo\Translatable]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public string $description;
 
     #[ODM\Field]
     #[Assert\NotBlank]
     #[Assert\Choice(choices: ['C-41', 'E-6', 'B&W', 'ECN-2'], message: 'Choose a valid process.')]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public string $process;
 
     #[ODM\Field]
@@ -52,46 +56,42 @@ class Film implements Translatable
             message: 'Choose a valid emulsion type.',
         ),
     ]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $emultionType = null;
 
     #[ODM\Field]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?bool $inversible = null;
 
     #[ODM\Field]
     #[Assert\Url]
     #[Gedmo\Translatable]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $officialDocumentationUrl = null;
 
     #[ODM\Field]
     #[Assert\NotBlank]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public int $sensibility;
 
     #[ODM\Field]
     #[Assert\CssColor]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $primaryColor = null;
 
     #[ODM\Field]
     #[Assert\CssColor]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $secondaryColor = null;
 
     #[ODM\Field]
     #[Assert\CssColor]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $tertiaryColor = null;
 
     #[ODM\ReferenceOne(targetDocument: Manufacturer::class)]
-    #[Groups([Film::SERIALIZATION_READ_GROUP, Film::SERIALIZATION_WRITE_GROUP])]
+    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public Manufacturer $manufacturer;
-
-    #[Gedmo\Locale]
-    #[Groups([Film::SERIALIZATION_READ_GROUP])]
-    private $locale;
 
     public function __construct() {}
 
@@ -208,15 +208,5 @@ class Film implements Translatable
     public function getTertiaryColor(): ?string
     {
         return $this->tertiaryColor;
-    }
-
-    public function setTranslatableLocale($locale)
-    {
-        $this->locale = $locale;
-    }
-
-    public function getLocale()
-    {
-        return $this->locale;
     }
 }
