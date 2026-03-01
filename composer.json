@@ -1,7 +1,7 @@
 {
     "name": "film-analogger/film-analogger-api",
     "type": "project",
-    "version": "1.2.3",
+    "version": "0.0.0",
     "license": "proprietary",
     "minimum-stability": "stable",
     "prefer-stable": true,

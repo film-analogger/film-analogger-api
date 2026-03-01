@@ -6,3 +6,7 @@ commitizen:
     update_changelog_on_bump: true
     version_provider: composer
     version_scheme: semver2
+    update_changelog_on_bump: true
+    version_files :
+        - "./composer.json:version"
+        - "./config/packages/api_platform.yaml:api_platform.version"
