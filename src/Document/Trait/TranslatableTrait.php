@@ -25,6 +25,11 @@ trait TranslatableTrait
         return $this->locale;
     }
 
+    public function setTranslatableLocale($locale)
+    {
+        $this->locale = $locale;
+    }
+
     public function setLocale($locale)
     {
         $this->locale = $locale;

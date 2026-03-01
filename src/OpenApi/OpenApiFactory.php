@@ -28,10 +28,17 @@ class OpenApiFactory implements OpenApiFactoryInterface
      */
     private function addLocaleHeader(OpenApi $openApi): void
     {
-        $localeHeader = new Parameter(
+        $xLocaleHeader = new Parameter(
             name: LocalEventListener::LOCAL_HEADER,
             in: 'header',
             description: 'Locale (e.g. "en", "fr")',
+            schema: ['type' => 'string'],
+        );
+
+        $acceptLanguageHeader = new Parameter(
+            name: LocalEventListener::ACCEPT_LANGUAGE_HEADER,
+            in: 'header',
+            description: 'Accept-Language (e.g. "en", "fr", "en-US,en;q=0.9,fr;q=0.8") - used as a fallback if X-LOCALE is not set, the first language in the list that matches an available locale will be used',
             schema: ['type' => 'string'],
         );
 
@@ -41,8 +48,8 @@ class OpenApiFactory implements OpenApiFactoryInterface
             if (!$params) {
                 $params = [];
             }
-            $params[] = $localeHeader;
-
+            $params[] = $xLocaleHeader;
+            $params[] = $acceptLanguageHeader;
             $openApi->getPaths()->addPath($pathId, $pathItem->withParameters($params));
         }
     }

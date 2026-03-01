@@ -11,7 +11,8 @@ class TranslatableListener extends BaseTranslatableListener
 {
     public function __construct(private string $defaultLocale)
     {
-        $this->defaultLocale = $defaultLocale;
+        $this->setDefaultLocale($defaultLocale);
+        $this->locale = $defaultLocale;
     }
 
     public function postLoad(EventArgs $args)
@@ -24,7 +25,6 @@ class TranslatableListener extends BaseTranslatableListener
         $object = $ea->getObject();
         $meta = $om->getClassMetadata(get_class($object));
         $config = $this->getConfiguration($om, $meta->getName());
-
         // Call parent to perform the actual translation
         parent::postLoad($args);
         $locale = $this->getDefaultLocale();
@@ -36,7 +36,7 @@ class TranslatableListener extends BaseTranslatableListener
         // Check if the object was translated into a non-default locale
         if (
             isset($config['fields']) &&
-            substr($locale, 0, 2) !== substr($this->defaultLocale, 0, 2) &&
+            substr($locale, 0, 2) !== substr($this->getDefaultLocale(), 0, 2) &&
             in_array(
                 TranslatableTrait::class,
                 array_keys(new \ReflectionClass(get_class($object))->getTraits()),
