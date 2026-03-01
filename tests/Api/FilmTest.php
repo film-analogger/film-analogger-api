@@ -867,7 +867,7 @@ class FilmTest extends ApiTestCase
 
         // check French translation is returned when X-LOCALE is set to "fr"
         $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => ['X-LOCALE' => 'fr'],
+            'headers' => ['X-LOCALE' => 'fr', 'Accept-Language' => 'fr'],
         ]);
 
         $this->assertResponseIsSuccessful();

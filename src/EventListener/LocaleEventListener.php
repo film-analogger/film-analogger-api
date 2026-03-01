@@ -7,7 +7,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
-class LocalEventListener implements EventSubscriberInterface
+class LocaleEventListener implements EventSubscriberInterface
 {
     const LOCAL_HEADER = 'X-LOCALE';
     const ACCEPT_LANGUAGE_HEADER = 'Accept-Language';
@@ -37,7 +37,6 @@ class LocalEventListener implements EventSubscriberInterface
     {
         // Persist DefaultLocale in translation table
         $this->translatableListener->setPersistDefaultLocaleTranslation(true);
-        $localeInitialised = false;
         $request = $event->getRequest();
         if ($request->headers->has(self::LOCAL_HEADER)) {
             $locale = $request->headers->get(self::LOCAL_HEADER);
@@ -67,11 +66,16 @@ class LocalEventListener implements EventSubscriberInterface
                 return $qualityB <=> $qualityA;
             });
             $locales = array_map(fn($l) => trim(explode(';', $l)[0]), $locales);
+            $localMatched = false;
             foreach ($locales as $locale) {
                 if (in_array($locale, $this->availableLocales)) {
                     $request->setLocale($locale);
+                    $localMatched = true;
                     break;
                 }
+            }
+            if (!$localMatched) {
+                $request->setLocale($this->defaultLocale);
             }
         } else {
             $request->setLocale($this->defaultLocale);
@@ -83,7 +87,6 @@ class LocalEventListener implements EventSubscriberInterface
 
     /**
      * @param ResponseEvent $event
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function setContentLanguage(ResponseEvent $event)
     {

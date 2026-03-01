@@ -44,7 +44,7 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    FilmAnalogger\FilmAnaloggerApi\EventListener\LocalEventListener:
+    FilmAnalogger\FilmAnaloggerApi\EventListener\LocaleEventListener:
         arguments:
             $translatableListener: '@gedmo.listener.translatable'
             $defaultLocale: '%locale%'

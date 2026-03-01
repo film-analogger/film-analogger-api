@@ -6,7 +6,7 @@ use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\OpenApi;
-use FilmAnalogger\FilmAnaloggerApi\EventListener\LocalEventListener;
+use FilmAnalogger\FilmAnaloggerApi\EventListener\LocaleEventListener;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 
 #[AsDecorator(decorates: 'api_platform.openapi.factory')]
@@ -29,14 +29,14 @@ class OpenApiFactory implements OpenApiFactoryInterface
     private function addLocaleHeader(OpenApi $openApi): void
     {
         $xLocaleHeader = new Parameter(
-            name: LocalEventListener::LOCAL_HEADER,
+            name: LocaleEventListener::LOCAL_HEADER,
             in: 'header',
             description: 'Locale (e.g. "en", "fr")',
             schema: ['type' => 'string'],
         );
 
         $acceptLanguageHeader = new Parameter(
-            name: LocalEventListener::ACCEPT_LANGUAGE_HEADER,
+            name: LocaleEventListener::ACCEPT_LANGUAGE_HEADER,
             in: 'header',
             description: 'Accept-Language (e.g. "en", "fr", "en-US,en;q=0.9,fr;q=0.8") - used as a fallback if X-LOCALE is not set, the first language in the list that matches an available locale will be used',
             schema: ['type' => 'string'],
@@ -45,9 +45,13 @@ class OpenApiFactory implements OpenApiFactoryInterface
         foreach ($openApi->getPaths()->getPaths() as $pathId => $pathItem) {
             /** @var PathItem $pathItem */
             $params = $pathItem->getParameters();
-            if (!$params) {
-                $params = [];
-            }
+            $params = array_filter(
+                $params ?? [],
+                fn(Parameter $p) => !in_array($p->getName(), [
+                    LocaleEventListener::LOCAL_HEADER,
+                    LocaleEventListener::ACCEPT_LANGUAGE_HEADER,
+                ]),
+            );
             $params[] = $xLocaleHeader;
             $params[] = $acceptLanguageHeader;
             $openApi->getPaths()->addPath($pathId, $pathItem->withParameters($params));

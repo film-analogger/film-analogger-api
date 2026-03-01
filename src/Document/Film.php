@@ -96,8 +96,9 @@ class Film implements Translatable
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $tertiaryColor = null;
 
-    #[ODM\ReferenceOne(targetDocument: Manufacturer::class)]
+    #[ODM\ReferenceOne(targetDocument: Manufacturer::class, inversedBy: 'films')]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
+    #[Assert\NotNull(message: 'Manufacturer must be set.')]
     public Manufacturer $manufacturer;
 
     public function __construct() {}
