@@ -2,6 +2,7 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
@@ -16,12 +17,15 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[
     ApiResource(
         normalizationContext: [
+            'skip_null_values' => false,
             'groups' => [
                 SerializationGroups::FILM_READ_GROUP,
                 SerializationGroups::TRANSLATABLE_READ_GROUP,
             ],
         ],
-        denormalizationContext: ['groups' => [SerializationGroups::FILM_WRITE_GROUP]],
+        denormalizationContext: [
+            'groups' => [SerializationGroups::FILM_WRITE_GROUP],
+        ],
     ),
 ]
 class Film implements Translatable
@@ -49,7 +53,7 @@ class Film implements Translatable
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public string $process;
 
-    #[ODM\Field]
+    #[ODM\Field(nullable: true)]
     #[
         Assert\Choice(
             choices: ['panchromatic', 'orthochromatic', 'chromogene'],
@@ -59,11 +63,11 @@ class Film implements Translatable
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $emulsionType = null;
 
-    #[ODM\Field]
+    #[ODM\Field(nullable: true)]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?bool $inversible = null;
 
-    #[ODM\Field]
+    #[ODM\Field(nullable: true)]
     #[Assert\Url]
     #[Gedmo\Translatable]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
@@ -74,17 +78,20 @@ class Film implements Translatable
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public int $sensibility;
 
-    #[ODM\Field]
+    #[ODM\Field(nullable: true)]
     #[Assert\CssColor]
+    #[ApiProperty(example: '#FF0000')]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $primaryColor = null;
 
-    #[ODM\Field]
+    #[ODM\Field(nullable: true)]
+    #[ApiProperty(example: '#00FF00')]
     #[Assert\CssColor]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $secondaryColor = null;
 
-    #[ODM\Field]
+    #[ODM\Field(nullable: true)]
+    #[ApiProperty(example: '#0000FF')]
     #[Assert\CssColor]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $tertiaryColor = null;
