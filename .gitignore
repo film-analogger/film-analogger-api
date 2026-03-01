@@ -154,4 +154,5 @@ vite.config.ts.timestamp-*
 ###> phpunit/phpunit ###
 /phpunit.xml
 /.phpunit.cache/
+phpunit-report-junit.xml
 ###< phpunit/phpunit ###

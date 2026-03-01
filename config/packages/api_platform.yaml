@@ -1,0 +1,9 @@
+api_platform:
+    title: Hello API Platform
+    version: 0.0.0
+    serializer:
+        hydra_prefix: true
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin', 'X-LOCALE', 'Accept-Language']
