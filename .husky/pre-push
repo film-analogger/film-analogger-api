@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-php bin/phpunit
+docker exec film-analogger-api-php-1 bash -c "php bin/phpunit"
