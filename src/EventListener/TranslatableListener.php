@@ -9,6 +9,11 @@ use Gedmo\Translatable\TranslatableListener as BaseTranslatableListener;
 
 class TranslatableListener extends BaseTranslatableListener
 {
+    public function __construct(private string $defaultLocale)
+    {
+        $this->defaultLocale = $defaultLocale;
+    }
+
     public function postLoad(EventArgs $args)
     {
         $ea = $this->getEventAdapter($args);
@@ -22,10 +27,16 @@ class TranslatableListener extends BaseTranslatableListener
 
         // Call parent to perform the actual translation
         parent::postLoad($args);
+        $locale = $this->getDefaultLocale();
+
+        if (isset($config['fields'])) {
+            $locale = $this->getTranslatableLocale($object, $meta, $om);
+        }
 
         // Check if the object was translated into a non-default locale
         if (
             isset($config['fields']) &&
+            substr($locale, 0, 2) !== substr($this->defaultLocale, 0, 2) &&
             in_array(
                 TranslatableTrait::class,
                 array_keys(new \ReflectionClass(get_class($object))->getTraits()),

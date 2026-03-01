@@ -19,9 +19,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
 ]
 class Manufacturer
 {
-    const SERIALIZATION_READ_GROUP = 'read-manufacturer';
-    const SERIALIZATION_WRITE_GROUP = 'write-manufacturer';
-
     #[ODM\Id]
     #[Groups([SerializationGroups::MANUFACTURER_READ_GROUP, SerializationGroups::FILM_READ_GROUP])]
     private ?string $id = null;

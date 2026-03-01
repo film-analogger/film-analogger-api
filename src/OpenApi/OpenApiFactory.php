@@ -38,6 +38,9 @@ class OpenApiFactory implements OpenApiFactoryInterface
         foreach ($openApi->getPaths()->getPaths() as $pathId => $pathItem) {
             /** @var PathItem $pathItem */
             $params = $pathItem->getParameters();
+            if (!$params) {
+                $params = [];
+            }
             $params[] = $localeHeader;
 
             $openApi->getPaths()->addPath($pathId, $pathItem->withParameters($params));

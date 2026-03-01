@@ -2,23 +2,22 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Document\Trait;
 
+use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 trait TranslatableTrait
 {
-    const TRANSLATABLE_SERIALIZATION_READ_GROUP = 'translatable-read';
-
     #[Gedmo\Locale]
     private $locale;
 
     /**
      * array of TranslatedField objects, each containing the name of the translated field and the locale it was translated into
      */
-    #[Groups([self::TRANSLATABLE_SERIALIZATION_READ_GROUP])]
+    #[Groups([SerializationGroups::TRANSLATABLE_READ_GROUP])]
     private array $translations = [];
 
-    #[Groups([self::TRANSLATABLE_SERIALIZATION_READ_GROUP])]
+    #[Groups([SerializationGroups::TRANSLATABLE_READ_GROUP])]
     private bool $isTranslated = false;
 
     public function getLocale()

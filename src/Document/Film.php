@@ -57,7 +57,7 @@ class Film implements Translatable
         ),
     ]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
-    public ?string $emultionType = null;
+    public ?string $emulsionType = null;
 
     #[ODM\Field]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
@@ -140,14 +140,14 @@ class Film implements Translatable
         return $this->process;
     }
 
-    public function setEmultionType(?string $emultionType): void
+    public function setEmulsionType(?string $emulsionType): void
     {
-        $this->emultionType = $emultionType;
+        $this->emulsionType = $emulsionType;
     }
 
-    public function getEmultionType(): ?string
+    public function getEmulsionType(): ?string
     {
-        return $this->emultionType;
+        return $this->emulsionType;
     }
 
     public function setInversible(?bool $inversible): void

@@ -1,5 +1,7 @@
 <?php
 
+namespace FilmAnalogger\FilmAnaloggerApi\Document;
+
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use Gedmo\Translatable\Translatable;
 use Gedmo\Mapping\Annotation as Gedmo;
