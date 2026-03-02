@@ -15,6 +15,7 @@ services:
       # The two next lines can be removed after initial installation
       SYMFONY_VERSION: ${SYMFONY_VERSION:-}
       STABILITY: ${STABILITY:-stable}
+      TZ: Europe/Paris
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -60,12 +61,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-keycloak}
       POSTGRES_USER: ${POSTGRES_USER:-keycloak}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-    networks:
-      - keycloak_network
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.5.4
-    command: start
+    command: start-dev
     environment:
       KC_HOSTNAME: localhost
       KC_HOSTNAME_PORT: 8080
@@ -84,8 +83,6 @@ services:
     restart: always
     depends_on:
       - postgres
-    networks:
-      - keycloak_network
 ###< keycloak ###
 
 
@@ -107,9 +104,4 @@ volumes:
     driver: local
 ###< keycloak ###
 
-networks:
-###> keycloak ###
-  keycloak_network:
-    driver: bridge
-###< keycloak ###
 

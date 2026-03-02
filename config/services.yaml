@@ -49,3 +49,13 @@ services:
             $translatableListener: '@gedmo.listener.translatable'
             $defaultLocale: '%locale%'
             $availableLocales: '%availableLocales%'
+
+    FilmAnalogger\FilmAnaloggerApi\Security\OAuthClient\KeycloakClient:
+        arguments:
+            $issuer: '%env(OAUTH_KEYCLOAK_ISSUER)%'
+            $issuer_dev_override: '%env(OAUTH_KEYCLOAK_ISSUER_DEV_OVERRIDE)%'
+            $realm: '%env(OAUTH_KEYCLOAK_REALM)%'
+
+    FilmAnalogger\FilmAnaloggerApi\Security\KeycloakBearerUserProvider:
+        arguments:
+            $clientId: '%env(OAUTH_KEYCLOAK_CLIENT_ID)%'

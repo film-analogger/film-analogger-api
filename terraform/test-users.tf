@@ -3,7 +3,7 @@
 resource "random_password" "user_test_reader_password" {
     length           = 16
     special          = true
-    override_special = "!@#$%&*=+?"
+    override_special = "!@#$%*=+?"
 }
 
 resource "keycloak_user" "user_test_reader" {
@@ -40,7 +40,7 @@ resource "keycloak_user_groups" "user_test_reader_groups" {
 resource "random_password" "user_test_user_password" {
     length           = 16
     special          = true
-    override_special = "!@#$%&*=+?"
+    override_special = "!@#$%*=+?"
 }
 
 resource "keycloak_user" "user_test_user" {
@@ -75,7 +75,7 @@ resource "keycloak_user_groups" "user_test_user_groups" {
 resource "random_password" "user_test_writer_password" {
     length           = 16
     special          = true
-    override_special = "!@#$%&*=+?"
+    override_special = "!@#$%*=+?"
 }
 
 resource "keycloak_user" "user_test_writer" {
@@ -112,7 +112,7 @@ resource "keycloak_user_groups" "user_test_writer_groups" {
 resource "random_password" "user_test_admin_password" {
     length           = 16
     special          = true
-    override_special = "!@#$%&*=+?"
+    override_special = "!@#$%*=+?"
 }
 
 resource "keycloak_user" "user_test_admin" {

@@ -1,7 +1,7 @@
 resource "random_password" "client-api-client-secret" {
     length           = 16
     special          = true
-    override_special = "!@#$%&*=+?"
+    override_special = "!@#$%*=+?"
 }
 
 resource "keycloak_openid_client" "client-api" {
@@ -85,12 +85,12 @@ resource "keycloak_openid_client" "client-api-swagger" {
     standard_flow_enabled = true
 
     valid_redirect_uris = [
-        "https://localhost*",
+        "http://localhost:1080*",
     ]
 
     web_origins = [
-        "https://localhost",
+        "http://localhost:1080",
     ]
 
-    root_url = "https://localhost"
+    root_url = "http://localhost:1080"
 }

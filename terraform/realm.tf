@@ -5,11 +5,18 @@ resource "keycloak_realm" "realm" {
   display_name_html = "<b>Film Analogger</b>"
 
   login_theme = "keycloak.v2"
+  account_theme = "keycloak.v3"
+  admin_theme = "keycloak.v2"
 
   access_code_lifespan = "1h"
 
   ssl_required    = "external"
   password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
+
+  reset_password_allowed = false
+  remember_me = false
+  login_with_email_allowed = true
+  verify_email = true
 
   smtp_server {
     host = "smtp-relay.gmail.com"
@@ -55,4 +62,13 @@ resource "keycloak_realm" "realm" {
     relying_party_id          = "keycloak.example.com"
     signature_algorithms      = ["ES256", "RS256"]
   }
+
+  sso_session_idle_timeout = "384h0m0s"
+  sso_session_max_lifespan = "384h0m0s"
+
+  offline_session_idle_timeout = "720h0m0s"
+
+
+  access_code_lifespan_login = "4h0m0s"
+  access_code_lifespan_user_action = "10m0s"
 }
