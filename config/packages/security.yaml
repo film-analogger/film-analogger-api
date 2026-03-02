@@ -26,8 +26,9 @@ security:
         api:
             pattern: .*
             security: true
+            provider: keycloak_bearer_user_provider
             custom_authenticators:
-                - FilmAnalogger\FilmAnaloggerApi\Security\Authenticator\KeycloakBearerAuthenticator
+                - keycloak_bearer_authenticator
             stateless: true
 
 
@@ -41,3 +42,8 @@ when@test:
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
+
+        providers:
+            keycloak_bearer_user_provider:
+                id: FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserProviderMock
+

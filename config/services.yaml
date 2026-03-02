@@ -59,3 +59,12 @@ services:
     FilmAnalogger\FilmAnaloggerApi\Security\KeycloakBearerUserProvider:
         arguments:
             $clientId: '%env(OAUTH_KEYCLOAK_CLIENT_ID)%'
+
+    keycloak_bearer_authenticator:
+        class: FilmAnalogger\FilmAnaloggerApi\Security\Authenticator\KeycloakBearerAuthenticator
+
+
+when@test:
+    services:
+        keycloak_bearer_authenticator:
+            class: FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerAuthenticatorMock
