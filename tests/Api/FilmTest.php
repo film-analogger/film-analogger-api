@@ -2,14 +2,6 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use FilmAnalogger\FilmAnaloggerApi\Document\Film;
-use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
-use Doctrine\ODM\MongoDB\DocumentManager;
-use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
-use FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserMock;
-use Gedmo\Translatable\Document\Translation;
-
 class FilmTest extends AbstractFilmTestCase
 {
     public function testGetCollection(): void
@@ -17,9 +9,7 @@ class FilmTest extends AbstractFilmTestCase
         $this->createFilm();
         $this->createFilm(['name' => 'Ektar 100', 'sensibility' => 100]);
 
-        $client = static::createClient();
-
-        $client->loginUser(new KeycloakBearerUserMock(KeycloakRoles::ALL_ROLES), 'api');
+        $client = self::loggedClientAdmin();
         $client->request('GET', '/films');
 
         $this->assertResponseIsSuccessful();

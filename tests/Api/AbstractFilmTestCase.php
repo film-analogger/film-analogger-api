@@ -104,6 +104,9 @@ abstract class AbstractFilmTestCase extends ApiTestCase
 
     public static function loggedClientUser(): Client
     {
-        return self::loggedClientWithUserAndRoles([KeycloakRoles::USER]);
+        return self::loggedClientWithUserAndRoles([
+            KeycloakRoles::USER,
+            KeycloakRoles::DATA_READER,
+        ]);
     }
 }

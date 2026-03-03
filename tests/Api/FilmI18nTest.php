@@ -2,13 +2,7 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
-use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
-use Doctrine\ODM\MongoDB\DocumentManager;
-use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
-use FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserMock;
-use Gedmo\Translatable\Document\Translation;
 
 class FilmI18nTest extends AbstractFilmTestCase
 {
