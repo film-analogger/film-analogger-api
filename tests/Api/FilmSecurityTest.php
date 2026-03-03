@@ -80,7 +80,7 @@ class FilmSecurityTest extends AbstractFilmTestCase
         ]);
     }
 
-    public function testAdminCanDoAnithing(): void
+    public function testAdminCanDoAnything(): void
     {
         $film = $this->createFilm();
         $manufacturer = $this->createManufacturer();
@@ -129,7 +129,7 @@ class FilmSecurityTest extends AbstractFilmTestCase
         $this->assertResponseStatusCodeSame(201);
     }
 
-    public function testDataWriterCanDoAnithing(): void
+    public function testDataWriterCanDoAnything(): void
     {
         $film = $this->createFilm();
         $manufacturer = $this->createManufacturer();
