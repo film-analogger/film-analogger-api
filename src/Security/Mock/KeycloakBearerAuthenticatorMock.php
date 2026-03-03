@@ -2,6 +2,7 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Security\Mock;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,6 +15,15 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class KeycloakBearerAuthenticatorMock extends AbstractAuthenticator
 {
+    public function __construct(private LoggerInterface $logger)
+    {
+        if ('test' !== $_ENV['APP_ENV'] ?? null) {
+            throw new \RuntimeException(
+                'KeycloakBearerAuthenticatorMock can only be used in test environment',
+            );
+        }
+    }
+
     public function supports(Request $request): ?bool
     {
         return true;
@@ -21,7 +31,8 @@ class KeycloakBearerAuthenticatorMock extends AbstractAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        return new SelfValidatingPassport(new UserBadge('mocked_user'));
+        $this->logger->debug('KeycloakBearerAuthenticatorMock authenticate called');
+        return new SelfValidatingPassport(new UserBadge('test_user'));
     }
 
     public function onAuthenticationSuccess(
@@ -29,6 +40,7 @@ class KeycloakBearerAuthenticatorMock extends AbstractAuthenticator
         TokenInterface $token,
         string $firewallName,
     ): ?Response {
+        $this->logger->debug('KeycloakBearerAuthenticatorMock onAuthenticationSuccess called');
         return null;
     }
 
@@ -36,6 +48,9 @@ class KeycloakBearerAuthenticatorMock extends AbstractAuthenticator
         Request $request,
         AuthenticationException $exception,
     ): ?Response {
+        $this->logger->debug('KeycloakBearerAuthenticatorMock onAuthenticationFailure called', [
+            'exception' => $exception,
+        ]);
         $data = [
             'message' => strtr($exception->getMessageKey(), $exception->getMessageData()),
         ];

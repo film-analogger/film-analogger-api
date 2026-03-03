@@ -6,6 +6,7 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserMock;
 use Gedmo\Translatable\Document\Translation;
 
@@ -17,7 +18,8 @@ class FilmTest extends AbstractFilmTestCase
         $this->createFilm(['name' => 'Ektar 100', 'sensibility' => 100]);
 
         $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+
+        $client->loginUser(new KeycloakBearerUserMock(KeycloakRoles::ALL_ROLES), 'api');
         $client->request('GET', '/films');
 
         $this->assertResponseIsSuccessful();
@@ -33,8 +35,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $film = $this->createFilm();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('GET', '/films/' . $film->getId());
 
         $this->assertResponseIsSuccessful();
@@ -51,8 +52,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -77,8 +77,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -115,8 +114,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -134,8 +132,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -153,8 +150,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -172,8 +168,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -191,8 +186,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -211,8 +205,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -231,8 +224,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -251,8 +243,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -271,8 +262,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -291,8 +281,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -312,8 +301,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -334,8 +322,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -356,8 +343,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -378,8 +364,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -399,8 +384,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -420,8 +404,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -441,8 +424,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -462,8 +444,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $film = $this->createFilm();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
@@ -483,22 +464,19 @@ class FilmTest extends AbstractFilmTestCase
     {
         $film = $this->createFilm();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('DELETE', '/films/' . $film->getId());
 
         $this->assertResponseStatusCodeSame(204);
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('GET', '/films/' . $film->getId());
         $this->assertResponseStatusCodeSame(404);
     }
 
     public function testGetNonExistentFilmReturns404(): void
     {
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('GET', '/films/nonexistent-id');
 
         $this->assertResponseStatusCodeSame(404);
@@ -509,8 +487,7 @@ class FilmTest extends AbstractFilmTestCase
         $manufacturer = $this->createManufacturer('Fujifilm');
         $film = $this->createFilm(['manufacturer' => $manufacturer, 'name' => 'Superia 400']);
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('GET', '/films/' . $film->getId());
 
         $this->assertResponseIsSuccessful();
@@ -523,8 +500,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -558,8 +534,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $film = $this->createFilm(['process' => 'C-41']);
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
@@ -575,8 +550,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $film = $this->createFilm();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
@@ -589,8 +563,7 @@ class FilmTest extends AbstractFilmTestCase
 
     public function testGetCollectionReturnsEmptyWhenNoFilms(): void
     {
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('GET', '/films');
 
         $this->assertResponseIsSuccessful();
@@ -604,8 +577,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -624,8 +596,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -644,8 +615,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -664,8 +634,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -686,8 +655,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -708,8 +676,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $film = $this->createFilm();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
@@ -731,8 +698,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $film = $this->createFilm();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
@@ -750,8 +716,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $film = $this->createFilm();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
@@ -767,8 +732,7 @@ class FilmTest extends AbstractFilmTestCase
         $film = $this->createFilm();
         $originalId = $film->getId();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $response = $client->request('GET', '/films/' . $originalId);
 
         $this->assertResponseIsSuccessful();
@@ -780,8 +744,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer('Ilford');
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -794,8 +757,7 @@ class FilmTest extends AbstractFilmTestCase
         ]);
         $this->assertResponseStatusCodeSame(201);
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -808,8 +770,7 @@ class FilmTest extends AbstractFilmTestCase
         ]);
         $this->assertResponseStatusCodeSame(201);
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('GET', '/films');
         $this->assertJsonContains(['hydra:totalItems' => 2]);
     }
@@ -818,8 +779,7 @@ class FilmTest extends AbstractFilmTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock());
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [

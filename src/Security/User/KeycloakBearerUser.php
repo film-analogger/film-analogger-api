@@ -133,6 +133,14 @@ class KeycloakBearerUser implements UserInterface
     }
 
     /**
+     * @return string
+     */
+    public function getPreferredUsername(): string
+    {
+        return $this->preferred_username;
+    }
+
+    /**
      * @param string $preferred_username
      */
     public function setPreferredUsername(string $preferred_username): void
@@ -185,8 +193,9 @@ class KeycloakBearerUser implements UserInterface
      */
     public function getPassword()
     {
-        // TODO: Implement getPassword() method.
-        return $this->sub;
+        throw new \LogicException(
+            'This method should not be called, as the user does not store any password.',
+        );
     }
 
     /**
@@ -198,8 +207,9 @@ class KeycloakBearerUser implements UserInterface
      */
     public function getSalt()
     {
-        // TODO: Implement getSalt() method.
-        return null;
+        throw new \LogicException(
+            'This method should not be called, as the user does not store any password.',
+        );
     }
 
     /**
@@ -209,7 +219,6 @@ class KeycloakBearerUser implements UserInterface
      */
     public function getUsername()
     {
-        // TODO: Implement getUsername() method.
         return $this->preferred_username;
     }
 
@@ -229,45 +238,8 @@ class KeycloakBearerUser implements UserInterface
      */
     public function eraseCredentials(): void
     {
-        // TODO: Implement eraseCredentials() method.
-    }
-
-    /**
-     * String representation of object
-     * @link http://php.net/manual/en/serializable.serialize.php
-     * @return array the string representation of the object or null
-     */
-    public function __serialize(): array
-    {
-        return [
-            $this->sub,
-            $this->name,
-            $this->email,
-            $this->given_name,
-            $this->family_name,
-            $this->preferred_username,
-            $this->roles,
-            $this->accessToken,
-        ];
-    }
-
-    /**
-     * Constructs the object
-     * @link http://php.net/manual/en/serializable.unserialize.php
-     * @param string $serialized
-     * @return void
-     */
-    public function __unserialize($serialized): void
-    {
-        [
-            $this->sub,
-            $this->name,
-            $this->email,
-            $this->given_name,
-            $this->family_name,
-            $this->preferred_username,
-            $this->roles,
-            $this->accessToken,
-        ] = unserialize($serialized, ['allowed_classes' => false]);
+        throw new \LogicException(
+            'This method should not be called, as the user does not store any sensitive data.',
+        );
     }
 }

@@ -10,6 +10,12 @@ final class KeycloakBearerUserMock extends KeycloakBearerUser
 
     public function __construct(array $roles = [], array $attributes = [])
     {
+        if ('test' !== $_ENV['APP_ENV'] ?? null) {
+            throw new \RuntimeException(
+                'KeycloakBearerUserMock can only be used in test environment',
+            );
+        }
+
         $this->mockedRoles = $roles;
         parent::__construct(
             '',
@@ -40,12 +46,12 @@ final class KeycloakBearerUserMock extends KeycloakBearerUser
 
     public function getPassword(): ?string
     {
-        throw 'not implemented';
+        throw new \RuntimeException('Not implemented');
     }
 
     public function getSalt(): ?string
     {
-        throw 'not implemented';
+        throw new \RuntimeException('Not implemented');
     }
 
     public function eraseCredentials(): void {}

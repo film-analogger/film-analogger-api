@@ -8,6 +8,8 @@ use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserMock;
 use Gedmo\Translatable\Document\Translation;
+use ApiPlatform\Symfony\Bundle\Test\Client;
+use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 
 abstract class AbstractFilmTestCase extends ApiTestCase
 {
@@ -72,5 +74,36 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->flush();
 
         return $film;
+    }
+
+    public static function loggedClientWithUserAndRoles(array $roles = []): Client
+    {
+        $client = static::createClient();
+        $client->loginUser(new KeycloakBearerUserMock($roles), 'api');
+        return $client;
+    }
+
+    public static function loggedClientAdmin(): Client
+    {
+        return self::loggedClientWithUserAndRoles(KeycloakRoles::ALL_ROLES);
+    }
+
+    public static function loggedClientDataWriter(): Client
+    {
+        return self::loggedClientWithUserAndRoles([
+            KeycloakRoles::DATA_WRITER,
+            KeycloakRoles::DATA_READER,
+            KeycloakRoles::USER,
+        ]);
+    }
+
+    public static function loggedClientDataReader(): Client
+    {
+        return self::loggedClientWithUserAndRoles([KeycloakRoles::DATA_READER]);
+    }
+
+    public static function loggedClientUser(): Client
+    {
+        return self::loggedClientWithUserAndRoles([KeycloakRoles::USER]);
     }
 }
