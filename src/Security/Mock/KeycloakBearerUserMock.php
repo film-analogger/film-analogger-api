@@ -8,8 +8,16 @@ final class KeycloakBearerUserMock extends KeycloakBearerUser
 {
     private array $mockedRoles = [];
 
-    public function __construct(array $roles = [], array $attributes = [])
-    {
+    public function __construct(
+        array $roles = [],
+        $sub = '',
+        $name = 'Jean-Claude Bonnisseur de la Bath',
+        $email = 'jc.bonnisseurdlb@example.test',
+        $given_name = 'Jean-Claude',
+        $family_name = 'Bonnisseur de la Bath',
+        $preferred_username = 'jc.bonnisseurdlb',
+        array $attributes = [],
+    ) {
         if ('test' !== $_ENV['APP_ENV'] || getEnv('APP_ENV' !== 'test')) {
             throw new \RuntimeException(
                 'KeycloakBearerUserMock can only be used in test environment',
@@ -18,12 +26,12 @@ final class KeycloakBearerUserMock extends KeycloakBearerUser
 
         $this->mockedRoles = $roles;
         parent::__construct(
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
+            $sub,
+            $name,
+            $email,
+            $given_name,
+            $family_name,
+            $preferred_username,
             $attributes,
             [
                 'realm_access' => [],
@@ -32,11 +40,6 @@ final class KeycloakBearerUserMock extends KeycloakBearerUser
             ],
             '',
         );
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return $this->getUsername();
     }
 
     public function getRoles(): array
@@ -55,9 +58,4 @@ final class KeycloakBearerUserMock extends KeycloakBearerUser
     }
 
     public function eraseCredentials(): void {}
-
-    public function getUsername(): string
-    {
-        return 'test_user';
-    }
 }

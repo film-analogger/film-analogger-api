@@ -11,4 +11,6 @@ final class SerializationGroups
     const MANUFACTURER_WRITE_GROUP = 'write-manufacturer';
 
     const TRANSLATABLE_READ_GROUP = 'translatable-read';
+
+    const TIMESTAMPABLE_BLAMEABLE_READ_GROUP = 'timestampable-blameable-read';
 }

@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Repository\FilmRepository;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
@@ -19,12 +20,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Translatable\Translatable;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * Seul un data write peut mettre un film discontinuated
- * Un user peut poster un film mais officiel = false
- * Un user voit :
- *     - tous les films officiels + ses films non officiels par défaut
- */
+// /**
+//  * Seul un data write peut mettre un film discontinuated
+//  * Un user peut poster un film mais officiel = false
+//  * Un user voit :
+//  *     - tous les films officiels + ses films non officiels par défaut
+//  */
 
 #[ODM\Document(repositoryClass: FilmRepository::class)]
 #[
@@ -34,6 +35,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
             'groups' => [
                 SerializationGroups::FILM_READ_GROUP,
                 SerializationGroups::TRANSLATABLE_READ_GROUP,
+                SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
             ],
         ],
         denormalizationContext: [
@@ -52,6 +54,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 class Film implements Translatable
 {
     use TranslatableTrait;
+    use TimestampableBlameableTrait;
 
     #[ODM\Id]
     #[Groups([SerializationGroups::FILM_READ_GROUP])]

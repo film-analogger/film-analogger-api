@@ -76,37 +76,114 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         return $film;
     }
 
-    public static function loggedClientWithUserAndRoles(array $roles = []): Client
-    {
+    public static function loggedClientWithUserAndRoles(
+        array $roles = [],
+        $sub = '',
+        $name = 'Jean-Claude Bonnisseur de la Bath',
+        $email = 'jc.bonnisseurdlb@example.test',
+        $given_name = 'Jean-Claude',
+        $family_name = 'Bonnisseur de la Bath',
+        $preferred_username = 'jc.bonnisseurdlb',
+        array $attributes = [],
+    ): Client {
         $client = static::createClient();
-        $client->loginUser(new KeycloakBearerUserMock($roles), 'api');
+        $client->loginUser(
+            new KeycloakBearerUserMock(
+                $roles,
+                $sub,
+                $name,
+                $email,
+                $given_name,
+                $family_name,
+                $preferred_username,
+                $attributes,
+            ),
+            'api',
+        );
         return $client;
     }
 
-    public static function loggedClientAdmin(): Client
-    {
-        return self::loggedClientWithUserAndRoles(KeycloakRoles::ALL_ROLES);
+    public static function loggedClientAdmin(
+        $sub = '',
+        $name = 'Jean-Claude Bonnisseur de la Bath',
+        $email = 'jc.bonnisseurdlb@example.test',
+        $given_name = 'Jean-Claude',
+        $family_name = 'Bonnisseur de la Bath',
+        $preferred_username = 'test_user_admin',
+        array $attributes = [],
+    ): Client {
+        return self::loggedClientWithUserAndRoles(
+            KeycloakRoles::ALL_ROLES,
+            $sub,
+            $name,
+            $email,
+            $given_name,
+            $family_name,
+            $preferred_username,
+            $attributes,
+        );
     }
 
-    public static function loggedClientDataWriter(): Client
-    {
-        return self::loggedClientWithUserAndRoles([
-            KeycloakRoles::DATA_WRITER,
-            KeycloakRoles::DATA_READER,
-            KeycloakRoles::USER,
-        ]);
+    public static function loggedClientDataWriter(
+        $sub = '',
+        $name = 'Jean-Claude Bonnisseur de la Bath',
+        $email = 'jc.bonnisseurdlb@example.test',
+        $given_name = 'Jean-Claude',
+        $family_name = 'Bonnisseur de la Bath',
+        $preferred_username = 'test_user_data_writer',
+        array $attributes = [],
+    ): Client {
+        return self::loggedClientWithUserAndRoles(
+            [KeycloakRoles::DATA_WRITER, KeycloakRoles::DATA_READER, KeycloakRoles::USER],
+            $sub,
+            $name,
+            $email,
+            $given_name,
+            $family_name,
+            $preferred_username,
+            $attributes,
+        );
     }
 
-    public static function loggedClientDataReader(): Client
-    {
-        return self::loggedClientWithUserAndRoles([KeycloakRoles::DATA_READER]);
+    public static function loggedClientDataReader(
+        $sub = '',
+        $name = 'Jean-Claude Bonnisseur de la Bath',
+        $email = 'jc.bonnisseurdlb@example.test',
+        $given_name = 'Jean-Claude',
+        $family_name = 'Bonnisseur de la Bath',
+        $preferred_username = 'test_user_data_reader',
+        array $attributes = [],
+    ): Client {
+        return self::loggedClientWithUserAndRoles(
+            [KeycloakRoles::DATA_READER],
+            $sub,
+            $name,
+            $email,
+            $given_name,
+            $family_name,
+            $preferred_username,
+            $attributes,
+        );
     }
 
-    public static function loggedClientUser(): Client
-    {
-        return self::loggedClientWithUserAndRoles([
-            KeycloakRoles::USER,
-            KeycloakRoles::DATA_READER,
-        ]);
+    public static function loggedClientUser(
+        $sub = '',
+        $name = 'Jean-Claude Bonnisseur de la Bath',
+        $email = 'jc.bonnisseurdlb@example.test',
+        $given_name = 'Jean-Claude',
+        $family_name = 'Bonnisseur de la Bath',
+        $preferred_username = 'test_user_user',
+        array $attributes = [],
+    ): Client {
+        return self::loggedClientWithUserAndRoles(
+            [KeycloakRoles::USER, KeycloakRoles::DATA_READER],
+            $sub,
+            $name,
+            $email,
+            $given_name,
+            $family_name,
+            $preferred_username,
+            $attributes,
+        );
     }
 }
