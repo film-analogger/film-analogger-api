@@ -83,7 +83,7 @@ class FilmSecurityTest extends AbstractFilmTestCase
         ]);
     }
 
-    public function testAdminCanDoAnithing(): void
+    public function testAdminCanDoAnything(): void
     {
         $film = $this->createFilm();
         $manufacturer = $this->createManufacturer();
