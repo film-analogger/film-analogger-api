@@ -1,3 +1,18 @@
+## 0.1.2 (2026-03-03)
+
+### Feat
+
+- **security**: secure routes with differents roles and fix the tests that was broken
+- **auth**: add keycloak in the projetc
+- **auth**: Add keycloak docker and base terraform
+
+### Fix
+
+- **review**: apply changes of review
+- **security**: Enforce security checks
+
+## 0.1.0 (2026-03-01)
+
 ## 0.1.1 (2026-03-01)
 
 ### Fix
