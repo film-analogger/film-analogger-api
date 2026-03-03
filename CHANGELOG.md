@@ -1,3 +1,14 @@
+## 0.1.3 (2026-03-04)
+
+### Feat
+
+- **document**: add timestampable and bleamable trait and apply it to film and manufacturer
+
+### Fix
+
+- **review**: add review suggestions
+- **review**: addreview suggestions
+
 ## 0.1.2 (2026-03-03)
 
 ### Feat
