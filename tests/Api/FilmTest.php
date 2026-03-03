@@ -791,4 +791,72 @@ class FilmTest extends AbstractFilmTestCase
             'tertiaryColor' => 'green',
         ]);
     }
+
+    public function testTimestampableBlameableFilm(): void
+    {
+        $manufacturer = $this->createManufacturer();
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request('POST', '/films', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'Gold 200',
+                'description' => 'A consumer color negative film.',
+                'process' => 'C-41',
+                'sensibility' => 200,
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(201);
+        $this->assertJsonContains([
+            'createdBy' => 'test_user_admin',
+            'updatedBy' => 'test_user_admin',
+        ]);
+        $this->assertArrayHasKey('createdAt', $response->toArray());
+        $this->assertArrayHasKey('updatedAt', $response->toArray());
+        // createdAt and updatedAt should be same iso date
+        $this->assertIsString($response->toArray()['createdAt']);
+        $this->assertIsString($response->toArray()['updatedAt']);
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/',
+            $response->toArray()['createdAt'],
+        );
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/',
+            $response->toArray()['updatedAt'],
+        );
+        $this->assertTrue($response->toArray()['updatedAt'] == $response->toArray()['createdAt']);
+
+        sleep(1);
+
+        $client = self::loggedClientDataWriter();
+        $response = $client->request('PATCH', '/films/' . $response->toArray()['id'], [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => [
+                'name' => 'Gold 400',
+                'sensibility' => 400,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            'createdBy' => 'test_user_admin',
+            'updatedBy' => 'test_user_data_writer',
+        ]);
+        $this->assertArrayHasKey('createdAt', $response->toArray());
+        $this->assertArrayHasKey('updatedAt', $response->toArray());
+        // createdAt should be iso date and before to updatedAt
+        $this->assertIsString($response->toArray()['createdAt']);
+        $this->assertIsString($response->toArray()['updatedAt']);
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/',
+            $response->toArray()['createdAt'],
+        );
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/',
+            $response->toArray()['updatedAt'],
+        );
+        $this->assertTrue($response->toArray()['updatedAt'] > $response->toArray()['createdAt']);
+    }
 }

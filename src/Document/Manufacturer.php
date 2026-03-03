@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Post;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -19,7 +20,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ODM\Document]
 #[
     ApiResource(
-        normalizationContext: ['groups' => [SerializationGroups::MANUFACTURER_READ_GROUP]],
+        normalizationContext: [
+            'groups' => [
+                SerializationGroups::MANUFACTURER_READ_GROUP,
+                SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+            ],
+        ],
         denormalizationContext: ['groups' => [SerializationGroups::MANUFACTURER_WRITE_GROUP]],
         operations: [
             new Get(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
@@ -32,6 +38,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
 ]
 class Manufacturer
 {
+    use TimestampableBlameableTrait;
+
     #[ODM\Id]
     #[Groups([SerializationGroups::MANUFACTURER_READ_GROUP, SerializationGroups::FILM_READ_GROUP])]
     private ?string $id = null;
