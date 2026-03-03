@@ -52,7 +52,7 @@ services:
             - [ setAnnotationReader, [ '@gedmo.mapping.driver.attribute' ] ]
 
 
-        # Gedmo Timestampable Extension Listener
+    # Gedmo Timestampable Extension Listener
     gedmo.listener.timestampable:
         class: Gedmo\Timestampable\TimestampableListener
         tags:
