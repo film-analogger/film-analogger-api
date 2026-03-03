@@ -22,13 +22,8 @@ class KeycloakClient
         // if env = dev then disable ssl verification for http client
         if (getenv('APP_ENV') === 'dev') {
             $this->issuer = $this->issuer_dev_override;
-            $this->httpClient = HttpClient::create([
-                'verify_peer' => false,
-                'verify_host' => false,
-            ]);
-        } else {
-            $this->httpClient = HttpClient::create();
         }
+        $this->httpClient = HttpClient::create();
     }
 
     public function fetchIssuerKeys(): array

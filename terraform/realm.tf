@@ -10,6 +10,7 @@ resource "keycloak_realm" "realm" {
 
   access_code_lifespan = "1h"
 
+  # TODO: "all" in prod 
   ssl_required    = "external"
   password_policy = "upperCase(1) and length(8) and forceExpiredPasswordChange(365) and notUsername"
 
@@ -48,7 +49,7 @@ resource "keycloak_realm" "realm" {
     }
     brute_force_detection {
       permanent_lockout                 = false
-      max_login_failures                = 30
+      max_login_failures                = 5
       wait_increment_seconds            = 60
       quick_login_check_milli_seconds   = 1000
       minimum_quick_login_wait_seconds  = 60

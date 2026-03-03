@@ -10,7 +10,7 @@ final class KeycloakBearerUserProviderMock implements UserProviderInterface
 {
     public function __construct(private LoggerInterface $logger)
     {
-        if ('test' !== $_ENV['APP_ENV'] ?? null) {
+        if ('test' !== $_ENV['APP_ENV'] || getEnv('APP_ENV' !== 'test')) {
             throw new \RuntimeException(
                 'KeycloakBearerUserProviderMock can only be used in test environment',
             );

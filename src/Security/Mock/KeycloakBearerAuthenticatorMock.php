@@ -19,7 +19,7 @@ class KeycloakBearerAuthenticatorMock extends AbstractAuthenticator
 {
     public function __construct(private LoggerInterface $logger, private Security $security)
     {
-        if ('test' !== $_ENV['APP_ENV'] ?? null) {
+        if ('test' !== $_ENV['APP_ENV'] || getEnv('APP_ENV' !== 'test')) {
             throw new \RuntimeException(
                 'KeycloakBearerAuthenticatorMock can only be used in test environment',
             );

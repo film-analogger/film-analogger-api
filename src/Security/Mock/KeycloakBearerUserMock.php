@@ -10,7 +10,7 @@ final class KeycloakBearerUserMock extends KeycloakBearerUser
 
     public function __construct(array $roles = [], array $attributes = [])
     {
-        if ('test' !== $_ENV['APP_ENV'] ?? null) {
+        if ('test' !== $_ENV['APP_ENV'] || getEnv('APP_ENV' !== 'test')) {
             throw new \RuntimeException(
                 'KeycloakBearerUserMock can only be used in test environment',
             );
