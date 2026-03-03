@@ -2,83 +2,15 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use FilmAnalogger\FilmAnaloggerApi\Document\Film;
-use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
-use Doctrine\ODM\MongoDB\DocumentManager;
-use Gedmo\Translatable\Document\Translation;
-
-class FilmTest extends ApiTestCase
+class FilmTest extends AbstractFilmTestCase
 {
-    protected static null|bool $alwaysBootKernel = false;
-
-    private DocumentManager $documentManager;
-
-    protected function setUp(): void
-    {
-        $this->documentManager = static::getContainer()->get(DocumentManager::class);
-        $this->clearDatabase();
-    }
-
-    private function clearDatabase(): void
-    {
-        $this->documentManager->getDocumentCollection(Film::class)->drop();
-        $this->documentManager->getDocumentCollection(Manufacturer::class)->drop();
-        $this->documentManager->getDocumentCollection(Translation::class)->drop();
-    }
-
-    private function createManufacturer(string $name = 'Kodak'): Manufacturer
-    {
-        $manufacturer = new Manufacturer();
-        $manufacturer->setName($name);
-        $this->documentManager->persist($manufacturer);
-        $this->documentManager->flush();
-
-        return $manufacturer;
-    }
-
-    private function createFilm(array $overrides = []): Film
-    {
-        $manufacturer = $overrides['manufacturer'] ?? $this->createManufacturer();
-
-        $film = new Film();
-        $film->setName($overrides['name'] ?? 'Portra 400');
-        $film->setDescription($overrides['description'] ?? 'A professional color negative film.');
-        $film->setProcess($overrides['process'] ?? 'C-41');
-        $film->setSensibility($overrides['sensibility'] ?? 400);
-        $film->setManufacturer($manufacturer);
-
-        if (isset($overrides['emulsionType'])) {
-            $film->setEmulsionType($overrides['emulsionType']);
-        }
-        if (isset($overrides['inversible'])) {
-            $film->setInversible($overrides['inversible']);
-        }
-        if (isset($overrides['officialDocumentationUrl'])) {
-            $film->setOfficialDocumentationUrl($overrides['officialDocumentationUrl']);
-        }
-        if (isset($overrides['primaryColor'])) {
-            $film->setPrimaryColor($overrides['primaryColor']);
-        }
-        if (isset($overrides['secondaryColor'])) {
-            $film->setSecondaryColor($overrides['secondaryColor']);
-        }
-        if (isset($overrides['tertiaryColor'])) {
-            $film->setTertiaryColor($overrides['tertiaryColor']);
-        }
-
-        $this->documentManager->persist($film);
-        $this->documentManager->flush();
-
-        return $film;
-    }
-
     public function testGetCollection(): void
     {
         $this->createFilm();
         $this->createFilm(['name' => 'Ektar 100', 'sensibility' => 100]);
 
-        $response = static::createClient()->request('GET', '/films');
+        $client = self::loggedClientAdmin();
+        $client->request('GET', '/films');
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
@@ -93,7 +25,8 @@ class FilmTest extends ApiTestCase
     {
         $film = $this->createFilm();
 
-        $response = static::createClient()->request('GET', '/films/' . $film->getId());
+        $client = self::loggedClientAdmin();
+        $client->request('GET', '/films/' . $film->getId());
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
@@ -109,7 +42,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $response = static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Gold 200',
@@ -133,7 +67,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        $response = static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Ektachrome E100',
@@ -169,7 +104,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'description' => 'A film without a name.',
@@ -186,7 +122,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Portra 400',
@@ -203,7 +140,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Portra 400',
@@ -220,7 +158,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Portra 400',
@@ -237,7 +176,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Test Film',
@@ -255,7 +195,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'C41 Film',
@@ -273,7 +214,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'E6 Film',
@@ -291,7 +233,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'BW Film',
@@ -309,7 +252,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'ECN2 Film',
@@ -327,7 +271,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Test Film',
@@ -346,7 +291,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Panchromatic Film',
@@ -366,7 +312,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Ortho Film',
@@ -386,7 +333,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Chromogene Film',
@@ -406,7 +354,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Test Film',
@@ -425,7 +374,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Test Film',
@@ -444,7 +394,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Test Film',
@@ -463,7 +414,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Test Film',
@@ -482,7 +434,8 @@ class FilmTest extends ApiTestCase
     {
         $film = $this->createFilm();
 
-        static::createClient()->request('PATCH', '/films/' . $film->getId(), [
+        $client = self::loggedClientAdmin();
+        $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'name' => 'Portra 800',
@@ -501,17 +454,20 @@ class FilmTest extends ApiTestCase
     {
         $film = $this->createFilm();
 
-        static::createClient()->request('DELETE', '/films/' . $film->getId());
+        $client = self::loggedClientAdmin();
+        $client->request('DELETE', '/films/' . $film->getId());
 
         $this->assertResponseStatusCodeSame(204);
 
-        static::createClient()->request('GET', '/films/' . $film->getId());
+        $client = self::loggedClientAdmin();
+        $client->request('GET', '/films/' . $film->getId());
         $this->assertResponseStatusCodeSame(404);
     }
 
     public function testGetNonExistentFilmReturns404(): void
     {
-        static::createClient()->request('GET', '/films/nonexistent-id');
+        $client = self::loggedClientAdmin();
+        $client->request('GET', '/films/nonexistent-id');
 
         $this->assertResponseStatusCodeSame(404);
     }
@@ -521,7 +477,8 @@ class FilmTest extends ApiTestCase
         $manufacturer = $this->createManufacturer('Fujifilm');
         $film = $this->createFilm(['manufacturer' => $manufacturer, 'name' => 'Superia 400']);
 
-        $response = static::createClient()->request('GET', '/films/' . $film->getId());
+        $client = self::loggedClientAdmin();
+        $client->request('GET', '/films/' . $film->getId());
 
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
@@ -533,7 +490,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Minimal Film',
@@ -566,7 +524,8 @@ class FilmTest extends ApiTestCase
     {
         $film = $this->createFilm(['process' => 'C-41']);
 
-        static::createClient()->request('PATCH', '/films/' . $film->getId(), [
+        $client = self::loggedClientAdmin();
+        $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'process' => 'E-6',
@@ -581,7 +540,8 @@ class FilmTest extends ApiTestCase
     {
         $film = $this->createFilm();
 
-        static::createClient()->request('PATCH', '/films/' . $film->getId(), [
+        $client = self::loggedClientAdmin();
+        $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'process' => 'INVALID',
@@ -593,7 +553,8 @@ class FilmTest extends ApiTestCase
 
     public function testGetCollectionReturnsEmptyWhenNoFilms(): void
     {
-        $response = static::createClient()->request('GET', '/films');
+        $client = self::loggedClientAdmin();
+        $client->request('GET', '/films');
 
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
@@ -606,7 +567,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => '',
@@ -624,7 +586,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Test Film',
@@ -642,7 +605,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Test Film',
@@ -660,7 +624,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Ektachrome E100',
@@ -680,7 +645,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Portra 160',
@@ -700,7 +666,8 @@ class FilmTest extends ApiTestCase
     {
         $film = $this->createFilm();
 
-        static::createClient()->request('PATCH', '/films/' . $film->getId(), [
+        $client = self::loggedClientAdmin();
+        $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'primaryColor' => '#AABBCC',
@@ -721,7 +688,8 @@ class FilmTest extends ApiTestCase
     {
         $film = $this->createFilm();
 
-        static::createClient()->request('PATCH', '/films/' . $film->getId(), [
+        $client = self::loggedClientAdmin();
+        $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
@@ -738,7 +706,8 @@ class FilmTest extends ApiTestCase
     {
         $film = $this->createFilm();
 
-        static::createClient()->request('PATCH', '/films/' . $film->getId(), [
+        $client = self::loggedClientAdmin();
+        $client->request('PATCH', '/films/' . $film->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'officialDocumentationUrl' => 'not-a-url',
@@ -753,7 +722,8 @@ class FilmTest extends ApiTestCase
         $film = $this->createFilm();
         $originalId = $film->getId();
 
-        $response = static::createClient()->request('GET', '/films/' . $originalId);
+        $client = self::loggedClientAdmin();
+        $response = $client->request('GET', '/films/' . $originalId);
 
         $this->assertResponseIsSuccessful();
         $data = $response->toArray();
@@ -764,7 +734,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer('Ilford');
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'HP5 Plus',
@@ -776,7 +747,8 @@ class FilmTest extends ApiTestCase
         ]);
         $this->assertResponseStatusCodeSame(201);
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Delta 3200',
@@ -788,7 +760,8 @@ class FilmTest extends ApiTestCase
         ]);
         $this->assertResponseStatusCodeSame(201);
 
-        $response = static::createClient()->request('GET', '/films');
+        $client = self::loggedClientAdmin();
+        $client->request('GET', '/films');
         $this->assertJsonContains(['hydra:totalItems' => 2]);
     }
 
@@ -796,7 +769,8 @@ class FilmTest extends ApiTestCase
     {
         $manufacturer = $this->createManufacturer();
 
-        static::createClient()->request('POST', '/films', [
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/films', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Color Film',
@@ -815,322 +789,6 @@ class FilmTest extends ApiTestCase
             'primaryColor' => 'red',
             'secondaryColor' => 'blue',
             'tertiaryColor' => 'green',
-        ]);
-    }
-
-    public function testGetFilmWithFrenchLocale(): void
-    {
-        $film = $this->createFilm([
-            'description' => 'A professional color negative film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-        ]);
-
-        // Update the film with a French translation
-        $this->documentManager->clear();
-        $film = $this->documentManager->find(Film::class, $film->getId());
-
-        static::createClient()->request('PATCH', '/films/' . $film->getId(), [
-            'headers' => ['Content-Type' => 'application/merge-patch+json', 'X-LOCALE' => 'fr'],
-            'json' => [
-                'description' => 'Un film négatif couleur professionnel.',
-                'officialDocumentationUrl' => 'https://www.kodak.fr/portra400',
-            ],
-        ]);
-
-        // check default translation is returned when X-LOCALE is set to "en"
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => ['X-LOCALE' => 'en'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'A professional color negative film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-            'translations' => [],
-            'isTranslated' => false,
-        ]);
-        $this->assertArraysHaveIdenticalValues($response->toArray()['translations'], []);
-
-        // check default translation is returned when X-LOCALE is not set
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => [],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'A professional color negative film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-            'translations' => [],
-            'isTranslated' => false,
-        ]);
-        $this->assertArraysHaveIdenticalValues($response->toArray()['translations'], []);
-
-        // check French translation is returned when X-LOCALE is set to "fr"
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => ['X-LOCALE' => 'fr', 'Accept-Language' => 'fr'],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'Un film négatif couleur professionnel.',
-            'officialDocumentationUrl' => 'https://www.kodak.fr/portra400',
-            'translations' => [
-                [
-                    'locale' => 'fr',
-                    'field' => 'description',
-                ],
-                [
-                    'locale' => 'fr',
-                    'field' => 'officialDocumentationUrl',
-                ],
-            ],
-            'isTranslated' => true,
-        ]);
-    }
-
-    public function testGetFilmWithUnsupportedLocaleFallsBackToDefault(): void
-    {
-        $film = $this->createFilm([
-            'description' => 'A professional color negative film.',
-        ]);
-
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => ['X-LOCALE' => 'ja'],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'A professional color negative film.',
-            'isTranslated' => false,
-        ]);
-        $this->assertArraysHaveIdenticalValues($response->toArray()['translations'], []);
-    }
-
-    public function testGetFilmWithAcceptLanguageHeader(): void
-    {
-        $film = $this->createFilm([
-            'name' => 'Portra 400',
-            'description' => 'A professional color negative film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-        ]);
-
-        // Update the film with a French translation
-        $this->documentManager->clear();
-        $film = $this->documentManager->find(Film::class, $film->getId());
-
-        static::createClient()->request('PATCH', '/films/' . $film->getId(), [
-            'headers' => [
-                'Content-Type' => 'application/merge-patch+json',
-                'Accept-Language' => 'fr',
-            ],
-            'json' => [
-                'description' => 'Un film négatif couleur professionnel.',
-                'officialDocumentationUrl' => 'https://www.kodak.fr/portra400',
-            ],
-        ]);
-
-        // check default translation is returned when Accept-Language is set to "en"
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => ['Accept-Language' => 'en'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'A professional color negative film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-        ]);
-
-        // check default translation is returned when Accept-Language is not set
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => [],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'A professional color negative film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-        ]);
-
-        // check French translation is returned when Accept-Language is set to "fr"
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => ['Accept-Language' => 'fr'],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'Un film négatif couleur professionnel.',
-            'officialDocumentationUrl' => 'https://www.kodak.fr/portra400',
-        ]);
-    }
-
-    public function testGetFilmWithAcceptLanguageFallback(): void
-    {
-        $film = $this->createFilm([
-            'name' => 'Portra 400',
-            'description' => 'A professional color negative film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-        ]);
-
-        // Update the film with a French translation
-        $this->documentManager->clear();
-        $film = $this->documentManager->find(Film::class, $film->getId());
-
-        static::createClient()->request('PATCH', '/films/' . $film->getId(), [
-            'headers' => [
-                'Content-Type' => 'application/merge-patch+json',
-                'Accept-Language' => 'fr, en;q=0.9',
-            ],
-            'json' => [
-                'description' => 'Un film négatif couleur professionnel.',
-                'officialDocumentationUrl' => 'https://www.kodak.fr/portra400',
-            ],
-        ]);
-
-        // check default translation is returned when Accept-Language is set to "en"
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => ['Accept-Language' => 'en'],
-        ]);
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'A professional color negative film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-        ]);
-
-        // check French translation is returned when Accept-Language is set to "fr" with quality factor
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => ['Accept-Language' => 'fr, en;q=0.9'],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'Un film négatif couleur professionnel.',
-            'officialDocumentationUrl' => 'https://www.kodak.fr/portra400',
-        ]);
-
-        // check French translation is returned when Accept-Language is set to "fr" with quality factor ( same but reverse order )
-        $response = static::createClient()->request('GET', '/films/' . $film->getId(), [
-            'headers' => ['Accept-Language' => 'en;q=0.9, fr'],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'name' => 'Portra 400',
-            'description' => 'Un film négatif couleur professionnel.',
-            'officialDocumentationUrl' => 'https://www.kodak.fr/portra400',
-        ]);
-    }
-
-    public function testGetFilmCollectionWithFrenchLocale(): void
-    {
-        $film1 = $this->createFilm([
-            'name' => 'Portra 400',
-            'description' => 'A professional film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-        ]);
-        $film2 = $this->createFilm([
-            'name' => 'Ektar 100',
-            'description' => 'A vivid color film.',
-            'officialDocumentationUrl' => 'https://www.kodak.com/ektar100',
-        ]);
-
-        $this->documentManager->clear();
-
-        static::createClient()->request('PATCH', '/films/' . $film1->getId(), [
-            'headers' => [
-                'Content-Type' => 'application/merge-patch+json',
-                'Accept-Language' => 'fr, en;q=0.9',
-            ],
-            'json' => [
-                'description' => 'Un film négatif couleur professionnel.',
-                'officialDocumentationUrl' => 'https://www.kodak.fr/portra400',
-            ],
-        ]);
-
-        static::createClient()->request('PATCH', '/films/' . $film2->getId(), [
-            'headers' => [
-                'Content-Type' => 'application/merge-patch+json',
-                'Accept-Language' => 'fr, en;q=0.9',
-            ],
-            'json' => [
-                'description' => 'Un film négatif couleur aux couleurs vives.',
-                'officialDocumentationUrl' => 'https://www.kodak.fr/ektar100',
-            ],
-        ]);
-
-        // check en
-        $response = static::createClient()->request('GET', '/films', [
-            'headers' => ['Accept-Language' => 'en'],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(['hydra:totalItems' => 2]);
-        $this->assertJsonContains([
-            'hydra:member' => [
-                [
-                    'name' => 'Portra 400',
-                    'description' => 'A professional film.',
-                    'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-                    'isTranslated' => false,
-                ],
-                [
-                    'name' => 'Ektar 100',
-                    'description' => 'A vivid color film.',
-                    'officialDocumentationUrl' => 'https://www.kodak.com/ektar100',
-                    'isTranslated' => false,
-                ],
-            ],
-        ]);
-
-        // check fallback
-        $response = static::createClient()->request('GET', '/films', [
-            'headers' => [],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(['hydra:totalItems' => 2]);
-        $this->assertJsonContains([
-            'hydra:member' => [
-                [
-                    'name' => 'Portra 400',
-                    'description' => 'A professional film.',
-                    'officialDocumentationUrl' => 'https://www.kodak.com/portra400',
-                    'isTranslated' => false,
-                ],
-                [
-                    'name' => 'Ektar 100',
-                    'description' => 'A vivid color film.',
-                    'officialDocumentationUrl' => 'https://www.kodak.com/ektar100',
-                    'isTranslated' => false,
-                ],
-            ],
-        ]);
-
-        $response = static::createClient()->request('GET', '/films', [
-            'headers' => ['Accept-Language' => 'fr'],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(['hydra:totalItems' => 2]);
-        $this->assertJsonContains([
-            'hydra:member' => [
-                [
-                    'name' => 'Portra 400',
-                    'description' => 'Un film négatif couleur professionnel.',
-                    'officialDocumentationUrl' => 'https://www.kodak.fr/portra400',
-                    'isTranslated' => true,
-                ],
-                [
-                    'name' => 'Ektar 100',
-                    'description' => 'Un film négatif couleur aux couleurs vives.',
-                    'officialDocumentationUrl' => 'https://www.kodak.fr/ektar100',
-                    'isTranslated' => true,
-                ],
-            ],
         ]);
     }
 }

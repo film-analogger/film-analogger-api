@@ -4,14 +4,27 @@ namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Repository\FilmRepository;
+use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Translatable\Translatable;
 use Gedmo\Mapping\Annotation as Gedmo;
+
+/**
+ * Seul un data write peut mettre un film discontinuated
+ * Un user peut poster un film mais officiel = false
+ * Un user voit :
+ *     - tous les films officiels + ses films non officiels par défaut
+ */
 
 #[ODM\Document(repositoryClass: FilmRepository::class)]
 #[
@@ -25,6 +38,14 @@ use Gedmo\Mapping\Annotation as Gedmo;
         ],
         denormalizationContext: [
             'groups' => [SerializationGroups::FILM_WRITE_GROUP],
+        ],
+
+        operations: [
+            new Get(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
+            new GetCollection(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
+            new Post(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
+            new Patch(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
+            new Delete(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
         ],
     ),
 ]

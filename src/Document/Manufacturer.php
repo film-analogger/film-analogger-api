@@ -3,9 +3,15 @@
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -15,6 +21,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
     ApiResource(
         normalizationContext: ['groups' => [SerializationGroups::MANUFACTURER_READ_GROUP]],
         denormalizationContext: ['groups' => [SerializationGroups::MANUFACTURER_WRITE_GROUP]],
+        operations: [
+            new Get(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
+            new GetCollection(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
+            new Post(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
+            new Patch(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
+            new Delete(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
+        ],
     ),
 ]
 class Manufacturer

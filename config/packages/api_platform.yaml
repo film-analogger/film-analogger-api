@@ -7,3 +7,10 @@ api_platform:
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin', 'X-LOCALE', 'Accept-Language']
+    oauth:
+        enabled: true
+        clientId: '%env(OAUTH_KEYCLOAK_CLIENT_ID_SWAGGER)%'
+        type: 'oauth2'
+        flow: 'authorizationCode'
+        authorizationUrl: '%env(OAUTH_KEYCLOAK_ISSUER)%/realms/%env(OAUTH_KEYCLOAK_REALM)%/protocol/openid-connect/auth'
+        tokenUrl: '%env(OAUTH_KEYCLOAK_ISSUER)%/realms/%env(OAUTH_KEYCLOAK_REALM)%/protocol/openid-connect/token'

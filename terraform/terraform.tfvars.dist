@@ -1,0 +1,9 @@
+### mandatiory variables
+keycloak_realm_master_client_secret = "!ChangeMe!"
+keycloak_server_url = "http://localhost:8080"
+email_from_address = "example@example.com"
+email_smtp_username = "example@example.com"
+email_smtp_password = "password"
+
+### optional variables with default values
+keycloak_realm_master_client_id = "terraform"
