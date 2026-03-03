@@ -1,7 +1,7 @@
 variable "keycloak_realm_master_client_secret" {
     description = "The client secret for the Keycloak master realm client used by Terraform to authenticate with Keycloak. This should be set to the value of the 'terraform' client secret in Keycloak."
     type        = string
-    default     = "!ChangeMe!"
+    sensitive   = true
 }
 
 

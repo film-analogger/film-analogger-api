@@ -2,9 +2,6 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
 
-use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
-use FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserMock;
-
 class FilmSecurityTest extends AbstractFilmTestCase
 {
     public function testNoConnectedUserGetUnauthorized(): void

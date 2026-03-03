@@ -21,7 +21,7 @@ class KeycloakBearerAuthenticator extends AbstractAuthenticator
      */
     protected function formatToken(string $token): string
     {
-        return trim(preg_replace('/^(?:\s+)?[B-b]earer\s/', '', $token));
+        return trim(preg_replace('/^(?:\s+)?[Bb]earer\s/', '', $token));
     }
 
     public function supports(Request $request): ?bool

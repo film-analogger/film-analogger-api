@@ -19,6 +19,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Translatable\Translatable;
 use Gedmo\Mapping\Annotation as Gedmo;
 
+/**
+ * Seul un data write peut mettre un film discontinuated
+ * Un user peut poster un film mais officiel = false
+ * Un user voit :
+ *     - tous les films officiels + ses films non officiels par défaut
+ */
+
 #[ODM\Document(repositoryClass: FilmRepository::class)]
 #[
     ApiResource(

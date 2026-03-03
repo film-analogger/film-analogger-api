@@ -74,14 +74,21 @@ class KeycloakBearerUserProvider implements UserProviderInterface
                 $accessToken,
                 JWK::parseKeySet($this->keycloakClient->fetchIssuerKeys()),
             );
+
+            /** TODO:
+             * Add test and test that :
+             * After decoding/signature verification, the token is accepted without validating standard claims
+             * like iss (issuer) and aud/azp (audience/authorized party) against the configured realm/client.
+             * Since realm keys sign tokens for multiple clients, please validate these claims (and fail authentication)
+             * to ensure only tokens intended for this API are accepted.
+             */
         } catch (\InvalidArgumentException | \DomainException | \UnexpectedValueException $ex) {
             $this->logger->info('token validation failed', [
                 'errorMessage' => $ex->getMessage(),
                 'errorType' => get_class($ex),
-                'token' => $accessToken,
             ]);
             throw new CustomUserMessageAuthenticationException(
-                'The token does not exist, is malformated, invalid or expired',
+                'The token does not exist, is malformed, invalid or expired',
             );
         } catch (ClientException | ServerException $ex) {
             $this->logger->error($ex->getMessage());

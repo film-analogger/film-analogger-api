@@ -62,11 +62,3 @@ services:
 
     keycloak_bearer_authenticator:
         class: FilmAnalogger\FilmAnaloggerApi\Security\Authenticator\KeycloakBearerAuthenticator
-
-
-when@test:
-    services:
-        keycloak_bearer_authenticator:
-            class: FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerAuthenticatorMock
-            autowire: true
-            autoconfigure: true
