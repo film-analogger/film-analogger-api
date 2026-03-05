@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Repository\FilmRepository;
@@ -73,17 +74,16 @@ class Film implements Translatable
 
     #[ODM\Field]
     #[Assert\NotBlank]
-    #[Assert\Choice(choices: ['C-41', 'E-6', 'B&W', 'ECN-2'], message: 'Choose a valid process.')]
+    #[
+        Assert\Choice(
+            choices: ProcessConstants::CHEMISTRY_PROCESSES,
+            message: 'Choose a valid process.',
+        ),
+    ]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public string $process;
 
-    #[ODM\Field(nullable: true)]
-    #[
-        Assert\Choice(
-            choices: ['panchromatic', 'orthochromatic', 'chromogene'],
-            message: 'Choose a valid emulsion type.',
-        ),
-    ]
+    #[Assert\Choice(callback: 'getValidEmulsionTypes', message: 'Choose a valid emulsion type.')]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $emulsionType = null;
 
@@ -240,5 +240,10 @@ class Film implements Translatable
     public function getTertiaryColor(): ?string
     {
         return $this->tertiaryColor;
+    }
+
+    public function getValidEmulsionTypes(): array
+    {
+        return ProcessConstants::getValidEmulsionTypesForProcess($this->process);
     }
 }

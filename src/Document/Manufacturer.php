@@ -64,6 +64,15 @@ class Manufacturer
     ]
     public Collection $films;
 
+    #[ODM\ReferenceMany(targetDocument: Chemistry::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public Collection $chemistries;
+
     public function __construct()
     {
         $this->films = new ArrayCollection();
