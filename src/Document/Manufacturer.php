@@ -2,6 +2,7 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -16,6 +17,7 @@ use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ODM\Document]
 #[
@@ -73,6 +75,50 @@ class Manufacturer
     ]
     public Collection $chemistries;
 
+    #[ODM\Field(nullable: true)]
+    #[Assert\CssColor]
+    #[ApiProperty(example: '#FF0000')]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public ?string $primaryColor = null;
+
+    #[ODM\Field(nullable: true)]
+    #[ApiProperty(example: '#00FF00')]
+    #[Assert\CssColor]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public ?string $secondaryColor = null;
+
+    #[ODM\Field(nullable: true)]
+    #[ApiProperty(example: '#0000FF')]
+    #[Assert\CssColor]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public ?string $tertiaryColor = null;
+
+    #[ODM\Field(nullable: true)]
+    #[Assert\Url]
+    #[Gedmo\Translatable]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public ?string $website = null;
+
     public function __construct()
     {
         $this->films = new ArrayCollection();
@@ -102,5 +148,45 @@ class Manufacturer
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function setPrimaryColor(?string $primaryColor): void
+    {
+        $this->primaryColor = $primaryColor;
+    }
+
+    public function getPrimaryColor(): ?string
+    {
+        return $this->primaryColor;
+    }
+
+    public function setSecondaryColor(?string $secondaryColor): void
+    {
+        $this->secondaryColor = $secondaryColor;
+    }
+
+    public function getSecondaryColor(): ?string
+    {
+        return $this->secondaryColor;
+    }
+
+    public function setTertiaryColor(?string $tertiaryColor): void
+    {
+        $this->tertiaryColor = $tertiaryColor;
+    }
+
+    public function getTertiaryColor(): ?string
+    {
+        return $this->tertiaryColor;
+    }
+
+    public function setWebsite(?string $website): void
+    {
+        $this->website = $website;
+    }
+
+    public function getWebsite(): ?string
+    {
+        return $this->website;
     }
 }

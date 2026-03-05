@@ -127,6 +127,17 @@ class Chemistry
     ]
     public Collection $dilutions;
 
+    #[ODM\Field(nullable: true)]
+    #[Assert\Url]
+    #[Gedmo\Translatable]
+    #[
+        Groups([
+            SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::CHEMISTRY_WRITE_GROUP,
+        ]),
+    ]
+    public ?string $officialDocumentationUrl = null;
+
     public function __construct()
     {
         $this->dilutions = new ArrayCollection();
@@ -207,5 +218,15 @@ class Chemistry
     public function removeDilution(Dilution $dilution): void
     {
         $this->dilutions->removeElement($dilution);
+    }
+
+    public function setOfficialDocumentationUrl(?string $officialDocumentationUrl): void
+    {
+        $this->officialDocumentationUrl = $officialDocumentationUrl;
+    }
+
+    public function getOfficialDocumentationUrl(): ?string
+    {
+        return $this->officialDocumentationUrl;
     }
 }

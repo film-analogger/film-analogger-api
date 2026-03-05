@@ -31,12 +31,12 @@ class ManufacturerFixtures extends Fixture
     private function getData(): array
     {
         return [
-            [self::KODAK, 'Kodak'],
-            [self::ILFORD, 'Ilford'],
-            [self::FUJIFILM, 'Fujifilm'],
-            [self::ADOX, 'Adox'],
-            [self::FOMA, 'Foma'],
-            [self::ROLLEI, 'Rollei'],
+            [self::KODAK, 'Kodak', null, null, null],
+            [self::ILFORD, 'Ilford', null, null, null],
+            [self::FUJIFILM, 'Fujifilm', null, null, null],
+            [self::ADOX, 'Adox', null, null, null],
+            [self::FOMA, 'Foma', null, null, null],
+            [self::ROLLEI, 'Rollei', null, null, null],
         ];
     }
 }
