@@ -23,9 +23,11 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[
     ApiResource(
         normalizationContext: [
+            'skip_null_values' => false,
             'groups' => [
                 SerializationGroups::MANUFACTURER_READ_GROUP,
                 SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+                SerializationGroups::TRANSLATABLE_READ_GROUP,
             ],
         ],
         denormalizationContext: ['groups' => [SerializationGroups::MANUFACTURER_WRITE_GROUP]],
