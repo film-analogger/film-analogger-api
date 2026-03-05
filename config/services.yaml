@@ -40,6 +40,7 @@ services:
         calls:
             - [ setAnnotationReader, [ '@gedmo.mapping.driver.attribute' ] ]
             - [ setPersistDefaultLocaleTranslation, [ true ] ]
+            - [ setTranslationFallback, [ true ] ]
 
     # Gedmo Blameable Extension Listener
     gedmo.listener.blameable:
