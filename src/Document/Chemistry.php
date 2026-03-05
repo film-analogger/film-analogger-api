@@ -110,6 +110,7 @@ class Chemistry
     private ?string $description = null;
 
     #[ODM\EmbedMany(targetDocument: Dilution::class)]
+    #[Assert\Valid]
     #[
         Groups([
             SerializationGroups::CHEMISTRY_READ_GROUP,

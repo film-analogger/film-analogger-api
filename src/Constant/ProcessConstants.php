@@ -126,7 +126,7 @@ final class ProcessConstants
                 return self::CHEMISTRY_TYPES_RA4_PAPER;
 
             default:
-                return self::CHEMISTRY_TYPES;
+                return [];
         }
     }
 

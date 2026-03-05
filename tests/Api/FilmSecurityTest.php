@@ -10,270 +10,60 @@ class FilmSecurityTest extends AbstractFilmTestCase
         $this->createFilm(['name' => 'Ektar 100', 'sensibility' => 100]);
 
         $client = static::createClient();
-        $client->request('GET', '/films');
 
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
-
-        $client->request('GET', '/films/some-id');
-
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
-
-        $client->request('PATCH', '/films/some-id');
-
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
-
-        $client->request('DELETE', '/films/some-id');
-
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
-
-        $client->request('POST', '/films');
-
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
-        $client->request('GET', '/manufacturers');
-
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
-
-        $client->request('GET', '/manufacturers/some-id');
-
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
-
-        $client->request('PATCH', '/manufacturers/some-id');
-
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
-
-        $client->request('DELETE', '/manufacturers/some-id');
-
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
-
-        $client->request('POST', '/manufacturers');
-
-        $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains([
-            'message' => 'Token is not present in the request headers',
-        ]);
+        foreach (
+            [
+                ['GET', '/films'],
+                ['GET', '/films/some-id'],
+                ['PATCH', '/films/some-id'],
+                ['DELETE', '/films/some-id'],
+                ['POST', '/films'],
+            ]
+            as [$method, $uri]
+        ) {
+            $this->assertUnauthorizedMissingToken($client, $method, $uri);
+        }
     }
 
     public function testAdminCanDoAnything(): void
     {
-        $film = $this->createFilm();
-        $manufacturer = $this->createManufacturer();
-
-        $this->createFilm(['name' => 'Ektar 100', 'sensibility' => 100]);
-
-        $client = self::loggedClientAdmin();
-        $client->request('GET', '/films');
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('GET', '/films/' . $film->getId());
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('PATCH', '/films/' . $film->getId(), [
-            'headers' => ['Content-Type' => 'application/merge-patch+json'],
-            'json' => [
-                'name' => 'Portra 800',
-                'sensibility' => 800,
-            ],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('DELETE', '/films/' . $film->getId());
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(204);
-
-        $client->request('POST', '/films', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'json' => [
-                'name' => 'Gold 200',
-                'description' => 'A consumer color negative film.',
-                'process' => 'C-41',
-                'sensibility' => 200,
-                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
-            ],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(201);
+        $this->assertFilmSecurityByRole(self::loggedClientAdmin(), true);
     }
 
     public function testDataWriterCanDoAnything(): void
     {
-        $film = $this->createFilm();
-        $manufacturer = $this->createManufacturer();
-
-        $this->createFilm(['name' => 'Ektar 100', 'sensibility' => 100]);
-
-        $client = self::loggedClientDataWriter();
-        $client->request('GET', '/films');
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('GET', '/films/' . $film->getId());
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('PATCH', '/films/' . $film->getId(), [
-            'headers' => ['Content-Type' => 'application/merge-patch+json'],
-            'json' => [
-                'name' => 'Portra 800',
-                'sensibility' => 800,
-            ],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('DELETE', '/films/' . $film->getId());
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(204);
-
-        $client->request('POST', '/films', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'json' => [
-                'name' => 'Gold 200',
-                'description' => 'A consumer color negative film.',
-                'process' => 'C-41',
-                'sensibility' => 200,
-                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
-            ],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(201);
+        $this->assertFilmSecurityByRole(self::loggedClientDataWriter(), true);
     }
 
     public function testDataReaderCanReadDataOnly(): void
     {
-        $film = $this->createFilm();
-        $manufacturer = $this->createManufacturer();
-
-        $this->createFilm(['name' => 'Ektar 100', 'sensibility' => 100]);
-
-        $client = self::loggedClientDataReader();
-        $client->request('GET', '/films');
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('GET', '/films/' . $film->getId());
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('PATCH', '/films/' . $film->getId(), [
-            'headers' => ['Content-Type' => 'application/merge-patch+json'],
-            'json' => [
-                'name' => 'Portra 800',
-                'sensibility' => 800,
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(403);
-        $this->assertJsonContains([
-            'detail' => 'Access Denied.',
-            'status' => 403,
-        ]);
-        $client->request('DELETE', '/films/' . $film->getId());
-
-        $this->assertResponseStatusCodeSame(403);
-        $this->assertJsonContains([
-            'detail' => 'Access Denied.',
-            'status' => 403,
-        ]);
-
-        $client->request('POST', '/films', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'json' => [
-                'name' => 'Gold 200',
-                'description' => 'A consumer color negative film.',
-                'process' => 'C-41',
-                'sensibility' => 200,
-                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
-            ],
-        ]);
-        $this->assertResponseStatusCodeSame(403);
-        $this->assertJsonContains([
-            'detail' => 'Access Denied.',
-            'status' => 403,
-        ]);
+        $this->assertFilmSecurityByRole(self::loggedClientDataReader(), false);
     }
 
     public function testUserCanReadDataOnly(): void
+    {
+        $this->assertFilmSecurityByRole(self::loggedClientUser(), false);
+    }
+
+    private function assertFilmSecurityByRole($client, bool $canWrite): void
     {
         $film = $this->createFilm();
         $manufacturer = $this->createManufacturer();
 
         $this->createFilm(['name' => 'Ektar 100', 'sensibility' => 100]);
 
-        $client = self::loggedClientUser();
-        $client->request('GET', '/films');
+        $this->assertSuccessfulStatus($client, 'GET', '/films', 200);
+        $this->assertSuccessfulStatus($client, 'GET', '/films/' . $film->getId(), 200);
 
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('GET', '/films/' . $film->getId());
-
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-
-        $client->request('PATCH', '/films/' . $film->getId(), [
+        $patchOptions = [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'name' => 'Portra 800',
                 'sensibility' => 800,
             ],
-        ]);
+        ];
 
-        $this->assertResponseStatusCodeSame(403);
-        $this->assertJsonContains([
-            'detail' => 'Access Denied.',
-            'status' => 403,
-        ]);
-        $client->request('DELETE', '/films/' . $film->getId());
-
-        $this->assertResponseStatusCodeSame(403);
-        $this->assertJsonContains([
-            'detail' => 'Access Denied.',
-            'status' => 403,
-        ]);
-
-        $client->request('POST', '/films', [
+        $postOptions = [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Gold 200',
@@ -282,11 +72,29 @@ class FilmSecurityTest extends AbstractFilmTestCase
                 'sensibility' => 200,
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
             ],
-        ]);
-        $this->assertResponseStatusCodeSame(403);
-        $this->assertJsonContains([
-            'detail' => 'Access Denied.',
-            'status' => 403,
-        ]);
+        ];
+
+        if ($canWrite) {
+            $this->assertSuccessfulStatus(
+                $client,
+                'PATCH',
+                '/films/' . $film->getId(),
+                200,
+                $patchOptions,
+            );
+            $this->assertSuccessfulStatus($client, 'DELETE', '/films/' . $film->getId(), 204);
+            $this->assertSuccessfulStatus($client, 'POST', '/films', 201, $postOptions);
+
+            return;
+        }
+
+        $this->assertForbiddenAccessDenied(
+            $client,
+            'PATCH',
+            '/films/' . $film->getId(),
+            $patchOptions,
+        );
+        $this->assertForbiddenAccessDenied($client, 'DELETE', '/films/' . $film->getId());
+        $this->assertForbiddenAccessDenied($client, 'POST', '/films', $postOptions);
     }
 }

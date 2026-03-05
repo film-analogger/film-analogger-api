@@ -50,7 +50,12 @@ class ChemistryType
     use TimestampableBlameableTrait;
 
     #[ODM\Id]
-    #[Groups([SerializationGroups::CHEMISTRY_READ_GROUP])]
+    #[
+        Groups([
+            SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::CHEMISTRY_TYPE_READ_GROUP,
+        ]),
+    ]
     private string $id;
 
     #[ODM\Field]
@@ -58,7 +63,8 @@ class ChemistryType
     #[
         Groups([
             SerializationGroups::CHEMISTRY_READ_GROUP,
-            SerializationGroups::CHEMISTRY_WRITE_GROUP,
+            SerializationGroups::CHEMISTRY_TYPE_READ_GROUP,
+            SerializationGroups::CHEMISTRY_TYPE_WRITE_GROUP,
         ]),
     ]
     private string $name;
@@ -77,7 +83,7 @@ class ChemistryType
             SerializationGroups::CHEMISTRY_TYPE_WRITE_GROUP,
         ]),
     ]
-    public string $process;
+    public string $process = '';
 
     #[ODM\Field]
     #[Assert\NotBlank]
@@ -90,6 +96,7 @@ class ChemistryType
     #[
         Groups([
             SerializationGroups::CHEMISTRY_TYPE_READ_GROUP,
+            SerializationGroups::CHEMISTRY_READ_GROUP,
             SerializationGroups::CHEMISTRY_TYPE_WRITE_GROUP,
         ]),
     ]
@@ -100,14 +107,15 @@ class ChemistryType
     #[
         Groups([
             SerializationGroups::CHEMISTRY_TYPE_READ_GROUP,
+            SerializationGroups::CHEMISTRY_READ_GROUP,
             SerializationGroups::CHEMISTRY_TYPE_WRITE_GROUP,
         ]),
     ]
     private string $typeLabel;
 
-    public static function getValidChemistryTypesForProcess(string $process): array
+    public function getValidChemistryTypesForProcess(): array
     {
-        return ProcessConstants::getValidChemistryTypesForProcess($process);
+        return ProcessConstants::getValidChemistryTypesForProcess($this->process);
     }
 
     public function getId(): string

@@ -124,6 +124,7 @@ class Manufacturer
     public function __construct()
     {
         $this->films = new ArrayCollection();
+        $this->chemistries = new ArrayCollection();
     }
 
     public function getId(): ?string
