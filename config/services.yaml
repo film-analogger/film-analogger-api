@@ -92,3 +92,11 @@ services:
 
     keycloak_bearer_authenticator:
         class: FilmAnalogger\FilmAnaloggerApi\Security\Authenticator\KeycloakBearerAuthenticator
+
+
+
+    FilmAnalogger\FilmAnaloggerApi\DataFixtures\:
+        resource: '../src/DataFixtures'
+        public: true
+        tags:
+            - { name: 'doctrine.fixture.odm.mongodb' }

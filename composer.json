@@ -38,6 +38,7 @@
         "symfony/yaml": "8.0.*"
     },
     "require-dev": {
+        "doctrine/data-fixtures": "^2.2",
         "phpunit/phpunit": "^13.0.5",
         "symfony/browser-kit": "8.0.*",
         "symfony/css-selector": "8.0.*",

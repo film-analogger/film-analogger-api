@@ -110,7 +110,12 @@ class Chemistry
 
     #[ODM\Field]
     #[Gedmo\Translatable]
-    #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
+    #[
+        Groups([
+            SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::CHEMISTRY_WRITE_GROUP,
+        ]),
+    ]
     private ?string $description = null;
 
     #[ODM\EmbedMany(targetDocument: Dilution::class)]
