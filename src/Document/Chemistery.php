@@ -99,15 +99,6 @@ class Chemistry
     #[Assert\NotNull(message: 'Manufacturer must be set.')]
     public Manufacturer $manufacturer;
 
-    #[ODM\ReferenceMany(targetDocument: Chemistry::class, mappedBy: 'manufacturer', storeAs: 'id')]
-    #[
-        Groups([
-            SerializationGroups::MANUFACTURER_READ_GROUP,
-            SerializationGroups::MANUFACTURER_WRITE_GROUP,
-        ]),
-    ]
-    public Collection $chemistries;
-
     #[ODM\Field]
     #[Gedmo\Translatable]
     #[
@@ -190,11 +181,6 @@ class Chemistry
     {
         $this->manufacturer = $manufacturer;
         return $this;
-    }
-
-    public function getChemistries(): Collection
-    {
-        return $this->chemistries;
     }
 
     public function getDescription(): ?string

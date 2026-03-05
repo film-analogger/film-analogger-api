@@ -24,14 +24,12 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 ->setChemistryType(
                     $this->getReference($data['chemistryType'], ChemistryType::class),
                 )
+                ->setOfficialDocumentationUrl($data['officialDocumentationUrl'] ?? null)
                 ->setManufacturer($this->getReference($data['manufacturer'], Manufacturer::class));
 
             foreach ($data['dilutions'] ?? [] as [$chemParts, $waterParts, $official]) {
                 $chemistry->addDilution(
-                    new Dilution()
-                        ->setChemistryParts($chemParts)
-                        ->setWaterParts($waterParts)
-                        ->setOfficial($official),
+                    new Dilution()->setChemistryParts($chemParts)->setWaterParts($waterParts),
                 );
             }
 
@@ -53,6 +51,8 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::KODAK,
                 'dilutions' => [[1, 0, true], [1, 1, true]],
+                'officialDocumentationUrl' =>
+                    'https://business.kodakmoments.com/sites/default/files/files/resources/j78.pdf',
             ],
             [
                 'name' => 'HC-110',
@@ -61,7 +61,9 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::KODAK,
-                'dilutions' => [[1, 15, true], [1, 31, true], [1, 63, false]],
+                'dilutions' => [[1, 15, true], [1, 31, true]],
+                'officialDocumentationUrl' =>
+                    'https://business.kodakmoments.com/sites/default/files/wysiwyg/pro/chemistry/j24.pdf',
             ],
             [
                 'name' => 'XTOL',
@@ -70,7 +72,9 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::KODAK,
-                'dilutions' => [[1, 0, true], [1, 1, true], [1, 2, true], [1, 3, false]],
+                'dilutions' => [[1, 0, true], [1, 1, true], [1, 2, false], [1, 3, false]],
+                'officialDocumentationUrl' =>
+                    'https://business.kodakmoments.com/sites/default/files/wysiwyg/pro/chemistry/J-109_Feb_2018.pdf',
             ],
 
             // ── Kodak B&W Fixers ──────────────────────────────────────────────
@@ -82,6 +86,7 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'chemistryType' => ChemistryTypeFixtures::BW_FIXER,
                 'manufacturer' => ManufacturerFixtures::KODAK,
                 'dilutions' => [[1, 5, true]],
+                'officialDocumentationUrl' => null,
             ],
 
             // ── Kodak Wetting Agents ───────────────────────────────────────────
@@ -93,6 +98,7 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'chemistryType' => ChemistryTypeFixtures::BW_WETTING_AGENT,
                 'manufacturer' => ManufacturerFixtures::KODAK,
                 'dilutions' => [[1, 200, true]],
+                'officialDocumentationUrl' => null,
             ],
 
             // ── Ilford B&W Film Developers ────────────────────────────────────
@@ -104,6 +110,8 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
                 'dilutions' => [[1, 0, true], [1, 1, true], [1, 3, true]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/wp/wp-content/uploads/2024/09/ILFORD-POWDER-CHEM-190824.pdf',
             ],
             [
                 'name' => 'Ilfosol 3',
@@ -113,6 +121,8 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
                 'dilutions' => [[1, 9, true], [1, 14, true]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/wp/wp-content/uploads/2024/09/Ilfosol3-Sept2024.pdf',
             ],
             [
                 'name' => 'Microphen',
@@ -122,6 +132,8 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
                 'dilutions' => [[1, 0, true], [1, 1, true], [1, 3, true]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/wp/wp-content/uploads/2024/09/ILFORD-POWDER-CHEM-190824.pdf',
             ],
 
             // ── Ilford B&W Fixers ─────────────────────────────────────────────
@@ -133,6 +145,8 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'chemistryType' => ChemistryTypeFixtures::BW_FIXER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
                 'dilutions' => [[1, 4, true], [1, 9, true]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/amfile/file/download/file/1833/product/711/',
             ],
 
             // ── Ilford Stop Baths ─────────────────────────────────────────────
@@ -144,6 +158,8 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'chemistryType' => ChemistryTypeFixtures::BW_STOP,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
                 'dilutions' => [[1, 19, true]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/amfile/file/download/file/1865/product/669/',
             ],
 
             // ── Ilford Wetting Agents ─────────────────────────────────────────
@@ -155,6 +171,8 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'chemistryType' => ChemistryTypeFixtures::BW_WETTING_AGENT,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
                 'dilutions' => [[1, 200, true]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/amfile/file/download/file/1865/product/673/',
             ],
 
             // ── Adox B&W Film Developers ──────────────────────────────────────
@@ -165,7 +183,9 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ADOX,
-                'dilutions' => [[1, 25, true], [1, 50, true], [1, 100, true]],
+                'dilutions' => [[1, 25, true], [1, 50, true], [1, 100, false]],
+                'officialDocumentationUrl' =>
+                    'https://www.fotoimpex.com/shop/images/products/media/56415_4_PDF-Datenblatt.pdf',
             ],
         ];
     }
