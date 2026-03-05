@@ -153,9 +153,10 @@ class Chemistry
         return $this->name;
     }
 
-    public function setName(string $name): void
+    public function setName(string $name): static
     {
         $this->name = $name;
+        return $this;
     }
 
     public function getProcess(): string
@@ -163,9 +164,10 @@ class Chemistry
         return $this->process;
     }
 
-    public function setProcess(string $process): void
+    public function setProcess(string $process): static
     {
         $this->process = $process;
+        return $this;
     }
 
     public function getChemistryType(): ChemistryType
@@ -173,9 +175,10 @@ class Chemistry
         return $this->chemistryType;
     }
 
-    public function setChemistryType(ChemistryType $chemistryType): void
+    public function setChemistryType(ChemistryType $chemistryType): static
     {
         $this->chemistryType = $chemistryType;
+        return $this;
     }
 
     public function getManufacturer(): Manufacturer
@@ -183,9 +186,10 @@ class Chemistry
         return $this->manufacturer;
     }
 
-    public function setManufacturer(Manufacturer $manufacturer): void
+    public function setManufacturer(Manufacturer $manufacturer): static
     {
         $this->manufacturer = $manufacturer;
+        return $this;
     }
 
     public function getChemistries(): Collection
@@ -198,9 +202,10 @@ class Chemistry
         return $this->description;
     }
 
-    public function setDescription(?string $description): void
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
+        return $this;
     }
 
     public function getDilutions(): Collection
@@ -220,9 +225,10 @@ class Chemistry
         $this->dilutions->removeElement($dilution);
     }
 
-    public function setOfficialDocumentationUrl(?string $officialDocumentationUrl): void
+    public function setOfficialDocumentationUrl(?string $officialDocumentationUrl): static
     {
         $this->officialDocumentationUrl = $officialDocumentationUrl;
+        return $this;
     }
 
     public function getOfficialDocumentationUrl(): ?string

@@ -140,9 +140,10 @@ class Manufacturer
         return $this->films;
     }
 
-    public function setName(string $name): void
+    public function setName(string $name): static
     {
         $this->name = $name;
+        return $this;
     }
 
     public function getName(): string
@@ -150,9 +151,10 @@ class Manufacturer
         return $this->name;
     }
 
-    public function setPrimaryColor(?string $primaryColor): void
+    public function setPrimaryColor(?string $primaryColor): static
     {
         $this->primaryColor = $primaryColor;
+        return $this;
     }
 
     public function getPrimaryColor(): ?string
@@ -160,9 +162,10 @@ class Manufacturer
         return $this->primaryColor;
     }
 
-    public function setSecondaryColor(?string $secondaryColor): void
+    public function setSecondaryColor(?string $secondaryColor): static
     {
         $this->secondaryColor = $secondaryColor;
+        return $this;
     }
 
     public function getSecondaryColor(): ?string
@@ -170,9 +173,10 @@ class Manufacturer
         return $this->secondaryColor;
     }
 
-    public function setTertiaryColor(?string $tertiaryColor): void
+    public function setTertiaryColor(?string $tertiaryColor): static
     {
         $this->tertiaryColor = $tertiaryColor;
+        return $this;
     }
 
     public function getTertiaryColor(): ?string
@@ -180,9 +184,10 @@ class Manufacturer
         return $this->tertiaryColor;
     }
 
-    public function setWebsite(?string $website): void
+    public function setWebsite(?string $website): static
     {
         $this->website = $website;
+        return $this;
     }
 
     public function getWebsite(): ?string

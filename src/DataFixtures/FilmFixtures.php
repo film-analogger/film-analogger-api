@@ -15,13 +15,14 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
     {
         foreach ($this->getData() as $data) {
             $film = new Film();
-            $film->setName($data['name']);
-            $film->setDescription($data['description']);
             $film->process = $data['process'];
             $film->sensibility = $data['sensibility'];
             $film->emulsionType = $data['emulsionType'];
             $film->inversible = $data['inversible'] ?? null;
-            $film->setManufacturer($this->getReference($data['manufacturer'], Manufacturer::class));
+            $film
+                ->setName($data['name'])
+                ->setDescription($data['description'])
+                ->setManufacturer($this->getReference($data['manufacturer'], Manufacturer::class));
 
             $manager->persist($film);
         }

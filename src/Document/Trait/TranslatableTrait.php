@@ -40,7 +40,7 @@ trait TranslatableTrait
         return $this->translations;
     }
 
-    public function setTranslations(array $translations): self
+    public function setTranslations(array $translations): static
     {
         $this->translations = $translations;
         return $this;
@@ -51,7 +51,7 @@ trait TranslatableTrait
         return $this->isTranslated;
     }
 
-    public function setIsTranslated(bool $isTranslated): self
+    public function setIsTranslated(bool $isTranslated): static
     {
         $this->isTranslated = $isTranslated;
         return $this;

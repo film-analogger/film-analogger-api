@@ -46,9 +46,10 @@ class Dilution
         return $this->chemistryParts;
     }
 
-    public function setChemistryParts(int $chemistryParts): void
+    public function setChemistryParts(int $chemistryParts): static
     {
         $this->chemistryParts = $chemistryParts;
+        return $this;
     }
 
     public function getWaterParts(): int
@@ -56,9 +57,10 @@ class Dilution
         return $this->waterParts;
     }
 
-    public function setWaterParts(int $waterParts): void
+    public function setWaterParts(int $waterParts): static
     {
         $this->waterParts = $waterParts;
+        return $this;
     }
 
     public function isOfficial(): bool
@@ -66,9 +68,10 @@ class Dilution
         return $this->official;
     }
 
-    public function setOfficial(bool $official): void
+    public function setOfficial(bool $official): static
     {
         $this->official = $official;
+        return $this;
     }
 
     /**

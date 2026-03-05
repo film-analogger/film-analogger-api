@@ -31,10 +31,11 @@ class ChemistryTypeFixtures extends Fixture
     {
         foreach ($this->getData() as $data) {
             $type = new ChemistryType();
-            $type->setName($data['name']);
             $type->process = $data['process'];
-            $type->setTypeCode($data['typeCode']);
-            $type->setTypeLabel($data['typeLabel']);
+            $type
+                ->setName($data['name'])
+                ->setTypeCode($data['typeCode'])
+                ->setTypeLabel($data['typeLabel']);
 
             $manager->persist($type);
             $this->addReference($data['reference'], $type);

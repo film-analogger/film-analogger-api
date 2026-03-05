@@ -17,22 +17,22 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
     {
         foreach ($this->getData() as $data) {
             $chemistry = new Chemistry();
-            $chemistry->setName($data['name']);
             $chemistry->process = $data['process'];
-            $chemistry->setDescription($data['description'] ?? null);
-            $chemistry->setChemistryType(
-                $this->getReference($data['chemistryType'], ChemistryType::class),
-            );
-            $chemistry->setManufacturer(
-                $this->getReference($data['manufacturer'], Manufacturer::class),
-            );
+            $chemistry
+                ->setName($data['name'])
+                ->setDescription($data['description'] ?? null)
+                ->setChemistryType(
+                    $this->getReference($data['chemistryType'], ChemistryType::class),
+                )
+                ->setManufacturer($this->getReference($data['manufacturer'], Manufacturer::class));
 
             foreach ($data['dilutions'] ?? [] as [$chemParts, $waterParts, $official]) {
-                $dilution = new Dilution();
-                $dilution->setChemistryParts($chemParts);
-                $dilution->setWaterParts($waterParts);
-                $dilution->setOfficial($official);
-                $chemistry->addDilution($dilution);
+                $chemistry->addDilution(
+                    new Dilution()
+                        ->setChemistryParts($chemParts)
+                        ->setWaterParts($waterParts)
+                        ->setOfficial($official),
+                );
             }
 
             $manager->persist($chemistry);
