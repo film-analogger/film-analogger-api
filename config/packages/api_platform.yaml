@@ -1,5 +1,5 @@
 api_platform:
-    version: 0.1.3
+    version: 0.1.4
     title: Hello API Platform
     serializer:
         hydra_prefix: true

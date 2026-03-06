@@ -1,3 +1,19 @@
+## 0.1.4 (2026-03-06)
+
+### Feat
+
+- **fixtures**: add translations to fixtures
+- **fixtures**: improve fixtures
+- **api**: make setters chainable
+- **api**: add fields to some objects and add fixtures
+- **fixtures**: add film and manufacturer fixtures
+- **api**: add ChemistryType and Chemistry
+
+### Fix
+
+- **review**: fix review comments
+- keycloak conf and translation
+
 ## 0.1.3 (2026-03-04)
 
 ### Feat

@@ -19,4 +19,7 @@ final class SerializationGroups
     const TRANSLATABLE_READ_GROUP = 'translatable-read';
 
     const TIMESTAMPABLE_BLAMEABLE_READ_GROUP = 'timestampable-blameable-read';
+
+    const APP_USER_READ_GROUP = 'read-app-user';
+    const APP_USER_WRITE_GROUP = 'write-app-user';
 }
