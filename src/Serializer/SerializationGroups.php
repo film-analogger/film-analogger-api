@@ -22,4 +22,5 @@ final class SerializationGroups
 
     const APP_USER_READ_GROUP = 'read-app-user';
     const APP_USER_WRITE_GROUP = 'write-app-user';
+    const APP_USER_AVATAR_UPLOAD_GROUP = 'avatar-upload-app-user';
 }

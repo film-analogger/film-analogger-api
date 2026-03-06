@@ -243,7 +243,6 @@ final class UserApiTest extends AbstractFilmTestCase
             'json' => [
                 'website' => 'https://example.com',
                 'description' => 'My bio',
-                'avatarUrl' => 'https://example.com/avatar.png',
             ],
         ]);
 
@@ -252,7 +251,6 @@ final class UserApiTest extends AbstractFilmTestCase
         $this->assertJsonContains([
             'website' => 'https://example.com',
             'description' => 'My bio',
-            'avatarUrl' => 'https://example.com/avatar.png',
         ]);
     }
 
@@ -279,19 +277,6 @@ final class UserApiTest extends AbstractFilmTestCase
         $client->request('PATCH', '/app_users/' . $user->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => ['website' => 'not-a-valid-url'],
-        ]);
-
-        $this->assertResponseStatusCodeSame(422);
-    }
-
-    public function testPatchWithInvalidAvatarUrlFails(): void
-    {
-        $user = $this->createAppUser(username: 'test_user_data_reader');
-
-        $client = self::loggedClientDataReader(preferred_username: 'test_user_data_reader');
-        $client->request('PATCH', '/app_users/' . $user->getId(), [
-            'headers' => ['Content-Type' => 'application/merge-patch+json'],
-            'json' => ['avatarUrl' => 'not-a-valid-url'],
         ]);
 
         $this->assertResponseStatusCodeSame(422);
@@ -393,7 +378,6 @@ final class UserApiTest extends AbstractFilmTestCase
         $user = $this->createAppUser(username: 'publicuser', email: 'public@example.test');
         $user->website = 'https://example.com';
         $user->description = 'Public bio';
-        $user->avatarUrl = 'https://example.com/avatar.png';
         $this->documentManager->flush();
 
         $client = self::loggedClientDataReader();
@@ -404,6 +388,9 @@ final class UserApiTest extends AbstractFilmTestCase
         $this->assertArrayHasKey('username', $data);
         $this->assertArrayHasKey('website', $data);
         $this->assertArrayHasKey('description', $data);
-        $this->assertArrayHasKey('avatarUrl', $data);
     }
+
+    // -------------------------------------------------------------------------
+    // Avatar upload
+    // -------------------------------------------------------------------------
 }

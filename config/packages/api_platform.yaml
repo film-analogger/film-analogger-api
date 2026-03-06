@@ -3,6 +3,13 @@ api_platform:
     title: Hello API Platform
     serializer:
         hydra_prefix: true
+    formats:
+        jsonld:
+            mime_types: ['application/ld+json']
+        json:
+            mime_types: ['application/json']
+        multipart:
+            mime_types: ['multipart/form-data']
     defaults:
         stateless: true
         cache_headers:
