@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Repository\FilmRepository;
@@ -73,17 +74,17 @@ class Film implements Translatable
 
     #[ODM\Field]
     #[Assert\NotBlank]
-    #[Assert\Choice(choices: ['C-41', 'E-6', 'B&W', 'ECN-2'], message: 'Choose a valid process.')]
+    #[
+        Assert\Choice(
+            choices: ProcessConstants::CHEMISTRY_PROCESSES,
+            message: 'Choose a valid process.',
+        ),
+    ]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public string $process;
 
     #[ODM\Field(nullable: true)]
-    #[
-        Assert\Choice(
-            choices: ['panchromatic', 'orthochromatic', 'chromogene'],
-            message: 'Choose a valid emulsion type.',
-        ),
-    ]
+    #[Assert\Choice(callback: 'getValidEmulsionTypes', message: 'Choose a valid emulsion type.')]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $emulsionType = null;
 
@@ -132,9 +133,10 @@ class Film implements Translatable
         return $this->id;
     }
 
-    public function setManufacturer(Manufacturer $manufacturer): void
+    public function setManufacturer(Manufacturer $manufacturer): static
     {
         $this->manufacturer = $manufacturer;
+        return $this;
     }
 
     public function getManufacturer(): Manufacturer
@@ -142,9 +144,10 @@ class Film implements Translatable
         return $this->manufacturer;
     }
 
-    public function setName(string $name): void
+    public function setName(string $name): static
     {
         $this->name = $name;
+        return $this;
     }
 
     public function getName(): string
@@ -152,9 +155,10 @@ class Film implements Translatable
         return $this->name;
     }
 
-    public function setDescription(string $description): void
+    public function setDescription(string $description): static
     {
         $this->description = $description;
+        return $this;
     }
 
     public function getDescription(): string
@@ -162,9 +166,10 @@ class Film implements Translatable
         return $this->description;
     }
 
-    public function setProcess(string $process): void
+    public function setProcess(string $process): static
     {
         $this->process = $process;
+        return $this;
     }
 
     public function getProcess(): string
@@ -172,9 +177,10 @@ class Film implements Translatable
         return $this->process;
     }
 
-    public function setEmulsionType(?string $emulsionType): void
+    public function setEmulsionType(?string $emulsionType): static
     {
         $this->emulsionType = $emulsionType;
+        return $this;
     }
 
     public function getEmulsionType(): ?string
@@ -182,9 +188,10 @@ class Film implements Translatable
         return $this->emulsionType;
     }
 
-    public function setInversible(?bool $inversible): void
+    public function setInversible(?bool $inversible): static
     {
         $this->inversible = $inversible;
+        return $this;
     }
 
     public function getInversible(): ?bool
@@ -192,9 +199,10 @@ class Film implements Translatable
         return $this->inversible;
     }
 
-    public function setOfficialDocumentationUrl(?string $officialDocumentationUrl): void
+    public function setOfficialDocumentationUrl(?string $officialDocumentationUrl): static
     {
         $this->officialDocumentationUrl = $officialDocumentationUrl;
+        return $this;
     }
 
     public function getOfficialDocumentationUrl(): ?string
@@ -202,9 +210,10 @@ class Film implements Translatable
         return $this->officialDocumentationUrl;
     }
 
-    public function setSensibility(int $sensibility): void
+    public function setSensibility(int $sensibility): static
     {
         $this->sensibility = $sensibility;
+        return $this;
     }
 
     public function getSensibility(): int
@@ -212,9 +221,10 @@ class Film implements Translatable
         return $this->sensibility;
     }
 
-    public function setPrimaryColor(?string $primaryColor): void
+    public function setPrimaryColor(?string $primaryColor): static
     {
         $this->primaryColor = $primaryColor;
+        return $this;
     }
 
     public function getPrimaryColor(): ?string
@@ -222,9 +232,10 @@ class Film implements Translatable
         return $this->primaryColor;
     }
 
-    public function setSecondaryColor(?string $secondaryColor): void
+    public function setSecondaryColor(?string $secondaryColor): static
     {
         $this->secondaryColor = $secondaryColor;
+        return $this;
     }
 
     public function getSecondaryColor(): ?string
@@ -232,13 +243,19 @@ class Film implements Translatable
         return $this->secondaryColor;
     }
 
-    public function setTertiaryColor(?string $tertiaryColor): void
+    public function setTertiaryColor(?string $tertiaryColor): static
     {
         $this->tertiaryColor = $tertiaryColor;
+        return $this;
     }
 
     public function getTertiaryColor(): ?string
     {
         return $this->tertiaryColor;
+    }
+
+    public function getValidEmulsionTypes(): array
+    {
+        return ProcessConstants::getValidEmulsionTypesForProcess($this->process);
     }
 }

@@ -3,6 +3,8 @@
 namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use FilmAnalogger\FilmAnaloggerApi\Document\Chemistry;
+use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -27,7 +29,48 @@ abstract class AbstractFilmTestCase extends ApiTestCase
     {
         $this->documentManager->getDocumentCollection(Film::class)->drop();
         $this->documentManager->getDocumentCollection(Manufacturer::class)->drop();
+        $this->documentManager->getDocumentCollection(Chemistry::class)->drop();
+        $this->documentManager->getDocumentCollection(ChemistryType::class)->drop();
         $this->documentManager->getDocumentCollection(Translation::class)->drop();
+    }
+
+    protected function createChemistryType(
+        string $process = 'B&W',
+        string $typeCode = 'BW_FILM_DEVELOPER',
+        string $typeLabel = 'Film Developer',
+    ): ChemistryType {
+        $chemistryType = new ChemistryType();
+        $chemistryType->process = $process;
+        $chemistryType->setTypeCode($typeCode);
+        $chemistryType->setTypeLabel($typeLabel);
+        $this->documentManager->persist($chemistryType);
+        $this->documentManager->flush();
+
+        return $chemistryType;
+    }
+
+    protected function createChemistry(array $overrides = []): Chemistry
+    {
+        $manufacturer = $overrides['manufacturer'] ?? $this->createManufacturer();
+        $chemistryType = $overrides['chemistryType'] ?? $this->createChemistryType();
+
+        $chemistry = new Chemistry();
+        $chemistry->setName($overrides['name'] ?? 'D-76');
+        $chemistry->process = $overrides['process'] ?? 'B&W';
+        $chemistry->setChemistryType($chemistryType);
+        $chemistry->setManufacturer($manufacturer);
+
+        if (isset($overrides['description'])) {
+            $chemistry->setDescription($overrides['description']);
+        }
+        if (isset($overrides['officialDocumentationUrl'])) {
+            $chemistry->setOfficialDocumentationUrl($overrides['officialDocumentationUrl']);
+        }
+
+        $this->documentManager->persist($chemistry);
+        $this->documentManager->flush();
+
+        return $chemistry;
     }
 
     protected function createManufacturer(string $name = 'Kodak'): Manufacturer
@@ -74,6 +117,56 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->flush();
 
         return $film;
+    }
+
+    // protected function assertArraysHaveIdenticalValues(array $actual, array $expected): void
+    // {
+    //     $this->assertCount(count($expected), $actual);
+    //     foreach ($expected as $expectedItem) {
+    //         $this->assertContains($expectedItem, $actual);
+    //     }
+    // }
+
+    protected function assertUnauthorizedMissingToken(
+        Client $client,
+        string $method,
+        string $uri,
+        array $options = [],
+    ): void {
+        $client->request($method, $uri, $options);
+
+        $this->assertResponseStatusCodeSame(401);
+        $this->assertJsonContains([
+            'message' => 'Token is not present in the request headers',
+        ]);
+    }
+
+    protected function assertSuccessfulStatus(
+        Client $client,
+        string $method,
+        string $uri,
+        int $expectedStatus,
+        array $options = [],
+    ): void {
+        $client->request($method, $uri, $options);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame($expectedStatus);
+    }
+
+    protected function assertForbiddenAccessDenied(
+        Client $client,
+        string $method,
+        string $uri,
+        array $options = [],
+    ): void {
+        $client->request($method, $uri, $options);
+
+        $this->assertResponseStatusCodeSame(403);
+        $this->assertJsonContains([
+            'detail' => 'Access Denied.',
+            'status' => 403,
+        ]);
     }
 
     public static function loggedClientWithUserAndRoles(

@@ -1,7 +1,7 @@
 resource "random_password" "client-api-client-secret" {
     length           = 16
     special          = true
-    override_special = "!@#$%*=+?"
+    override_special = "%*=+-_"
 }
 
 resource "keycloak_openid_client" "client-api" {
@@ -93,4 +93,6 @@ resource "keycloak_openid_client" "client-api-swagger" {
     ]
 
     root_url = "http://localhost:1080"
+
+    access_token_lifespan = "3600"
 }
