@@ -1,6 +1,7 @@
 <?php
+namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api\DataApi;
 
-namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
+use FilmAnalogger\FilmAnaloggerApi\Tests\Api\AbstractFilmTestCase;
 
 class ManufacturerSecurityTest extends AbstractFilmTestCase
 {
