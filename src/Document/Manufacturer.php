@@ -13,11 +13,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
+use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Gedmo\Translatable\Translatable;
 
 #[ODM\Document]
 #[
@@ -40,9 +42,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
         ],
     ),
 ]
-class Manufacturer
+class Manufacturer implements Translatable
 {
     use TimestampableBlameableTrait;
+    use TranslatableTrait;
 
     #[ODM\Id]
     #[Groups([SerializationGroups::MANUFACTURER_READ_GROUP, SerializationGroups::FILM_READ_GROUP])]
@@ -196,5 +199,26 @@ class Manufacturer
     public function getWebsite(): ?string
     {
         return $this->website;
+    }
+
+    public function addChemistry(Chemistry $chemistry): static
+    {
+        $chemistry->setManufacturer($this);
+        $this->chemistries->add($chemistry);
+        return $this;
+    }
+
+    public function getChemistries(): Collection
+    {
+        return $this->chemistries;
+    }
+
+    public function setChemistries(Collection $chemistries): static
+    {
+        foreach ($chemistries as $chemistry) {
+            $chemistry->setManufacturer($this);
+        }
+        $this->chemistries = $chemistries;
+        return $this;
     }
 }

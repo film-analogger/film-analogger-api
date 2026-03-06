@@ -447,7 +447,7 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'inversible' => false,
                 'officialDocumentationUrl' =>
                     'https://www.rolleianalog.com/wp-content/uploads/2021/02/INFRARED_Datenblatt_EN_R012101.pdf',
-                'primaryColor' => '##E60064',
+                'primaryColor' => '#E60064',
                 'secondaryColor' => '#FFFFFF',
                 'tertiaryColor' => null,
             ],

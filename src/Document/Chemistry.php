@@ -19,6 +19,7 @@ use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Gedmo\Translatable\Translatable;
 
 #[ODM\Document]
 #[
@@ -44,7 +45,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
         ],
     ),
 ]
-class Chemistry
+class Chemistry implements Translatable
 {
     use TranslatableTrait;
     use TimestampableBlameableTrait;
@@ -99,7 +100,7 @@ class Chemistry
     #[Assert\NotNull(message: 'Manufacturer must be set.')]
     public Manufacturer $manufacturer;
 
-    #[ODM\Field]
+    #[ODM\Field(nullable: true)]
     #[Gedmo\Translatable]
     #[
         Groups([

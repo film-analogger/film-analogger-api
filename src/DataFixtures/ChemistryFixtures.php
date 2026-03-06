@@ -29,7 +29,10 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
 
             foreach ($data['dilutions'] ?? [] as [$chemParts, $waterParts, $official]) {
                 $chemistry->addDilution(
-                    new Dilution()->setChemistryParts($chemParts)->setWaterParts($waterParts),
+                    new Dilution()
+                        ->setChemistryParts($chemParts)
+                        ->setWaterParts($waterParts)
+                        ->setOfficial($official),
                 );
             }
 

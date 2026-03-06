@@ -35,13 +35,11 @@ abstract class AbstractFilmTestCase extends ApiTestCase
     }
 
     protected function createChemistryType(
-        string $name = 'B&W Film Developer',
         string $process = 'B&W',
         string $typeCode = 'BW_FILM_DEVELOPER',
         string $typeLabel = 'Film Developer',
     ): ChemistryType {
         $chemistryType = new ChemistryType();
-        $chemistryType->setName($name);
         $chemistryType->process = $process;
         $chemistryType->setTypeCode($typeCode);
         $chemistryType->setTypeLabel($typeLabel);
@@ -120,6 +118,14 @@ abstract class AbstractFilmTestCase extends ApiTestCase
 
         return $film;
     }
+
+    // protected function assertArraysHaveIdenticalValues(array $actual, array $expected): void
+    // {
+    //     $this->assertCount(count($expected), $actual);
+    //     foreach ($expected as $expectedItem) {
+    //         $this->assertContains($expectedItem, $actual);
+    //     }
+    // }
 
     protected function assertUnauthorizedMissingToken(
         Client $client,

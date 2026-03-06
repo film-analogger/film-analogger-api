@@ -46,7 +46,7 @@ class ChemistryTypeSecurityTest extends AbstractFilmTestCase
 
     private function assertChemistryTypeSecurityByRole($client, bool $canWrite): void
     {
-        $chemistryType = $this->createChemistryType('B&W Fixer', 'B&W', 'FIXER', 'Fixer');
+        $chemistryType = $this->createChemistryType('B&W', 'FIXER', 'Fixer');
 
         $this->assertSuccessfulStatus($client, 'GET', '/chemistry_types', 200);
         $this->assertSuccessfulStatus(
@@ -66,7 +66,6 @@ class ChemistryTypeSecurityTest extends AbstractFilmTestCase
         $postOptions = [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'B&W Fixer 2',
                 'process' => 'B&W',
                 'typeCode' => 'FIXER',
                 'typeLabel' => 'Fixer',

@@ -133,10 +133,7 @@ final class ProcessConstants
     const FILM_EMULSION_TYPES_COLOR = ['chromogene'];
     const FILM_EMULSION_TYPES_BNW = ['panchromatic', 'orthochromatic', 'chromogene'];
 
-    const FILM_EMULSION_TYPES = [
-        ...self::FILM_EMULSION_TYPES_COLOR,
-        ...self::FILM_EMULSION_TYPES_BNW,
-    ];
+    const FILM_EMULSION_TYPES = ['panchromatic', 'orthochromatic', 'chromogene'];
 
     public static function getValidEmulsionTypesForProcess(string $process): array
     {

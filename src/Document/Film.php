@@ -83,6 +83,7 @@ class Film implements Translatable
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public string $process;
 
+    #[ODM\Field(nullable: true)]
     #[Assert\Choice(callback: 'getValidEmulsionTypes', message: 'Choose a valid emulsion type.')]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $emulsionType = null;

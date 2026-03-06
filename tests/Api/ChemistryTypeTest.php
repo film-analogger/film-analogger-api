@@ -6,13 +6,8 @@ class ChemistryTypeTest extends AbstractFilmTestCase
 {
     public function testGetCollection(): void
     {
-        $this->createChemistryType(
-            'B&W Film Developer',
-            'B&W',
-            'BW_FILM_DEVELOPER',
-            'Film Developer',
-        );
-        $this->createChemistryType('B&W Fixer', 'B&W', 'FIXER', 'Fixer');
+        $this->createChemistryType('B&W', 'BW_FILM_DEVELOPER', 'Film Developer');
+        $this->createChemistryType('B&W', 'FIXER', 'Fixer');
 
         $client = self::loggedClientAdmin();
         $client->request('GET', '/chemistry_types');
@@ -36,7 +31,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $this->assertResponseIsSuccessful();
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
         $this->assertJsonContains([
-            'name' => 'B&W Film Developer',
             'process' => 'B&W',
             'typeCode' => 'BW_FILM_DEVELOPER',
             'typeLabel' => 'Film Developer',
@@ -49,7 +43,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'B&W Fixer',
                 'process' => 'B&W',
                 'typeCode' => 'FIXER',
                 'typeLabel' => 'Fixer',
@@ -58,7 +51,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
 
         $this->assertResponseStatusCodeSame(201);
         $this->assertJsonContains([
-            'name' => 'B&W Fixer',
             'process' => 'B&W',
             'typeCode' => 'FIXER',
             'typeLabel' => 'Fixer',
@@ -71,7 +63,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'C-41 Color Developer',
                 'process' => 'C-41',
                 'typeCode' => 'C41_COLOR_DEVELOPER',
                 'typeLabel' => 'Color Developer',
@@ -91,7 +82,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'E-6 First Developer',
                 'process' => 'E-6',
                 'typeCode' => 'E6_FILM_DEVELOPER',
                 'typeLabel' => 'First Developer',
@@ -111,7 +101,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'RA-4 Color Developer',
                 'process' => 'RA4',
                 'typeCode' => 'RA4_COLOR_DEVELOPER',
                 'typeLabel' => 'Color Developer',
@@ -125,44 +114,12 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         ]);
     }
 
-    public function testCreateChemistryTypeWithoutNameFails(): void
-    {
-        $client = self::loggedClientAdmin();
-        $client->request('POST', '/chemistry_types', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'json' => [
-                'process' => 'B&W',
-                'typeCode' => 'FIXER',
-                'typeLabel' => 'Fixer',
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(422);
-    }
-
-    public function testCreateChemistryTypeWithBlankNameFails(): void
-    {
-        $client = self::loggedClientAdmin();
-        $client->request('POST', '/chemistry_types', [
-            'headers' => ['Content-Type' => 'application/ld+json'],
-            'json' => [
-                'name' => '',
-                'process' => 'B&W',
-                'typeCode' => 'FIXER',
-                'typeLabel' => 'Fixer',
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(422);
-    }
-
     public function testCreateChemistryTypeWithoutProcessFails(): void
     {
         $client = self::loggedClientAdmin();
         $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'B&W Fixer',
                 'typeCode' => 'FIXER',
                 'typeLabel' => 'Fixer',
             ],
@@ -177,7 +134,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'B&W Fixer',
                 'process' => 'INVALID-PROCESS',
                 'typeCode' => 'FIXER',
                 'typeLabel' => 'Fixer',
@@ -194,7 +150,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'Invalid type',
                 'process' => 'C-41',
                 'typeCode' => 'BW_FILM_DEVELOPER',
                 'typeLabel' => 'Film Developer',
@@ -210,7 +165,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'B&W Fixer',
                 'process' => 'B&W',
                 'typeCode' => 'FIXER',
             ],
@@ -225,7 +179,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'B&W Fixer',
                 'process' => 'B&W',
                 'typeCode' => 'FIXER',
                 'typeLabel' => '',
@@ -243,14 +196,12 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $client->request('PATCH', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
-                'name' => 'B&W Film Developer Updated',
                 'typeLabel' => 'Film Dev',
             ],
         ]);
 
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
-            'name' => 'B&W Film Developer Updated',
             'typeLabel' => 'Film Dev',
         ]);
     }
@@ -295,7 +246,6 @@ class ChemistryTypeTest extends AbstractFilmTestCase
         $response = $client->request('POST', '/chemistry_types', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'B&W Fixer',
                 'process' => 'B&W',
                 'typeCode' => 'FIXER',
                 'typeLabel' => 'Fixer',
