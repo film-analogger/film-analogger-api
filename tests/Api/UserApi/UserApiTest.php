@@ -58,7 +58,7 @@ final class UserApiTest extends AbstractFilmTestCase
             'theo.guerin',
         );
 
-        $event = $this->createMock(LoginSuccessEvent::class);
+        $event = $this->createStub(LoginSuccessEvent::class);
         $event->method('getUser')->willReturn($keycloakUser);
 
         $subscriber->provisionUser($event);
@@ -94,7 +94,7 @@ final class UserApiTest extends AbstractFilmTestCase
             'existing',
         );
 
-        $event = $this->createMock(LoginSuccessEvent::class);
+        $event = $this->createStub(LoginSuccessEvent::class);
         $event->method('getUser')->willReturn($keycloakUser);
 
         $subscriber->provisionUser($event);
@@ -114,7 +114,7 @@ final class UserApiTest extends AbstractFilmTestCase
             'password',
         );
 
-        $event = $this->createMock(LoginSuccessEvent::class);
+        $event = $this->createStub(LoginSuccessEvent::class);
         $event->method('getUser')->willReturn($plainUser);
 
         $subscriber->provisionUser($event);

@@ -9,6 +9,7 @@ use FilmAnalogger\FilmAnaloggerApi\Document\AppUser;
 use FilmAnalogger\FilmAnaloggerApi\EventListener\UserProvisioningEventSubscriber;
 use FilmAnalogger\FilmAnaloggerApi\Repository\AppUserRepository;
 use FilmAnalogger\FilmAnaloggerApi\Security\User\KeycloakBearerUser;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
@@ -16,17 +17,16 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 final class UserProvisioningEventSubscriberTest extends TestCase
 {
     private MockObject|DocumentManager $documentManager;
-    private MockObject|AppUserRepository $repository;
     private UserProvisioningEventSubscriber $subscriber;
 
     protected function setUp(): void
     {
         $this->documentManager = $this->createMock(DocumentManager::class);
-        $this->repository = $this->createMock(AppUserRepository::class);
 
         $this->subscriber = new UserProvisioningEventSubscriber($this->documentManager);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function testGetSubscribedEvents(): void
     {
         self::assertSame(
@@ -37,7 +37,7 @@ final class UserProvisioningEventSubscriberTest extends TestCase
 
     public function testProvisionUserReturnsEarlyWhenUserIsNotKeycloakBearerUser(): void
     {
-        $event = $this->createMock(LoginSuccessEvent::class);
+        $event = $this->createStub(LoginSuccessEvent::class);
         $event
             ->method('getUser')
             ->willReturn(
@@ -55,19 +55,21 @@ final class UserProvisioningEventSubscriberTest extends TestCase
 
     public function testProvisionUserDoesNothingWhenUserAlreadyExists(): void
     {
-        $keycloakUser = $this->createMock(KeycloakBearerUser::class);
+        $keycloakUser = $this->createStub(KeycloakBearerUser::class);
         $keycloakUser->method('getSub')->willReturn('sub-123');
 
-        $event = $this->createMock(LoginSuccessEvent::class);
+        $event = $this->createStub(LoginSuccessEvent::class);
         $event->method('getUser')->willReturn($keycloakUser);
+
+        $repository = $this->createMock(AppUserRepository::class);
 
         $this->documentManager
             ->expects($this->once())
             ->method('getRepository')
             ->with(AppUser::class)
-            ->willReturn($this->repository);
+            ->willReturn($repository);
 
-        $this->repository
+        $repository
             ->expects($this->once())
             ->method('findOneBySub')
             ->with('sub-123')
@@ -82,7 +84,7 @@ final class UserProvisioningEventSubscriberTest extends TestCase
 
     public function testProvisionUserPersistsMappedAppUserWhenNotExisting(): void
     {
-        $keycloakUser = $this->createMock(KeycloakBearerUser::class);
+        $keycloakUser = $this->createStub(KeycloakBearerUser::class);
         $keycloakUser->method('getSub')->willReturn('sub-456');
         $keycloakUser->method('getPreferredUsername')->willReturn('tguerin');
         $keycloakUser->method('getEmail')->willReturn('tguerin@example.com');
@@ -90,16 +92,18 @@ final class UserProvisioningEventSubscriberTest extends TestCase
         $keycloakUser->method('getGivenName')->willReturn('Théo');
         $keycloakUser->method('getFamilyName')->willReturn('Guerin');
 
-        $event = $this->createMock(LoginSuccessEvent::class);
+        $event = $this->createStub(LoginSuccessEvent::class);
         $event->method('getUser')->willReturn($keycloakUser);
+
+        $repository = $this->createMock(AppUserRepository::class);
 
         $this->documentManager
             ->expects($this->once())
             ->method('getRepository')
             ->with(AppUser::class)
-            ->willReturn($this->repository);
+            ->willReturn($repository);
 
-        $this->repository
+        $repository
             ->expects($this->once())
             ->method('findOneBySub')
             ->with('sub-456')
