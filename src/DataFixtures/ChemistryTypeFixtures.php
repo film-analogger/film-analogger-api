@@ -29,16 +29,28 @@ class ChemistryTypeFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
+        $entities = [];
+
         foreach ($this->getData() as $data) {
             $type = new ChemistryType();
             $type->process = $data['process'];
-            $type
-                ->setName($data['name'])
-                ->setTypeCode($data['typeCode'])
-                ->setTypeLabel($data['typeLabel']);
+            $type->setTypeCode($data['typeCode'])->setTypeLabel($data['typeLabel']);
 
             $manager->persist($type);
             $this->addReference($data['reference'], $type);
+            $entities[] = [$type, $data];
+        }
+
+        $manager->flush();
+
+        foreach ($entities as [$type, $data]) {
+            foreach ($data['translations'] ?? [] as $locale => $translations) {
+                $type->setTranslatableLocale($locale);
+                if (isset($translations['typeLabel'])) {
+                    $type->setTypeLabel($translations['typeLabel']);
+                }
+                $manager->persist($type);
+            }
         }
 
         $manager->flush();
@@ -50,128 +62,128 @@ class ChemistryTypeFixtures extends Fixture
             // ── B&W ──────────────────────────────────────────────────────────
             [
                 'reference' => self::BW_FILM_DEVELOPER,
-                'name' => 'B&W Film Developer',
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'typeCode' => ProcessConstants::CHEMISTRY_BW_FILM_DEVELOPER,
-                'typeLabel' => 'Film Developer',
+                'typeLabel' => 'B&W Film Developer',
+                'translations' => ['fr' => ['typeLabel' => 'Révélateur noir et blanc']],
             ],
             [
                 'reference' => self::BW_FIXER,
-                'name' => 'B&W Fixer',
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'typeCode' => ProcessConstants::CHEMISTRY_FIXER,
                 'typeLabel' => 'Fixer',
+                'translations' => ['fr' => ['typeLabel' => 'Fixateur']],
             ],
             [
                 'reference' => self::BW_STOP,
-                'name' => 'B&W Stop Bath',
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'typeCode' => ProcessConstants::CHEMISTRY_STOP,
                 'typeLabel' => 'Stop Bath',
+                'translations' => ['fr' => ['typeLabel' => 'Bain d\'arrêt']],
             ],
             [
                 'reference' => self::BW_WETTING_AGENT,
-                'name' => 'B&W Wetting Agent',
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'typeCode' => ProcessConstants::CHEMISTRY_WETTING_AGENT,
                 'typeLabel' => 'Wetting Agent',
+                'translations' => ['fr' => ['typeLabel' => 'Agent mouillant']],
             ],
             [
                 'reference' => self::BW_FILM_CLEANER,
-                'name' => 'B&W Film Cleaner',
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'typeCode' => ProcessConstants::CHEMISTRY_FILM_CLEANER,
                 'typeLabel' => 'Film Cleaner',
+                'translations' => ['fr' => ['typeLabel' => 'Nettoyant pour film']],
             ],
 
             // ── C-41 ─────────────────────────────────────────────────────────
             [
                 'reference' => self::C41_COLOR_DEVELOPER,
-                'name' => 'C-41 Color Developer',
                 'process' => ProcessConstants::CHEMISTRY_C41,
                 'typeCode' => ProcessConstants::CHEMISTRY_C41_COLOR_DEVELOPER,
                 'typeLabel' => 'Color Developer',
+                'translations' => ['fr' => ['typeLabel' => 'Révélateur couleur']],
             ],
             [
                 'reference' => self::C41_BLEACH,
-                'name' => 'C-41 Bleach',
                 'process' => ProcessConstants::CHEMISTRY_C41,
                 'typeCode' => ProcessConstants::CHEMISTRY_BLEACH,
                 'typeLabel' => 'Bleach',
+                'translations' => ['fr' => ['typeLabel' => 'Blanchiment']],
             ],
             [
                 'reference' => self::C41_STABILIZER,
-                'name' => 'C-41 Stabilizer',
                 'process' => ProcessConstants::CHEMISTRY_C41,
                 'typeCode' => ProcessConstants::CHEMISTRY_STABILIZER,
                 'typeLabel' => 'Stabilizer',
+                'translations' => ['fr' => ['typeLabel' => 'Stabilisateur']],
             ],
             [
                 'reference' => self::C41_WETTING_AGENT,
-                'name' => 'C-41 Wetting Agent',
                 'process' => ProcessConstants::CHEMISTRY_C41,
                 'typeCode' => ProcessConstants::CHEMISTRY_WETTING_AGENT,
                 'typeLabel' => 'Wetting Agent',
+                'translations' => ['fr' => ['typeLabel' => 'Agent mouillant']],
             ],
 
             // ── E-6 ──────────────────────────────────────────────────────────
             [
                 'reference' => self::E6_FILM_DEVELOPER,
-                'name' => 'E-6 First Developer',
                 'process' => ProcessConstants::CHEMISTRY_E6,
                 'typeCode' => ProcessConstants::CHEMISTRY_E6_FILM_DEVELOPER,
-                'typeLabel' => 'First Developer',
+                'typeLabel' => 'E-6 Film Developer',
+                'translations' => ['fr' => ['typeLabel' => 'Révélateur Film E-6']],
             ],
             [
                 'reference' => self::E6_COLOR_DEVELOPER,
-                'name' => 'E-6 Color Developer',
                 'process' => ProcessConstants::CHEMISTRY_E6,
                 'typeCode' => ProcessConstants::CHEMISTRY_E6_COLOR_DEVELOPER,
-                'typeLabel' => 'Color Developer',
+                'typeLabel' => 'E-6 Color Developer',
+                'translations' => ['fr' => ['typeLabel' => 'Révélateur couleur E-6']],
             ],
             [
                 'reference' => self::E6_BLEACH,
-                'name' => 'E-6 Bleach',
                 'process' => ProcessConstants::CHEMISTRY_E6,
                 'typeCode' => ProcessConstants::CHEMISTRY_BLEACH,
                 'typeLabel' => 'Bleach',
+                'translations' => ['fr' => ['typeLabel' => 'Blanchiment']],
             ],
             [
                 'reference' => self::E6_STABILIZER,
-                'name' => 'E-6 Stabilizer',
                 'process' => ProcessConstants::CHEMISTRY_E6,
                 'typeCode' => ProcessConstants::CHEMISTRY_STABILIZER,
                 'typeLabel' => 'Stabilizer',
+                'translations' => ['fr' => ['typeLabel' => 'Stabilisateur']],
             ],
 
             // ── RA-4 ─────────────────────────────────────────────────────────
             [
                 'reference' => self::RA4_COLOR_DEVELOPER,
-                'name' => 'RA-4 Color Developer',
                 'process' => ProcessConstants::CHEMISTRY_RA4,
                 'typeCode' => ProcessConstants::CHEMISTRY_RA4_COLOR_DEVELOPER,
-                'typeLabel' => 'Color Developer',
+                'typeLabel' => 'RA-4 Color Developer',
+                'translations' => ['fr' => ['typeLabel' => 'Révélateur couleur RA-4']],
             ],
             [
                 'reference' => self::RA4_BLEACH,
-                'name' => 'RA-4 Bleach',
                 'process' => ProcessConstants::CHEMISTRY_RA4,
                 'typeCode' => ProcessConstants::CHEMISTRY_BLEACH,
                 'typeLabel' => 'Bleach',
+                'translations' => ['fr' => ['typeLabel' => 'Blanchisseur']],
             ],
             [
                 'reference' => self::RA4_FIXER,
-                'name' => 'RA-4 Fixer',
                 'process' => ProcessConstants::CHEMISTRY_RA4,
                 'typeCode' => ProcessConstants::CHEMISTRY_FIXER,
                 'typeLabel' => 'Fixer',
+                'translations' => ['fr' => ['typeLabel' => 'Fixateur']],
             ],
             [
                 'reference' => self::RA4_STABILIZER,
-                'name' => 'RA-4 Stabilizer',
                 'process' => ProcessConstants::CHEMISTRY_RA4,
                 'typeCode' => ProcessConstants::CHEMISTRY_STABILIZER,
                 'typeLabel' => 'Stabilizer',
+                'translations' => ['fr' => ['typeLabel' => 'Stabilisateur']],
             ],
         ];
     }

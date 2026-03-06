@@ -13,6 +13,8 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
+        $entities = [];
+
         foreach ($this->getData() as $data) {
             $film = new Film();
             $film->process = $data['process'];
@@ -29,6 +31,19 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 ->setTertiaryColor($data['tertiaryColor'] ?? null);
 
             $manager->persist($film);
+            $entities[] = [$film, $data];
+        }
+
+        $manager->flush();
+
+        foreach ($entities as [$film, $data]) {
+            foreach ($data['translations'] ?? [] as $locale => $translations) {
+                $film->setTranslatableLocale($locale);
+                if (isset($translations['description'])) {
+                    $film->setDescription($translations['description']);
+                }
+                $manager->persist($film);
+            }
         }
 
         $manager->flush();
@@ -52,6 +67,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#0E7873',
                 'secondaryColor' => '#FAB617',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film panchromatique noir et blanc haute vitesse emblématique avec un grain caractéristique et une large latitude d\'exposition.',
+                    ],
+                ],
             ],
             [
                 'name' => 'T-Max 100',
@@ -67,6 +88,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#754583',
                 'secondaryColor' => '#FAB617',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film N&B à grain en T très fin offrant une netteté exceptionnelle à basse sensibilité.',
+                    ],
+                ],
             ],
             [
                 'name' => 'T-Max 400',
@@ -82,6 +109,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#4CB599',
                 'secondaryColor' => '#FAB617',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film à grain en T polyvalent combinant haute vitesse et grain très fin pour un film N&B.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Gold 200',
@@ -97,6 +130,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#A6198A',
                 'secondaryColor' => '#FAB617',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Pour des photos argentiques lumineuses et colorées, le film Kodak Gold 135mm 36 poses offre des couleurs saisissantes, éclatantes et naturelles. Sa formulation unique capture la lumière avec précision pour des tons riches et vibrants qui capturent parfaitement vos souvenirs. ( description officielle de https://www.kodak.gtcie.com/ )',
+                    ],
+                ],
             ],
             [
                 'name' => 'UltraMax 400',
@@ -112,6 +151,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#3F79AB',
                 'secondaryColor' => '#FAB617',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Le film couleur Kodak UltraMax 400 ISO est un choix incontournable pour les photographes recherchant un film polyvalent et haute performance. Avec sa sensibilité ISO 400, il offre une grande flexibilité dans de nombreuses conditions lumineuses tout en maintenant une qualité d\'image exceptionnelle. Compatible avec tous les appareils 35mm, vous pourrez réaliser 36 poses à grain fin. ( description officielle de https://www.kodak.gtcie.com/ )',
+                    ],
+                ],
             ],
             [
                 'name' => 'Ektar 100',
@@ -127,6 +172,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#4B1311',
                 'secondaryColor' => '#FAB617',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film couleur négatif au grain le plus fin du monde avec une saturation éclatante, idéal pour la photographie de paysage.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Portra 160',
@@ -142,6 +193,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#715FD9',
                 'secondaryColor' => '#FAB617',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film portrait professionnel avec des tons chair naturels, un grain fin et une large latitude d\'exposition.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Portra 400',
@@ -157,6 +214,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#6245DF',
                 'secondaryColor' => '#FAB617',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film portrait professionnel haute vitesse avec des couleurs naturelles et une excellente capacité de traitement poussé.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Ektachrome E100',
@@ -172,6 +235,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#415FD0',
                 'secondaryColor' => '#FAB617',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film diapositive E-6 professionnel à grain fin, haute netteté et rendu naturel des couleurs.',
+                    ],
+                ],
             ],
 
             // ── Ilford ───────────────────────────────────────────────────────
@@ -189,6 +258,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#24AF2C',
                 'secondaryColor' => '#ffffff',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film noir et blanc haute vitesse polyvalent avec une large latitude d\'exposition, excellent pour le traitement poussé.',
+                    ],
+                ],
             ],
             [
                 'name' => 'FP4 Plus',
@@ -204,6 +279,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#0B3C9A',
                 'secondaryColor' => '#ffffff',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film noir et blanc à grain fin de vitesse moyenne offrant une netteté et une gamme tonale exceptionnelles.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Delta 100',
@@ -219,6 +300,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#0898D0',
                 'secondaryColor' => '#ffffff',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film noir et blanc à technologie core-shell offrant un grain extrêmement fin à ISO 100.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Delta 400',
@@ -234,6 +321,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#30B256',
                 'secondaryColor' => '#ffffff',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film noir et blanc haute vitesse à technologie core-shell avec un grain très fin pour ISO 400.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Delta 3200',
@@ -249,6 +342,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#9B79D8',
                 'secondaryColor' => '#ffffff',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film noir et blanc ultra-haute vitesse à technologie core-shell avec un grain fin pour ISO 3200, idéal pour la photographie en faible lumière et en action.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Pan F Plus',
@@ -264,6 +363,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#E5AD2C',
                 'secondaryColor' => '#ffffff',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film lent à grain ultra-fin pour un maximum de détails en conditions d\'éclairage contrôlées.',
+                    ],
+                ],
             ],
             [
                 'name' => 'SFX 200',
@@ -279,6 +384,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#D720C8',
                 'secondaryColor' => '#ffffff',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film noir et blanc à sensibilité rouge étendue produisant des effets semblables à l\'infrarouge.',
+                    ],
+                ],
             ],
 
             // ── Fujifilm ─────────────────────────────────────────────────────
@@ -296,6 +407,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#ffffff',
                 'secondaryColor' => '#CA4979',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film couleur négatif grand public avec une reproduction naturelle des couleurs pour la photographie quotidienne.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Fujicolor 400',
@@ -311,6 +428,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#ffffff',
                 'secondaryColor' => '#0D76B9',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film couleur négatif grand public haute vitesse pour les situations en intérieur et en faible lumière.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Velvia 50',
@@ -326,6 +449,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#000000',
                 'secondaryColor' => '#CFAD66',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film diapositive professionnel renommé pour sa saturation éclatante et son grain ultra-fin.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Velvia 100',
@@ -341,6 +470,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#CFAD66',
                 'secondaryColor' => '#000000',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film diapositive professionnel aux couleurs vibrantes et au grain fin pour une prise de vue plus rapide.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Provia 100F',
@@ -356,6 +491,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#C2B775',
                 'secondaryColor' => '#000000',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film diapositive professionnel lumière du jour avec une balance des couleurs naturelle et un grain fin.',
+                    ],
+                ],
             ],
 
             // ── Adox ─────────────────────────────────────────────────────────
@@ -373,6 +514,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#FFFFFF',
                 'secondaryColor' => '#E48157',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film noir et blanc orthochromatique à très haute résolution avec un grain ultra-fin.',
+                    ],
+                ],
             ],
             [
                 'name' => 'HR-50',
@@ -388,6 +535,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#FFFFFF',
                 'secondaryColor' => '#E48157',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film panchromatique noir et blanc à haute résolution combinant grain fin et large latitude.',
+                    ],
+                ],
             ],
 
             // ── Foma ─────────────────────────────────────────────────────────
@@ -404,6 +557,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#000000',
                 'secondaryColor' => '#FDE403',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film panchromatique noir et blanc classique à grain fin et bonne gamme tonale.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Fomapan 400',
@@ -418,6 +577,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#000000',
                 'secondaryColor' => '#9CE53C',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film panchromatique noir et blanc haute vitesse avec une large latitude d\'exposition.',
+                    ],
+                ],
             ],
 
             // ── Rollei ────────────────────────────────────────────────────────
@@ -435,6 +600,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#EE2E22',
                 'secondaryColor' => '#FFFFFF',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film panchromatique noir et blanc polyvalent avec une large gradation tonale.',
+                    ],
+                ],
             ],
             [
                 'name' => 'Rollei Infrared 400',
@@ -450,6 +621,12 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 'primaryColor' => '#E60064',
                 'secondaryColor' => '#FFFFFF',
                 'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film panchromatique sensible aux infrarouges noir et blanc pour un rendu spectaculaire du ciel.',
+                    ],
+                ],
             ],
         ];
     }
