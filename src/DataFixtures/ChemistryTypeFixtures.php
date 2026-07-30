@@ -26,6 +26,10 @@ class ChemistryTypeFixtures extends Fixture
     public const RA4_BLEACH = 'chemistry-type-ra4-bleach';
     public const RA4_FIXER = 'chemistry-type-ra4-fixer';
     public const RA4_STABILIZER = 'chemistry-type-ra4-stabilizer';
+    public const BW_PRINT_PAPER_DEVELOPER = 'chemistry-type-bw-print-paper-developer';
+    public const BW_PRINT_STOP = 'chemistry-type-bw-print-stop';
+    public const BW_PRINT_FIXER = 'chemistry-type-bw-print-fixer';
+    public const BW_PRINT_TONER = 'chemistry-type-bw-print-toner';
 
     public function load(ObjectManager $manager): void
     {
@@ -184,6 +188,36 @@ class ChemistryTypeFixtures extends Fixture
                 'typeCode' => ProcessConstants::CHEMISTRY_STABILIZER,
                 'typeLabel' => 'Stabilizer',
                 'translations' => ['fr' => ['typeLabel' => 'Stabilisateur']],
+            ],
+
+            // ── B&W Print (darkroom printing) ───────────────────────────────
+            [
+                'reference' => self::BW_PRINT_PAPER_DEVELOPER,
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'typeCode' => ProcessConstants::CHEMISTRY_BW_PAPER_DEVELOPER,
+                'typeLabel' => 'Paper Developer',
+                'translations' => ['fr' => ['typeLabel' => 'Révélateur papier']],
+            ],
+            [
+                'reference' => self::BW_PRINT_STOP,
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'typeCode' => ProcessConstants::CHEMISTRY_STOP,
+                'typeLabel' => 'Stop Bath',
+                'translations' => ['fr' => ['typeLabel' => 'Bain d\'arrêt']],
+            ],
+            [
+                'reference' => self::BW_PRINT_FIXER,
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'typeCode' => ProcessConstants::CHEMISTRY_FIXER,
+                'typeLabel' => 'Fixer',
+                'translations' => ['fr' => ['typeLabel' => 'Fixateur']],
+            ],
+            [
+                'reference' => self::BW_PRINT_TONER,
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'typeCode' => ProcessConstants::CHEMISTRY_TONER,
+                'typeLabel' => 'Toner',
+                'translations' => ['fr' => ['typeLabel' => 'Virage']],
             ],
         ];
     }

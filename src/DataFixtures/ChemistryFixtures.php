@@ -13,6 +13,13 @@ use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 
 class ChemistryFixtures extends Fixture implements DependentFixtureInterface
 {
+    public const ILFORD_MULTIGRADE_DEVELOPER = 'chemistry-ilford-multigrade-developer';
+    public const ILFORD_ILFOSTOP = 'chemistry-ilford-ilfostop';
+    public const ILFORD_RAPID_FIXER = 'chemistry-ilford-rapid-fixer';
+    public const ILFORD_SELENIUM_TONER = 'chemistry-ilford-selenium-toner';
+    public const ILFORD_BROMOPHEN = 'chemistry-ilford-bromophen';
+    public const HOMEMADE_ACETIC_ACID_STOP = 'chemistry-homemade-acetic-acid-stop';
+
     public function load(ObjectManager $manager): void
     {
         $entities = [];
@@ -39,6 +46,9 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
             }
 
             $manager->persist($chemistry);
+            if (isset($data['reference'])) {
+                $this->addReference($data['reference'], $chemistry);
+            }
             $entities[] = [$chemistry, $data];
         }
 
@@ -433,6 +443,112 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                     'fr' => [
                         'description' =>
                             'Bain blanchisseur-fixateur combiné du kit Colortec RA-4, qui élimine l\'argent et fixe le tirage en une seule étape.',
+                    ],
+                ],
+            ],
+
+            // ── Ilford B&W Print (darkroom printing) ────────────────────────
+            [
+                'reference' => self::ILFORD_MULTIGRADE_DEVELOPER,
+                'name' => 'Multigrade Developer',
+                'description' =>
+                    'General-purpose paper developer for Ilford Multigrade variable-contrast papers, warm-neutral black tones.',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'chemistryType' => ChemistryTypeFixtures::BW_PRINT_PAPER_DEVELOPER,
+                'manufacturer' => ManufacturerFixtures::ILFORD,
+                'dilutions' => [[1, 9, true], [1, 14, false]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/amfile/file/download/file/1/product/670/',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Révélateur papier polyvalent pour les papiers à contraste variable Ilford Multigrade, tons noirs chauds-neutres.',
+                    ],
+                ],
+            ],
+            [
+                'reference' => self::ILFORD_ILFOSTOP,
+                'name' => 'Ilfostop',
+                'description' =>
+                    'Odourless indicator stop bath for film and paper, changes colour from yellow to purple when exhausted.',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'chemistryType' => ChemistryTypeFixtures::BW_PRINT_STOP,
+                'manufacturer' => ManufacturerFixtures::ILFORD,
+                'dilutions' => [[1, 19, true]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/amfile/file/download/file/3/product/671/',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain d\'arrêt indicateur inodore pour film et papier, change de couleur du jaune au violet une fois épuisé.',
+                    ],
+                ],
+            ],
+            [
+                'reference' => self::ILFORD_RAPID_FIXER,
+                'name' => 'Rapid Fixer',
+                'description' =>
+                    'Fast-acting film and paper fixer; more dilute for archival paper fixing than for film.',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'chemistryType' => ChemistryTypeFixtures::BW_PRINT_FIXER,
+                'manufacturer' => ManufacturerFixtures::ILFORD,
+                'dilutions' => [[1, 9, true], [1, 4, false]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/amfile/file/download/file/5/product/672/',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Fixateur rapide film et papier ; plus dilué pour un fixage archive du papier que pour le film.',
+                    ],
+                ],
+            ],
+            [
+                'reference' => self::ILFORD_SELENIUM_TONER,
+                'name' => 'Selenium Toner',
+                'description' =>
+                    'Selenium-based toner for archival permanence and subtle tone shift, from mild split-tone to deep purple-brown.',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'chemistryType' => ChemistryTypeFixtures::BW_PRINT_TONER,
+                'manufacturer' => ManufacturerFixtures::ILFORD,
+                'dilutions' => [[1, 9, true], [1, 4, false]],
+                'officialDocumentationUrl' =>
+                    'https://www.ilfordphoto.com/amfile/file/download/file/7/product/673/',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Virage au sélénium pour la pérennité de conservation et une nuance de ton subtile, du léger virage partiel au brun-violet profond.',
+                    ],
+                ],
+            ],
+            [
+                'reference' => self::ILFORD_BROMOPHEN,
+                'name' => 'Bromophen',
+                'description' =>
+                    'Warm-tone paper developer for bromide and chlorobromide papers, popular for its rich, neutral-to-warm blacks.',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'chemistryType' => ChemistryTypeFixtures::BW_PRINT_PAPER_DEVELOPER,
+                'manufacturer' => ManufacturerFixtures::ILFORD,
+                'dilutions' => [[1, 3, true], [1, 9, false]],
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Révélateur papier à tons chauds pour papiers bromure et chlorobromure, apprécié pour ses noirs riches, neutres à chauds.',
+                    ],
+                ],
+            ],
+            [
+                'reference' => self::HOMEMADE_ACETIC_ACID_STOP,
+                'name' => 'Acide acétique 20%',
+                'description' =>
+                    'Homemade stop bath: household vinegar or diluted acetic acid, used interchangeably by name across sessions.',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'chemistryType' => ChemistryTypeFixtures::BW_PRINT_STOP,
+                'manufacturer' => ManufacturerFixtures::GENERIC,
+                'dilutions' => [[1, 9, true]],
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain d\'arrêt maison : vinaigre ménager ou acide acétique dilué, noté indifféremment sous l\'un ou l\'autre nom selon les séances.',
                     ],
                 ],
             ],

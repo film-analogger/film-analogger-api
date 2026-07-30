@@ -3,10 +3,21 @@
 namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ExposureKind;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBase;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBrand;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperGrade;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperSurface;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Chemistry;
 use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
+use FilmAnalogger\FilmAnaloggerApi\Document\ChemicalBath;
+use FilmAnalogger\FilmAnaloggerApi\Document\Dilution;
+use FilmAnalogger\FilmAnaloggerApi\Document\Exposure;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
+use FilmAnalogger\FilmAnaloggerApi\Document\PrintSession;
+use FilmAnalogger\FilmAnaloggerApi\Document\PrintWork;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserMock;
 use Gedmo\Translatable\Document\Translation;
@@ -32,6 +43,9 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->getDocumentCollection(Chemistry::class)->drop();
         $this->documentManager->getDocumentCollection(ChemistryType::class)->drop();
         $this->documentManager->getDocumentCollection(Translation::class)->drop();
+        $this->documentManager->getDocumentCollection(PrintSession::class)->drop();
+        $this->documentManager->getDocumentCollection(PrintWork::class)->drop();
+        $this->documentManager->getDocumentCollection(Exposure::class)->drop();
     }
 
     protected function createChemistryType(
@@ -117,6 +131,124 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->flush();
 
         return $film;
+    }
+
+    protected function createPaperChemistry(string $typeCode, array $overrides = []): Chemistry
+    {
+        $chemistryType = $this->createChemistryType(
+            ProcessConstants::CHEMISTRY_BW_PRINT,
+            $typeCode,
+            $overrides['typeLabel'] ?? $typeCode,
+        );
+
+        $chemistry = new Chemistry();
+        $chemistry->setName($overrides['name'] ?? $typeCode);
+        $chemistry->process = ProcessConstants::CHEMISTRY_BW_PRINT;
+        $chemistry->setChemistryType($chemistryType);
+        $chemistry->setManufacturer($overrides['manufacturer'] ?? $this->createManufacturer());
+
+        $dilution = new Dilution();
+        $dilution
+            ->setChemistryParts(1)
+            ->setWaterParts($overrides['waterParts'] ?? 9)
+            ->setOfficial(true);
+        $chemistry->addDilution($dilution);
+
+        $this->documentManager->persist($chemistry);
+        $this->documentManager->flush();
+
+        return $chemistry;
+    }
+
+    protected function createChemicalBath(array $overrides = []): ChemicalBath
+    {
+        $bath = new ChemicalBath();
+        $bath
+            ->setChemistry($overrides['chemistry'] ?? $this->createPaperChemistry('BW_PAPER_DEVELOPER'))
+            ->setDurationSeconds($overrides['durationSeconds'] ?? 60);
+
+        if (isset($overrides['dilutionOverride'])) {
+            $bath->setDilutionOverride($overrides['dilutionOverride']);
+        }
+
+        return $bath;
+    }
+
+    protected function createPrintSession(array $overrides = []): PrintSession
+    {
+        $session = new PrintSession();
+        $session
+            ->setDate($overrides['date'] ?? new \DateTimeImmutable('2026-01-15'))
+            ->setLab($overrides['lab'] ?? 'Garage')
+            ->setNumber($overrides['number'] ?? 1)
+            ->setEnlarger($overrides['enlarger'] ?? 'Durst M805')
+            ->setTemperatureCelsius($overrides['temperatureCelsius'] ?? 20.0);
+
+        $chemicalBaths =
+            $overrides['chemicalBaths'] ??
+            [
+                $this->createChemicalBath(['chemistry' => $this->createPaperChemistry('BW_PAPER_DEVELOPER')]),
+                $this->createChemicalBath(['chemistry' => $this->createPaperChemistry('STOP')]),
+                $this->createChemicalBath(['chemistry' => $this->createPaperChemistry('FIXER')]),
+            ];
+        foreach ($chemicalBaths as $bath) {
+            $session->addChemicalBath($bath);
+        }
+
+        if (isset($overrides['wash'])) {
+            $session->setWash($overrides['wash']);
+        }
+        if (isset($overrides['notes'])) {
+            $session->setNotes($overrides['notes']);
+        }
+
+        $this->documentManager->persist($session);
+        $this->documentManager->flush();
+
+        return $session;
+    }
+
+    protected function createExposure(array $overrides = []): Exposure
+    {
+        $exposure = new Exposure();
+        $exposure
+            ->setOrder($overrides['order'] ?? 1)
+            ->setKind($overrides['kind'] ?? ExposureKind::BASE)
+            ->setBaseSeconds($overrides['baseSeconds'] ?? 32.0)
+            ->setStopOffsetNumerator($overrides['stopOffsetNumerator'] ?? 0)
+            ->setStopOffsetDenominator($overrides['stopOffsetDenominator'] ?? 1)
+            ->setGrade($overrides['grade'] ?? PaperGrade::G2);
+
+        if (isset($overrides['aperture'])) {
+            $exposure->setAperture($overrides['aperture']);
+        }
+        if (isset($overrides['observation'])) {
+            $exposure->setObservation($overrides['observation']);
+        }
+
+        return $exposure;
+    }
+
+    protected function createPrintWork(array $overrides = []): PrintWork
+    {
+        $print = new PrintWork();
+        $print
+            ->setSession($overrides['session'] ?? $this->createPrintSession())
+            ->setNumber($overrides['number'] ?? 1)
+            ->setPaperBrand($overrides['paperBrand'] ?? PaperBrand::ILFORD)
+            ->setPaperBase($overrides['paperBase'] ?? PaperBase::RC)
+            ->setPaperSurface($overrides['paperSurface'] ?? PaperSurface::GLOSSY)
+            ->setPaperWidthCm($overrides['paperWidthCm'] ?? 18.0)
+            ->setPaperHeightCm($overrides['paperHeightCm'] ?? 24.0);
+
+        foreach ($overrides['exposures'] ?? [$this->createExposure()] as $exposure) {
+            $print->addExposure($exposure);
+        }
+
+        $this->documentManager->persist($print);
+        $this->documentManager->flush();
+
+        return $print;
     }
 
     // protected function assertArraysHaveIdenticalValues(array $actual, array $expected): void

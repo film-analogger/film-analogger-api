@@ -23,4 +23,10 @@ final class SerializationGroups
     const APP_USER_READ_GROUP = 'read-app-user';
     const APP_USER_WRITE_GROUP = 'write-app-user';
     const APP_USER_AVATAR_UPLOAD_GROUP = 'avatar-upload-app-user';
+
+    const PRINT_SESSION_READ_GROUP = 'read-print-session';
+    const PRINT_SESSION_WRITE_GROUP = 'write-print-session';
+
+    const PRINT_READ_GROUP = 'read-print';
+    const PRINT_WRITE_GROUP = 'write-print';
 }
