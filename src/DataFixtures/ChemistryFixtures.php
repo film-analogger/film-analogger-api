@@ -277,6 +277,165 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                     ],
                 ],
             ],
+
+            // ── Tetenal C-41 (Colortec) ─────────────────────────────────────────
+            [
+                'name' => 'Colortec C-41 Developer',
+                'description' =>
+                    'Colour developer bath from the Colortec C-41 kit, for processing all C-41-compatible colour negative films.',
+                'process' => ProcessConstants::CHEMISTRY_C41,
+                'chemistryType' => ChemistryTypeFixtures::C41_COLOR_DEVELOPER,
+                'manufacturer' => ManufacturerFixtures::TETENAL,
+                'dilutions' => [[1, 4, true]],
+                'officialDocumentationUrl' =>
+                    'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102221/colortec-c-41-kit-for-1l',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain révélateur couleur du kit Colortec C-41, pour le traitement de tous les films négatifs couleur compatibles C-41.',
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Colortec C-41 Bleach Fix',
+                'description' =>
+                    'Combined bleach-fix bath from the Colortec C-41 kit, clearing silver and fixing the image in a single step.',
+                'process' => ProcessConstants::CHEMISTRY_C41,
+                'chemistryType' => ChemistryTypeFixtures::C41_BLEACH,
+                'manufacturer' => ManufacturerFixtures::TETENAL,
+                'dilutions' => [[1, 4, true]],
+                'officialDocumentationUrl' =>
+                    'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102221/colortec-c-41-kit-for-1l',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain blanchisseur-fixateur combiné du kit Colortec C-41, qui élimine l\'argent et fixe l\'image en une seule étape.',
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Colortec C-41 Stabilizer',
+                'description' =>
+                    'Final stabilizer bath from the Colortec C-41 kit, protecting the processed film during drying.',
+                'process' => ProcessConstants::CHEMISTRY_C41,
+                'chemistryType' => ChemistryTypeFixtures::C41_STABILIZER,
+                'manufacturer' => ManufacturerFixtures::TETENAL,
+                'dilutions' => [[1, 200, true]],
+                'officialDocumentationUrl' =>
+                    'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102221/colortec-c-41-kit-for-1l',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain stabilisateur final du kit Colortec C-41, qui protège le film traité pendant le séchage.',
+                    ],
+                ],
+            ],
+
+            // ── Tetenal E-6 (Colortec) ──────────────────────────────────────────
+            [
+                'name' => 'Colortec E-6 First Developer',
+                'description' =>
+                    'First developer bath from the Colortec E-6 3-bath kit, for the initial black-and-white development of slide film.',
+                'process' => ProcessConstants::CHEMISTRY_E6,
+                'chemistryType' => ChemistryTypeFixtures::E6_FILM_DEVELOPER,
+                'manufacturer' => ManufacturerFixtures::TETENAL,
+                'dilutions' => [[1, 0, true]],
+                'officialDocumentationUrl' =>
+                    'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102035/colortec-e-6-3-bath-kit-for-1-l',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain premier révélateur du kit Colortec E-6 3 bains, pour le développement noir et blanc initial des films diapositives.',
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Colortec E-6 Color Developer',
+                'description' =>
+                    'Colour developer bath from the Colortec E-6 3-bath kit, forming the dye image after the first developer.',
+                'process' => ProcessConstants::CHEMISTRY_E6,
+                'chemistryType' => ChemistryTypeFixtures::E6_COLOR_DEVELOPER,
+                'manufacturer' => ManufacturerFixtures::TETENAL,
+                'dilutions' => [[1, 0, true]],
+                'officialDocumentationUrl' =>
+                    'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102035/colortec-e-6-3-bath-kit-for-1-l',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain révélateur couleur du kit Colortec E-6 3 bains, qui forme l\'image colorée après le premier révélateur.',
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Colortec E-6 Bleach Fix',
+                'description' =>
+                    'Combined bleach-fix bath from the Colortec E-6 3-bath kit, clearing silver and fixing the reversed image.',
+                'process' => ProcessConstants::CHEMISTRY_E6,
+                'chemistryType' => ChemistryTypeFixtures::E6_BLEACH,
+                'manufacturer' => ManufacturerFixtures::TETENAL,
+                'dilutions' => [[1, 0, true]],
+                'officialDocumentationUrl' =>
+                    'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102035/colortec-e-6-3-bath-kit-for-1-l',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain blanchisseur-fixateur combiné du kit Colortec E-6 3 bains, qui élimine l\'argent et fixe l\'image inversée.',
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Colortec E-6 Stabilizer',
+                'description' =>
+                    'Final stabilizer bath from the Colortec E-6 3-bath kit, protecting the processed slide film during drying.',
+                'process' => ProcessConstants::CHEMISTRY_E6,
+                'chemistryType' => ChemistryTypeFixtures::E6_STABILIZER,
+                'manufacturer' => ManufacturerFixtures::TETENAL,
+                'dilutions' => [[1, 200, true]],
+                'officialDocumentationUrl' =>
+                    'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102035/colortec-e-6-3-bath-kit-for-1-l',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain stabilisateur final du kit Colortec E-6 3 bains, qui protège le film diapositive traité pendant le séchage.',
+                    ],
+                ],
+            ],
+
+            // ── Tetenal RA-4 (Colortec) ─────────────────────────────────────────
+            [
+                'name' => 'Colortec RA-4 Developer',
+                'description' =>
+                    'Colour developer bath from the Colortec RA-4 kit, for processing RA-4 colour photographic paper.',
+                'process' => ProcessConstants::CHEMISTRY_RA4,
+                'chemistryType' => ChemistryTypeFixtures::RA4_COLOR_DEVELOPER,
+                'manufacturer' => ManufacturerFixtures::TETENAL,
+                'dilutions' => [[1, 1, true]],
+                'officialDocumentationUrl' =>
+                    'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102124/colortec-ra-4-kit-for-5-l',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain révélateur couleur du kit Colortec RA-4, pour le traitement du papier photographique couleur RA-4.',
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Colortec RA-4 Bleach Fix',
+                'description' =>
+                    'Combined bleach-fix bath from the Colortec RA-4 kit, clearing silver and fixing the print in a single step.',
+                'process' => ProcessConstants::CHEMISTRY_RA4,
+                'chemistryType' => ChemistryTypeFixtures::RA4_BLEACH,
+                'manufacturer' => ManufacturerFixtures::TETENAL,
+                'dilutions' => [[1, 1, true]],
+                'officialDocumentationUrl' =>
+                    'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102124/colortec-ra-4-kit-for-5-l',
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Bain blanchisseur-fixateur combiné du kit Colortec RA-4, qui élimine l\'argent et fixe le tirage en une seule étape.',
+                    ],
+                ],
+            ],
         ];
     }
 

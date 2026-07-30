@@ -628,6 +628,117 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                     ],
                 ],
             ],
+
+            // ── CineStill ────────────────────────────────────────────────────
+            [
+                'name' => '800T',
+                'description' =>
+                    'Tungsten-balanced motion-picture-derived colour negative film with a signature red halation around bright light sources, processed in standard C-41.',
+                'process' => ProcessConstants::CHEMISTRY_C41,
+                'sensibility' => 800,
+                'emulsionType' => 'chromogene',
+                'manufacturer' => ManufacturerFixtures::CINESTILL,
+                'inversible' => false,
+                'officialDocumentationUrl' =>
+                    'https://cinestillfilm.com/products/800tungsten-c41-36exp-35mm-high-speed-color-negative-135',
+                'primaryColor' => '#000000',
+                'secondaryColor' => '#ED1C24',
+                'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film négatif couleur balance tungstène dérivé de pellicule cinéma, avec son halo rouge caractéristique autour des sources de lumière vive, développé en C-41 standard.',
+                    ],
+                ],
+            ],
+            [
+                'name' => '50D',
+                'description' =>
+                    'Daylight-balanced, ultra-fine-grain motion-picture-derived colour negative film for saturated, sharp results in bright light.',
+                'process' => ProcessConstants::CHEMISTRY_C41,
+                'sensibility' => 50,
+                'emulsionType' => 'chromogene',
+                'manufacturer' => ManufacturerFixtures::CINESTILL,
+                'inversible' => false,
+                'officialDocumentationUrl' =>
+                    'https://cinestillfilm.com/products/50daylight-36exp-135-fine-grain-color-film-35mm-roll',
+                'primaryColor' => '#FFB81C',
+                'secondaryColor' => '#000000',
+                'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film négatif couleur balance lumière du jour dérivé de pellicule cinéma, à grain ultra-fin, pour des résultats saturés et nets en pleine lumière.',
+                    ],
+                ],
+            ],
+
+            // ── Lomography ───────────────────────────────────────────────────
+            [
+                'name' => 'Color Negative 400',
+                'description' =>
+                    'Versatile everyday colour negative film with vivid colours and fine grain, forgiving of exposure mistakes.',
+                'process' => ProcessConstants::CHEMISTRY_C41,
+                'sensibility' => 400,
+                'emulsionType' => 'chromogene',
+                'manufacturer' => ManufacturerFixtures::LOMOGRAPHY,
+                'inversible' => false,
+                'officialDocumentationUrl' =>
+                    'https://shop.lomography.com/us/lomography-color-negative-35-mm-iso-400',
+                'primaryColor' => '#D71920',
+                'secondaryColor' => '#FFFFFF',
+                'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film négatif couleur polyvalent pour un usage quotidien, aux couleurs éclatantes et au grain fin, tolérant aux erreurs d\'exposition.',
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Lady Grey 400',
+                'description' =>
+                    'High-speed black-and-white film with smooth grain, high sharpness and a broad tonal range.',
+                'process' => ProcessConstants::CHEMISTRY_BW,
+                'sensibility' => 400,
+                'emulsionType' => 'panchromatic',
+                'manufacturer' => ManufacturerFixtures::LOMOGRAPHY,
+                'inversible' => false,
+                'officialDocumentationUrl' =>
+                    'https://shop.lomography.com/us/lady-grey-b-w-35-mm-iso-400',
+                'primaryColor' => '#4A4A4A',
+                'secondaryColor' => '#FFFFFF',
+                'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film noir et blanc haute vitesse au grain lisse, à la netteté élevée et à la large gamme tonale.',
+                    ],
+                ],
+            ],
+
+            // ── Bergger ──────────────────────────────────────────────────────
+            [
+                'name' => 'Pancro 400',
+                'description' =>
+                    'Dual-emulsion panchromatic black-and-white film with a wide exposure latitude from ISO 100 to 1600 and high resolution.',
+                'process' => ProcessConstants::CHEMISTRY_BW,
+                'sensibility' => 400,
+                'emulsionType' => 'panchromatic',
+                'manufacturer' => ManufacturerFixtures::BERGGER,
+                'inversible' => false,
+                'officialDocumentationUrl' =>
+                    'https://bergger.com/en/films-sheets/bergger-pancro-400-35-mm.html',
+                'primaryColor' => '#0B2E59',
+                'secondaryColor' => '#FFFFFF',
+                'tertiaryColor' => null,
+                'translations' => [
+                    'fr' => [
+                        'description' =>
+                            'Film noir et blanc panchromatique à double émulsion, avec une large latitude d\'exposition de 100 à 1600 ISO et une haute résolution.',
+                    ],
+                ],
+            ],
         ];
     }
 
