@@ -587,7 +587,7 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
 
             // ── Rollei ────────────────────────────────────────────────────────
             [
-                'name' => 'Rollei RPX 400',
+                'name' => 'RPX 400',
                 'description' =>
                     'Versatile panchromatic black-and-white film with broad tonal gradation.',
                 'process' => ProcessConstants::CHEMISTRY_BW,
@@ -608,7 +608,7 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 ],
             ],
             [
-                'name' => 'Rollei Infrared 400',
+                'name' => 'Infrared 400',
                 'description' =>
                     'Panchromatic infrared-sensitive black-and-white film for dramatic sky rendition.',
                 'process' => ProcessConstants::CHEMISTRY_BW,

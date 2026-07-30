@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\OpenApi\Model as Model;
+use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
 use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
 use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
 
@@ -34,12 +35,34 @@ use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
         ],
         denormalizationContext: ['groups' => [SerializationGroups::APP_USER_WRITE_GROUP]],
         operations: [
-            new Get(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
-            new GetCollection(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
+            new Get(
+                security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
+                openapi: new Model\Operation(
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
+            new GetCollection(
+                security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
+                openapi: new Model\Operation(
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
             new Patch(
                 security: 'is_granted("' .
                     KeycloakRoles::DATA_READER .
                     '") and object.username === user.getUserIdentifier()',
+                openapi: new Model\Operation(
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
             ),
             new Post(
                 uriTemplate: '/app_users/{id}/avatar',
@@ -66,6 +89,10 @@ use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
                             ),
                         ]),
                     ),
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
                 ),
             ),
         ],
