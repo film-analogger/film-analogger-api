@@ -12,6 +12,7 @@ Keycloak (OAuth2 bearer tokens).
 - [Requirements](#requirements)
 - [Getting started](#getting-started)
 - [Keycloak setup (Terraform)](#keycloak-setup-terraform)
+- [Database initialization](#database-initialization)
 - [Fixtures](#fixtures)
 - [API](#api)
     - [Authentication](#authentication)
@@ -105,6 +106,24 @@ Copy the API client secret into `.env.local` as `OAUTH_KEYCLOAK_CLIENT_SECRET`.
 
 Terraform provisions four test users (`test_reader`, `test_user`, `test_writer`, `test_admin`),
 one per group, so every permission level can be exercised locally.
+
+## Database initialization
+
+Create the MongoDB collections, indexes and validation rules for the mapped documents:
+
+```bash
+docker compose exec php bin/console doctrine:mongodb:schema:create
+```
+
+If the document mapping changes later (new field, new index, ...), update the existing schema
+instead of recreating it:
+
+```bash
+docker compose exec php bin/console doctrine:mongodb:schema:update
+```
+
+There is no migrations bundle in this project — MongoDB ODM has no equivalent of Doctrine
+migrations, indexes and validation rules are just reconciled in place by `schema:update`.
 
 ## Fixtures
 
