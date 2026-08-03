@@ -20,6 +20,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\Translatable\Translatable;
+use ApiPlatform\OpenApi\Model as Model;
+use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
 
 #[ODM\Document]
 #[
@@ -34,11 +36,51 @@ use Gedmo\Translatable\Translatable;
         ],
         denormalizationContext: ['groups' => [SerializationGroups::MANUFACTURER_WRITE_GROUP]],
         operations: [
-            new Get(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
-            new GetCollection(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
-            new Post(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
-            new Patch(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
-            new Delete(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
+            new Get(
+                security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
+                openapi: new Model\Operation(
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
+            new GetCollection(
+                security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
+                openapi: new Model\Operation(
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
+            new Post(
+                security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
+                openapi: new Model\Operation(
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
+            new Patch(
+                security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
+                openapi: new Model\Operation(
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
+            new Delete(
+                security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
+                openapi: new Model\Operation(
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
         ],
     ),
 ]
@@ -58,6 +100,7 @@ class Manufacturer implements Translatable
             SerializationGroups::MANUFACTURER_READ_GROUP,
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
             SerializationGroups::FILM_READ_GROUP,
+            SerializationGroups::CHEMISTRY_READ_GROUP,
         ]),
     ]
     public string $name;
@@ -96,6 +139,8 @@ class Manufacturer implements Translatable
         Groups([
             SerializationGroups::MANUFACTURER_READ_GROUP,
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
+            SerializationGroups::FILM_READ_GROUP,
+            SerializationGroups::CHEMISTRY_READ_GROUP,
         ]),
     ]
     public ?string $primaryColor = null;
@@ -107,6 +152,8 @@ class Manufacturer implements Translatable
         Groups([
             SerializationGroups::MANUFACTURER_READ_GROUP,
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
+            SerializationGroups::FILM_READ_GROUP,
+            SerializationGroups::CHEMISTRY_READ_GROUP,
         ]),
     ]
     public ?string $secondaryColor = null;
@@ -118,6 +165,8 @@ class Manufacturer implements Translatable
         Groups([
             SerializationGroups::MANUFACTURER_READ_GROUP,
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
+            SerializationGroups::FILM_READ_GROUP,
+            SerializationGroups::CHEMISTRY_READ_GROUP,
         ]),
     ]
     public ?string $tertiaryColor = null;

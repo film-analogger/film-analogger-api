@@ -9,6 +9,7 @@ final class ProcessConstants
     const CHEMISTRY_BW = 'B&W';
     const CHEMISTRY_ECN2 = 'ECN-2';
     const CHEMISTRY_RA4 = 'RA4';
+    const CHEMISTRY_BW_PRINT = 'B&W Print';
 
     const CHEMISTRY_PROCESSES = [
         self::CHEMISTRY_C41,
@@ -16,6 +17,7 @@ final class ProcessConstants
         self::CHEMISTRY_BW,
         self::CHEMISTRY_ECN2,
         self::CHEMISTRY_RA4,
+        self::CHEMISTRY_BW_PRINT,
     ];
 
     const CHEMISTRY_BW_PAPER_DEVELOPER = 'BW_PAPER_DEVELOPER';
@@ -124,6 +126,9 @@ final class ProcessConstants
 
             case self::CHEMISTRY_RA4:
                 return self::CHEMISTRY_TYPES_RA4_PAPER;
+
+            case self::CHEMISTRY_BW_PRINT:
+                return self::CHEMISTRY_TYPES_BW_PAPER;
 
             default:
                 return [];

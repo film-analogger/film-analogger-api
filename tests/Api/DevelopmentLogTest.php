@@ -10,7 +10,7 @@ class DevelopmentLogTest extends AbstractFilmTestCase
         $chemistry = $this->createChemistry(['name' => 'D-76', 'process' => 'B&W']);
         $camera = $this->createCamera(['name' => 'F100']);
 
-        $client = self::loggedClientUser();
+        $client = self::loggedClientAdmin();
         $response = $client->request('POST', '/development_logs', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -44,14 +44,14 @@ class DevelopmentLogTest extends AbstractFilmTestCase
         $this->assertSame('2024-06', $data['shotAt']['label']);
         $this->assertCount(1, $data['steps']);
         $this->assertSame(720, $data['steps'][0]['durationSeconds']);
-        $this->assertSame('test_user_user', $data['createdBy']);
+        $this->assertSame('test_user_admin', $data['createdBy']);
     }
 
     public function testShotAtWithYearOnly(): void
     {
         $film = $this->createFilm();
 
-        $client = self::loggedClientUser();
+        $client = self::loggedClientAdmin();
         $response = $client->request('POST', '/development_logs', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -69,7 +69,7 @@ class DevelopmentLogTest extends AbstractFilmTestCase
 
     public function testCreateDevelopmentLogWithoutFilmFails(): void
     {
-        $client = self::loggedClientUser();
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/development_logs', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -87,7 +87,7 @@ class DevelopmentLogTest extends AbstractFilmTestCase
     {
         $film = $this->createFilm();
 
-        $client = self::loggedClientUser();
+        $client = self::loggedClientAdmin();
         $client->request('POST', '/development_logs', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -104,9 +104,9 @@ class DevelopmentLogTest extends AbstractFilmTestCase
 
     public function testUpdateDevelopmentLog(): void
     {
-        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_user']);
+        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_admin']);
 
-        $client = self::loggedClientUser();
+        $client = self::loggedClientAdmin();
         $response = $client->request('PATCH', '/development_logs/' . $developmentLog->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => ['rating' => 5],
@@ -118,9 +118,9 @@ class DevelopmentLogTest extends AbstractFilmTestCase
 
     public function testDeleteDevelopmentLog(): void
     {
-        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_user']);
+        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_admin']);
 
-        $client = self::loggedClientUser();
+        $client = self::loggedClientAdmin();
         $client->request('DELETE', '/development_logs/' . $developmentLog->getId());
 
         $this->assertResponseStatusCodeSame(204);

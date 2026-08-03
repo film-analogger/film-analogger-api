@@ -2,6 +2,8 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
 
+use ApiPlatform\Symfony\Bundle\Test\Client;
+
 class DevelopmentLogSecurityTest extends AbstractFilmTestCase
 {
     public function testNoConnectedUserGetUnauthorized(): void
@@ -24,104 +26,108 @@ class DevelopmentLogSecurityTest extends AbstractFilmTestCase
         }
     }
 
-    public function testDataReaderWithoutUserRoleCannotAccess(): void
+    public function testDataReaderAloneCannotCreate(): void
     {
-        // Owned by the data-reader itself, so the ownership filter isn't what denies access here:
-        // it's the missing ROLE_user that must trigger the 403.
-        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_data_reader']);
+        $film = $this->createFilm();
 
         $client = self::loggedClientDataReader();
+        $client->request('POST', '/development_logs', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'film' => '/films/' . $film->getId(),
+                'shotAt' => ['year' => 2024],
+                'isoShotAt' => $film->getSensibility(),
+                'process' => $film->getProcess(),
+                'developedAt' => '2024-06-15',
+            ],
+        ]);
 
-        $this->assertForbiddenAccessDenied($client, 'GET', '/development_logs');
-        $this->assertForbiddenAccessDenied(
-            $client,
-            'GET',
-            '/development_logs/' . $developmentLog->getId(),
-        );
+        $this->assertResponseStatusCodeSame(403);
     }
 
-    public function testUserOnlySeesOwnLogsInCollection(): void
+    /**
+     * Creates a log as 'owner_writer'. Pass an existing client to reuse the
+     * same authenticated session (creating a fresh client via
+     * loggedClientDataWriter() each time would silently become the "current"
+     * client that the parameterless assert*() helpers read from, breaking
+     * assertions made against an earlier client instance).
+     */
+    private function createLogAsOwner(?Client $client = null): array
     {
-        $this->createDevelopmentLog(['createdBy' => 'test_user_user']);
-        $this->createDevelopmentLog(['createdBy' => 'someone_else']);
+        $film = $this->createFilm();
 
-        $client = self::loggedClientUser();
-        $response = $client->request('GET', '/development_logs');
+        $ownerClient = $client ?? self::loggedClientDataWriter(preferred_username: 'owner_writer');
+        $response = $ownerClient->request('POST', '/development_logs', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'film' => '/films/' . $film->getId(),
+                'shotAt' => ['year' => 2024, 'month' => 6],
+                'isoShotAt' => $film->getSensibility(),
+                'process' => $film->getProcess(),
+                'developedAt' => '2024-06-15',
+            ],
+        ]);
+        $this->assertResponseStatusCodeSame(201);
 
+        return [$ownerClient, $response->toArray()['id']];
+    }
+
+    public function testOwnerCanAccessOwnLog(): void
+    {
+        [$ownerClient, $id] = $this->createLogAsOwner();
+
+        $ownerClient->request('GET', '/development_logs/' . $id);
         $this->assertResponseIsSuccessful();
-        $this->assertSame(1, $response->toArray()['hydra:totalItems']);
+
+        $ownerClient->request('PATCH', '/development_logs/' . $id, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => ['rating' => 5],
+        ]);
+        $this->assertResponseIsSuccessful();
     }
 
-    public function testUserCannotGetSomeoneElsesLog(): void
+    public function testOtherDataWriterCannotAccessSomeoneElsesLog(): void
     {
-        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'someone_else']);
+        [, $id] = $this->createLogAsOwner();
 
-        $client = self::loggedClientUser();
-        $client->request('GET', '/development_logs/' . $developmentLog->getId());
+        $otherClient = self::loggedClientDataWriter(preferred_username: 'other_writer');
 
-        $this->assertResponseStatusCodeSame(404);
-    }
-
-    public function testUserCannotPatchSomeoneElsesLog(): void
-    {
-        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'someone_else']);
-
-        $client = self::loggedClientUser();
-        $client->request('PATCH', '/development_logs/' . $developmentLog->getId(), [
+        $this->assertForbiddenAccessDenied($otherClient, 'GET', '/development_logs/' . $id);
+        $this->assertForbiddenAccessDenied($otherClient, 'PATCH', '/development_logs/' . $id, [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => ['rating' => 1],
         ]);
-
-        $this->assertResponseStatusCodeSame(404);
+        $this->assertForbiddenAccessDenied($otherClient, 'DELETE', '/development_logs/' . $id);
     }
 
-    public function testUserCannotDeleteSomeoneElsesLog(): void
+    public function testAdminCanAccessAnyLog(): void
     {
-        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'someone_else']);
+        [, $id] = $this->createLogAsOwner();
 
-        $client = self::loggedClientUser();
-        $client->request('DELETE', '/development_logs/' . $developmentLog->getId());
-
-        $this->assertResponseStatusCodeSame(404);
-    }
-
-    public function testUserCanManageTheirOwnLog(): void
-    {
-        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_user']);
-
-        $client = self::loggedClientUser();
-
-        $this->assertSuccessfulStatus(
-            $client,
-            'GET',
-            '/development_logs/' . $developmentLog->getId(),
-            200,
-        );
-    }
-
-    public function testAdminSeesEveryonesLogs(): void
-    {
-        $this->createDevelopmentLog(['createdBy' => 'test_user_admin']);
-        $this->createDevelopmentLog(['createdBy' => 'someone_else']);
-
-        $client = self::loggedClientAdmin();
-        $response = $client->request('GET', '/development_logs');
-
+        $admin = self::loggedClientAdmin();
+        $admin->request('GET', '/development_logs/' . $id);
         $this->assertResponseIsSuccessful();
-        $this->assertSame(2, $response->toArray()['hydra:totalItems']);
+
+        $admin->request('DELETE', '/development_logs/' . $id);
+        $this->assertResponseStatusCodeSame(204);
     }
 
-    public function testAdminCanGetSomeoneElsesLog(): void
+    public function testGetCollectionIsScopedToOwner(): void
     {
-        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'someone_else']);
+        $ownerClient = self::loggedClientDataWriter(preferred_username: 'owner_writer');
+        $this->createLogAsOwner($ownerClient);
+        $this->createLogAsOwner($ownerClient);
 
-        $client = self::loggedClientAdmin();
+        $ownerClient->request('GET', '/development_logs');
+        $this->assertResponseIsSuccessful();
+        $this->assertJsonContains(['hydra:totalItems' => 2]);
 
-        $this->assertSuccessfulStatus(
-            $client,
-            'GET',
-            '/development_logs/' . $developmentLog->getId(),
-            200,
-        );
+        $otherClient = self::loggedClientDataWriter(preferred_username: 'other_writer');
+        $otherClient->request('GET', '/development_logs');
+        $this->assertJsonContains(['hydra:totalItems' => 0]);
+
+        $admin = self::loggedClientAdmin();
+        $admin->request('GET', '/development_logs');
+        $this->assertJsonContains(['hydra:totalItems' => 2]);
     }
 }

@@ -1,35 +1,38 @@
 <?php
+namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api\DataApi;
 
-namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
+use FilmAnalogger\FilmAnaloggerApi\Tests\Api\AbstractFilmTestCase;
 
-use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
+use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
 
-class ManufacturerI18nTest extends AbstractFilmTestCase
+class ChemistryTypeI18nTest extends AbstractFilmTestCase
 {
-    public function testGetManufacturerWithFrenchLocale(): void
+    public function testGetChemistryTypeWithFrenchLocale(): void
     {
-        $manufacturer = $this->createManufacturer('Kodak');
+        $chemistryType = $this->createChemistryType('B&W', 'BW_FILM_DEVELOPER', 'Film Developer');
 
         $this->documentManager->clear();
-        $manufacturer = $this->documentManager->find(Manufacturer::class, $manufacturer->getId());
+        $chemistryType = $this->documentManager->find(
+            ChemistryType::class,
+            $chemistryType->getId(),
+        );
 
         $client = self::loggedClientAdmin();
-        $client->request('PATCH', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('PATCH', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json', 'X-LOCALE' => 'fr'],
             'json' => [
-                'website' => 'https://www.kodak.fr',
+                'typeLabel' => 'Développeur de film',
             ],
         ]);
 
         // default (en) via X-LOCALE
         $client = self::loggedClientAdmin();
-        $response = $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $response = $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['X-LOCALE' => 'en'],
         ]);
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
-            'name' => 'Kodak',
-            'website' => null,
+            'typeLabel' => 'Film Developer',
             'translations' => [],
             'isTranslated' => false,
         ]);
@@ -37,13 +40,12 @@ class ManufacturerI18nTest extends AbstractFilmTestCase
 
         // default (en) with no locale header
         $client = self::loggedClientAdmin();
-        $response = $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $response = $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => [],
         ]);
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
-            'name' => 'Kodak',
-            'website' => null,
+            'typeLabel' => 'Film Developer',
             'translations' => [],
             'isTranslated' => false,
         ]);
@@ -51,175 +53,192 @@ class ManufacturerI18nTest extends AbstractFilmTestCase
 
         // French via X-LOCALE
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['X-LOCALE' => 'fr', 'Accept-Language' => 'fr'],
         ]);
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
-            'name' => 'Kodak',
-            'website' => 'https://www.kodak.fr',
-            'translations' => [['locale' => 'fr', 'field' => 'website']],
+            'typeLabel' => 'Développeur de film',
+            'translations' => [['locale' => 'fr', 'field' => 'typeLabel']],
             'isTranslated' => true,
         ]);
     }
 
-    public function testGetManufacturerWithUnsupportedLocaleFallsBackToDefault(): void
+    public function testGetChemistryTypeWithUnsupportedLocaleFallsBackToDefault(): void
     {
-        $manufacturer = $this->createManufacturer('Kodak');
+        $chemistryType = $this->createChemistryType();
 
         $client = self::loggedClientAdmin();
-        $response = $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $response = $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['X-LOCALE' => 'ja'],
         ]);
 
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
-            'name' => 'Kodak',
+            'typeLabel' => 'Film Developer',
             'isTranslated' => false,
         ]);
         $this->assertArraysHaveIdenticalValues($response->toArray()['translations'], []);
     }
 
-    public function testGetManufacturerWithAcceptLanguageHeader(): void
+    public function testGetChemistryTypeWithAcceptLanguageHeader(): void
     {
-        $manufacturer = $this->createManufacturer('Kodak');
+        $chemistryType = $this->createChemistryType('B&W', 'BW_FILM_DEVELOPER', 'Film Developer');
 
         $this->documentManager->clear();
-        $manufacturer = $this->documentManager->find(Manufacturer::class, $manufacturer->getId());
+        $chemistryType = $this->documentManager->find(
+            ChemistryType::class,
+            $chemistryType->getId(),
+        );
 
         $client = self::loggedClientAdmin();
-        $client->request('PATCH', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('PATCH', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => [
                 'Content-Type' => 'application/merge-patch+json',
                 'Accept-Language' => 'fr',
             ],
             'json' => [
-                'website' => 'https://www.kodak.fr',
+                'typeLabel' => 'Développeur de film',
             ],
         ]);
 
         // English via Accept-Language
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['Accept-Language' => 'en'],
         ]);
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(['name' => 'Kodak', 'website' => null]);
+        $this->assertJsonContains([
+            'typeLabel' => 'Film Developer',
+        ]);
 
         // no header — falls back to default
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => [],
         ]);
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(['name' => 'Kodak', 'website' => null]);
+        $this->assertJsonContains([
+            'typeLabel' => 'Film Developer',
+        ]);
 
         // French via Accept-Language
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['Accept-Language' => 'fr'],
         ]);
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(['name' => 'Kodak', 'website' => 'https://www.kodak.fr']);
+        $this->assertJsonContains([
+            'typeLabel' => 'Développeur de film',
+        ]);
     }
 
-    public function testGetManufacturerWithAcceptLanguageFallback(): void
+    public function testGetChemistryTypeWithAcceptLanguageFallback(): void
     {
-        $manufacturer = $this->createManufacturer('Kodak');
+        $chemistryType = $this->createChemistryType('B&W', 'BW_FILM_DEVELOPER', 'Film Developer');
 
         $this->documentManager->clear();
-        $manufacturer = $this->documentManager->find(Manufacturer::class, $manufacturer->getId());
+        $chemistryType = $this->documentManager->find(
+            ChemistryType::class,
+            $chemistryType->getId(),
+        );
 
         $client = self::loggedClientAdmin();
-        $client->request('PATCH', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('PATCH', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => [
                 'Content-Type' => 'application/merge-patch+json',
                 'Accept-Language' => 'fr, en;q=0.9',
             ],
             'json' => [
-                'website' => 'https://www.kodak.fr',
+                'typeLabel' => 'Développeur de film',
             ],
         ]);
 
         // English
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['Accept-Language' => 'en'],
         ]);
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(['website' => null]);
+        $this->assertJsonContains([
+            'typeLabel' => 'Film Developer',
+        ]);
 
         // French with quality factor
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['Accept-Language' => 'fr, en;q=0.9'],
         ]);
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(['website' => 'https://www.kodak.fr']);
+        $this->assertJsonContains([
+            'typeLabel' => 'Développeur de film',
+        ]);
 
         // reverse order
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/manufacturers/' . $manufacturer->getId(), [
+        $client->request('GET', '/chemistry_types/' . $chemistryType->getId(), [
             'headers' => ['Accept-Language' => 'en;q=0.9, fr'],
         ]);
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(['website' => 'https://www.kodak.fr']);
+        $this->assertJsonContains([
+            'typeLabel' => 'Développeur de film',
+        ]);
     }
 
-    public function testGetManufacturerCollectionWithFrenchLocale(): void
+    public function testGetChemistryTypeCollectionWithFrenchLocale(): void
     {
-        $kodak = $this->createManufacturer('Kodak');
-        $ilford = $this->createManufacturer('Ilford');
+        $type1 = $this->createChemistryType('B&W', 'BW_FILM_DEVELOPER', 'Film Developer');
+        $type2 = $this->createChemistryType('B&W', 'FIXER', 'Fixer');
 
         $this->documentManager->clear();
 
         $client = self::loggedClientAdmin();
-        $client->request('PATCH', '/manufacturers/' . $kodak->getId(), [
+        $client->request('PATCH', '/chemistry_types/' . $type1->getId(), [
             'headers' => [
                 'Content-Type' => 'application/merge-patch+json',
                 'Accept-Language' => 'fr, en;q=0.9',
             ],
-            'json' => ['website' => 'https://www.kodak.fr'],
+            'json' => [
+                'typeLabel' => 'Développeur de film',
+            ],
         ]);
 
         $client = self::loggedClientAdmin();
-        $client->request('PATCH', '/manufacturers/' . $ilford->getId(), [
+        $client->request('PATCH', '/chemistry_types/' . $type2->getId(), [
             'headers' => [
                 'Content-Type' => 'application/merge-patch+json',
                 'Accept-Language' => 'fr, en;q=0.9',
             ],
-            'json' => ['website' => 'https://www.ilfordphoto.fr'],
+            'json' => [
+                'typeLabel' => 'Fixateur',
+            ],
         ]);
 
         // English
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/manufacturers', [
+        $client->request('GET', '/chemistry_types', [
             'headers' => ['Accept-Language' => 'en'],
         ]);
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains(['hydra:totalItems' => 2]);
         $this->assertJsonContains([
             'hydra:member' => [
-                ['name' => 'Kodak', 'website' => null, 'isTranslated' => false],
-                ['name' => 'Ilford', 'website' => null, 'isTranslated' => false],
+                ['typeLabel' => 'Film Developer', 'isTranslated' => false],
+                ['typeLabel' => 'Fixer', 'isTranslated' => false],
             ],
         ]);
 
         // French
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/manufacturers', [
+        $client->request('GET', '/chemistry_types', [
             'headers' => ['Accept-Language' => 'fr'],
         ]);
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains(['hydra:totalItems' => 2]);
         $this->assertJsonContains([
             'hydra:member' => [
-                ['name' => 'Kodak', 'website' => 'https://www.kodak.fr', 'isTranslated' => true],
-                [
-                    'name' => 'Ilford',
-                    'website' => 'https://www.ilfordphoto.fr',
-                    'isTranslated' => true,
-                ],
+                ['typeLabel' => 'Développeur de film', 'isTranslated' => true],
+                ['typeLabel' => 'Fixateur', 'isTranslated' => true],
             ],
         ]);
     }

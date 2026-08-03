@@ -20,6 +20,11 @@ class ManufacturerFixtures extends Fixture
     public const LEICA = 'manufacturer-leica';
     public const HASSELBLAD = 'manufacturer-hasselblad';
     public const MAMIYA = 'manufacturer-mamiya';
+    public const CINESTILL = 'manufacturer-cinestill';
+    public const LOMOGRAPHY = 'manufacturer-lomography';
+    public const BERGGER = 'manufacturer-bergger';
+    public const TETENAL = 'manufacturer-tetenal';
+    public const GENERIC = 'manufacturer-generic';
 
     public function load(ObjectManager $manager): void
     {
@@ -70,6 +75,28 @@ class ManufacturerFixtures extends Fixture
                 null,
             ],
             [self::MAMIYA, 'Mamiya', 'https://mamiya.com/', '#000000', '#FFFFFF', null],
+            [
+                self::CINESTILL,
+                'CineStill',
+                'https://cinestillfilm.com/',
+                '#000000',
+                '#ED1C24',
+                null,
+            ],
+            [
+                self::LOMOGRAPHY,
+                'Lomography',
+                'https://www.lomography.com/',
+                '#D71920',
+                '#FFFFFF',
+                null,
+            ],
+            [self::BERGGER, 'Bergger', 'https://bergger.com/en/', '#0B2E59', '#FFFFFF', null],
+            [self::TETENAL, 'Tetenal', 'https://tetenal.com/en/', '#E30613', '#000000', null],
+            // Catch-all for homemade/unbranded chemistry (e.g. a diluted
+            // household vinegar stop bath) — not every bath used in a real
+            // darkroom session comes from a commercial product line.
+            [self::GENERIC, 'Générique / maison', null, null, null, null],
         ];
     }
 }

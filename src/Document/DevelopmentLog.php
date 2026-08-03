@@ -18,9 +18,11 @@ use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-// Un DevelopmentLog est une donnée personnelle : il n'appartient qu'à son créateur
-// (voir FilmAnalogger\FilmAnaloggerApi\Doctrine\Extension\OwnDevelopmentLogExtension),
-// à l'exception des admins qui peuvent tout consulter.
+// A DevelopmentLog is personal data: it belongs only to its creator (see
+// FilmAnalogger\FilmAnaloggerApi\Doctrine\OwnedByCurrentUserExtension for the
+// collection-scoping half of this), except for admins who can see everything.
+// This mirrors the PrintSession/PrintWork convention: DATA_READER/DATA_WRITER
+// gate the role, ownership is checked per-item via object.getCreatedBy().
 
 #[ODM\Document]
 #[
@@ -34,11 +36,29 @@ use Symfony\Component\Serializer\Attribute\Groups;
         ],
         denormalizationContext: ['groups' => [SerializationGroups::DEVELOPMENT_LOG_WRITE_GROUP]],
         operations: [
-            new Get(security: 'is_granted("' . KeycloakRoles::USER . '")'),
-            new GetCollection(security: 'is_granted("' . KeycloakRoles::USER . '")'),
-            new Post(security: 'is_granted("' . KeycloakRoles::USER . '")'),
-            new Patch(security: 'is_granted("' . KeycloakRoles::USER . '")'),
-            new Delete(security: 'is_granted("' . KeycloakRoles::USER . '")'),
+            new Get(
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_READER .
+                    '") and (is_granted("' .
+                    KeycloakRoles::ADMIN .
+                    '") or object.getCreatedBy() === user.getUserIdentifier())',
+            ),
+            new GetCollection(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
+            new Post(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
+            new Patch(
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") and (is_granted("' .
+                    KeycloakRoles::ADMIN .
+                    '") or object.getCreatedBy() === user.getUserIdentifier())',
+            ),
+            new Delete(
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") and (is_granted("' .
+                    KeycloakRoles::ADMIN .
+                    '") or object.getCreatedBy() === user.getUserIdentifier())',
+            ),
         ],
     ),
 ]
