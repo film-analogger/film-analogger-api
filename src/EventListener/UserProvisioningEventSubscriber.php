@@ -6,11 +6,14 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use FilmAnalogger\FilmAnaloggerApi\Document\AppUser;
 use FilmAnalogger\FilmAnaloggerApi\Repository\AppUserRepository;
 use FilmAnalogger\FilmAnaloggerApi\Security\User\KeycloakBearerUser;
+use MongoDB\Driver\Exception\BulkWriteException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
 final class UserProvisioningEventSubscriber implements EventSubscriberInterface
 {
+    private const MONGODB_DUPLICATE_KEY_ERROR_CODE = 11000;
+
     public function __construct(private readonly DocumentManager $documentManager) {}
 
     public static function getSubscribedEvents(): array
@@ -43,6 +46,17 @@ final class UserProvisioningEventSubscriber implements EventSubscriberInterface
         $appUser->familyName = $keycloakUser->getFamilyName();
 
         $this->documentManager->persist($appUser);
-        $this->documentManager->flush();
+
+        try {
+            $this->documentManager->flush();
+        } catch (BulkWriteException $e) {
+            if ($e->getCode() !== self::MONGODB_DUPLICATE_KEY_ERROR_CODE) {
+                throw $e;
+            }
+
+            // A concurrent request already provisioned this user (race on the
+            // unique keycloakSub/username/email indexes) — nothing left to do.
+            $this->documentManager->clear(AppUser::class);
+        }
     }
 }

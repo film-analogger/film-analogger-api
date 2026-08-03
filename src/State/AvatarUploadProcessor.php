@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FilmAnalogger\FilmAnaloggerApi\State;
 
+use ApiPlatform\Metadata\Exception\InvalidArgumentException;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -39,8 +40,7 @@ final readonly class AvatarUploadProcessor implements ProcessorInterface
         $avatarFile = $request?->files->get('avatarFile');
 
         if (!$avatarFile instanceof UploadedFile) {
-            $this->logger->error('No valid avatar file uploaded');
-            return $data;
+            throw new InvalidArgumentException('No valid avatar file uploaded.');
         }
 
         $data->setAvatarFile($avatarFile);

@@ -26,6 +26,10 @@ final class SerializationGroups
 
     const PRINT_SESSION_READ_GROUP = 'read-print-session';
     const PRINT_SESSION_WRITE_GROUP = 'write-print-session';
+    // Only included on item operations (Get/Post/Patch), not GetCollection,
+    // so listing print sessions doesn't trigger one PrintWork query per
+    // session (N+1).
+    const PRINT_SESSION_ITEM_READ_GROUP = 'read-print-session-item';
 
     const PRINT_READ_GROUP = 'read-print';
     const PRINT_WRITE_GROUP = 'write-print';

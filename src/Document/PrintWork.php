@@ -79,6 +79,10 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
                     // comparison, which doesn't type-cast string IDs to ObjectId.
                     'id' => new Link(fromClass: PrintSession::class, fromProperty: 'prints'),
                 ],
+                // This route's own security only checks the role: per-user scoping
+                // (non-admins see only their own prints) is enforced entirely by
+                // OwnedByCurrentUserExtension, which applies to any GetCollection on
+                // PrintWork/PrintSession regardless of URI. See that class' docblock.
                 security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
                 openapi: new Model\Operation(
                     responses: [
@@ -699,14 +703,20 @@ class PrintWork
     #[Assert\Callback]
     public function validatePaperOtherFields(ExecutionContextInterface $context): void
     {
-        if ($this->paperSurface === PaperSurface::OTHER && !$this->paperSurfaceOther) {
+        if (
+            $this->paperSurface === PaperSurface::OTHER &&
+            ($this->paperSurfaceOther === null || trim($this->paperSurfaceOther) === '')
+        ) {
             $context
                 ->buildViolation('paperSurfaceOther is required when paperSurface is OTHER.')
                 ->atPath('paperSurfaceOther')
                 ->addViolation();
         }
 
-        if ($this->paperBrand === PaperBrand::OTHER && !$this->paperBrandOther) {
+        if (
+            $this->paperBrand === PaperBrand::OTHER &&
+            ($this->paperBrandOther === null || trim($this->paperBrandOther) === '')
+        ) {
             $context
                 ->buildViolation('paperBrandOther is required when paperBrand is OTHER.')
                 ->atPath('paperBrandOther')

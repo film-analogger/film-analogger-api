@@ -2,6 +2,7 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Encoder;
 
+use ApiPlatform\Metadata\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 
@@ -21,7 +22,11 @@ final class MultipartDecoder implements DecoderInterface
 
         return array_map(static function (string $element) {
             // Multipart form values will be encoded in JSON.
-            return json_decode($element, true, flags: \JSON_THROW_ON_ERROR);
+            try {
+                return json_decode($element, true, flags: \JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                throw new InvalidArgumentException('Multipart form fields must be JSON-encoded.');
+            }
         }, $request->request->all()) + $request->files->all();
     }
 

@@ -39,6 +39,14 @@ use Symfony\Component\Validator\Constraints as Assert;
         ],
         operations: [
             new Get(
+                normalizationContext: [
+                    'skip_null_values' => false,
+                    'groups' => [
+                        SerializationGroups::PRINT_SESSION_READ_GROUP,
+                        SerializationGroups::PRINT_SESSION_ITEM_READ_GROUP,
+                        SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+                    ],
+                ],
                 security: 'is_granted("' .
                     KeycloakRoles::DATA_READER .
                     '") and (is_granted("' .
@@ -52,6 +60,10 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ),
             ),
             new GetCollection(
+                // No PRINT_SESSION_ITEM_READ_GROUP here: embedding `prints` in
+                // every row of a collection listing would trigger one extra
+                // PrintWork query per session (N+1). Fetch a session's prints
+                // via GET /print_sessions/{id} or /print_sessions/{id}/prints.
                 security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
                 openapi: new Model\Operation(
                     responses: [
@@ -61,6 +73,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ),
             ),
             new Post(
+                normalizationContext: [
+                    'skip_null_values' => false,
+                    'groups' => [
+                        SerializationGroups::PRINT_SESSION_READ_GROUP,
+                        SerializationGroups::PRINT_SESSION_ITEM_READ_GROUP,
+                        SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+                    ],
+                ],
                 security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
                 openapi: new Model\Operation(
                     responses: [
@@ -70,6 +90,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ),
             ),
             new Patch(
+                normalizationContext: [
+                    'skip_null_values' => false,
+                    'groups' => [
+                        SerializationGroups::PRINT_SESSION_READ_GROUP,
+                        SerializationGroups::PRINT_SESSION_ITEM_READ_GROUP,
+                        SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+                    ],
+                ],
                 security: 'is_granted("' .
                     KeycloakRoles::DATA_WRITER .
                     '") and (is_granted("' .
@@ -201,7 +229,7 @@ class PrintSession
     public ?string $notes = null;
 
     #[ODM\ReferenceMany(targetDocument: PrintWork::class, mappedBy: 'session', sort: ['number' => 1])]
-    #[Groups([SerializationGroups::PRINT_SESSION_READ_GROUP])]
+    #[Groups([SerializationGroups::PRINT_SESSION_ITEM_READ_GROUP])]
     public Collection $prints;
 
     public function __construct()

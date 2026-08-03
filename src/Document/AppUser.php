@@ -56,7 +56,9 @@ use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
             new Patch(
                 security: 'is_granted("' .
                     KeycloakRoles::DATA_READER .
-                    '") and object.username === user.getUserIdentifier()',
+                    '") and (is_granted("' .
+                    KeycloakRoles::ADMIN .
+                    '") or object.username === user.getUserIdentifier())',
                 openapi: new Model\Operation(
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
@@ -69,6 +71,11 @@ use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
                 name: 'upload_avatar',
                 processor: AvatarUploadProcessor::class,
                 inputFormats: ['multipart' => ['multipart/form-data']],
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_READER .
+                    '") and (is_granted("' .
+                    KeycloakRoles::ADMIN .
+                    '") or object.username === user.getUserIdentifier())',
                 openapi: new Model\Operation(
                     summary: 'Upload user avatar',
                     description: 'Upload or replace the avatar image for a user.',

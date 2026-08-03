@@ -39,7 +39,10 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager): void
     {
         $developer = $this->getReference(ChemistryFixtures::ILFORD_BROMOPHEN, Chemistry::class);
-        $stopBath = $this->getReference(ChemistryFixtures::HOMEMADE_ACETIC_ACID_STOP, Chemistry::class);
+        $stopBath = $this->getReference(
+            ChemistryFixtures::HOMEMADE_ACETIC_ACID_STOP,
+            Chemistry::class,
+        );
         $fixer = $this->getReference(ChemistryFixtures::ILFORD_RAPID_FIXER, Chemistry::class);
 
         $sessionOne = new PrintSession();
@@ -66,7 +69,13 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
             'paperWidthCm' => 30.0,
             'paperHeightCm' => 24.0,
             'exposures' => [
-                ['kind' => ExposureKind::BASE, 'baseSeconds' => 16.0, 'num' => 1, 'denom' => 3, 'grade' => PaperGrade::G2],
+                [
+                    'kind' => ExposureKind::BASE,
+                    'baseSeconds' => 16.0,
+                    'num' => 1,
+                    'denom' => 3,
+                    'grade' => PaperGrade::G2,
+                ],
             ],
         ]);
 
@@ -92,7 +101,13 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
             'exposures' => [
                 // Written "1/2" on the paper form: grade 0.5, not grade 1.5 —
                 // exactly the misreading trap PaperGrade::G0_5 exists for.
-                ['kind' => ExposureKind::BASE, 'baseSeconds' => 32.0, 'num' => 1, 'denom' => 3, 'grade' => PaperGrade::G0_5],
+                [
+                    'kind' => ExposureKind::BASE,
+                    'baseSeconds' => 32.0,
+                    'num' => 1,
+                    'denom' => 3,
+                    'grade' => PaperGrade::G0_5,
+                ],
             ],
         ]);
 
@@ -104,7 +119,9 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
             ->setEnlarger('Durst M805')
             ->setTemperatureCelsius(27.0)
             ->setWash('2 bains 5 min')
-            ->setNotes('Température a dérivé de 27°C à 26°C en fin de séance (hors plage Ilford 18-24°C).')
+            ->setNotes(
+                'Température a dérivé de 27°C à 26°C en fin de séance (hors plage Ilford 18-24°C).',
+            )
             ->setCreatedBy(AppUserFixtures::TEST_WRITER_USERNAME)
             ->addChemicalBath(new ChemicalBath()->setChemistry($developer)->setDurationSeconds(90))
             ->addChemicalBath(new ChemicalBath()->setChemistry($stopBath)->setDurationSeconds(15))
@@ -121,7 +138,13 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
             'paperWidthCm' => 24.0,
             'paperHeightCm' => 30.0,
             'exposures' => [
-                ['kind' => ExposureKind::BASE, 'baseSeconds' => 32.0, 'num' => 1, 'denom' => 3, 'grade' => PaperGrade::G1],
+                [
+                    'kind' => ExposureKind::BASE,
+                    'baseSeconds' => 32.0,
+                    'num' => 1,
+                    'denom' => 3,
+                    'grade' => PaperGrade::G1,
+                ],
             ],
         ]);
 
@@ -135,7 +158,13 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
             'maskingNotes' => 'Rectangle + 2 personnages',
             'notes' => 'Pull (retenir) 16 s sur le public — voir croquis sur la fiche papier.',
             'exposures' => [
-                ['kind' => ExposureKind::BASE, 'baseSeconds' => 32.0, 'num' => 1, 'denom' => 3, 'grade' => PaperGrade::G1],
+                [
+                    'kind' => ExposureKind::BASE,
+                    'baseSeconds' => 32.0,
+                    'num' => 1,
+                    'denom' => 3,
+                    'grade' => PaperGrade::G1,
+                ],
                 [
                     'kind' => ExposureKind::BURN,
                     'baseSeconds' => 16.0,
@@ -175,7 +204,11 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                     'paperWidthCm' => 24.0,
                     'paperHeightCm' => 30.0,
                     'exposures' => [
-                        ['kind' => ExposureKind::BASE, 'baseSeconds' => 12.0, 'grade' => PaperGrade::G3],
+                        [
+                            'kind' => ExposureKind::BASE,
+                            'baseSeconds' => 12.0,
+                            'grade' => PaperGrade::G3,
+                        ],
                     ],
                 ],
             ],
@@ -202,7 +235,11 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                     'paperWidthCm' => 24.0,
                     'paperHeightCm' => 30.0,
                     'exposures' => [
-                        ['kind' => ExposureKind::BASE, 'baseSeconds' => 14.0, 'grade' => PaperGrade::G2_5],
+                        [
+                            'kind' => ExposureKind::BASE,
+                            'baseSeconds' => 14.0,
+                            'grade' => PaperGrade::G2_5,
+                        ],
                     ],
                 ],
             ],
@@ -231,7 +268,11 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                     'paperWidthCm' => 30.0,
                     'paperHeightCm' => 24.0,
                     'exposures' => [
-                        ['kind' => ExposureKind::BASE, 'baseSeconds' => 18.0, 'grade' => PaperGrade::G2],
+                        [
+                            'kind' => ExposureKind::BASE,
+                            'baseSeconds' => 18.0,
+                            'grade' => PaperGrade::G2,
+                        ],
                     ],
                 ],
             ],
@@ -258,7 +299,11 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                     'paperWidthCm' => 30.0,
                     'paperHeightCm' => 24.0,
                     'exposures' => [
-                        ['kind' => ExposureKind::BASE, 'baseSeconds' => 20.0, 'grade' => PaperGrade::G2],
+                        [
+                            'kind' => ExposureKind::BASE,
+                            'baseSeconds' => 20.0,
+                            'grade' => PaperGrade::G2,
+                        ],
                     ],
                 ],
             ],
@@ -286,7 +331,11 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                     'paperWidthCm' => 30.0,
                     'paperHeightCm' => 40.0,
                     'exposures' => [
-                        ['kind' => ExposureKind::BASE, 'baseSeconds' => 22.0, 'grade' => PaperGrade::G1],
+                        [
+                            'kind' => ExposureKind::BASE,
+                            'baseSeconds' => 22.0,
+                            'grade' => PaperGrade::G1,
+                        ],
                     ],
                 ],
             ],
@@ -313,15 +362,22 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                     'paperWidthCm' => 30.0,
                     'paperHeightCm' => 40.0,
                     'exposures' => [
-                        ['kind' => ExposureKind::BASE, 'baseSeconds' => 24.0, 'grade' => PaperGrade::G1_5],
+                        [
+                            'kind' => ExposureKind::BASE,
+                            'baseSeconds' => 24.0,
+                            'grade' => PaperGrade::G1_5,
+                        ],
                     ],
                 ],
             ],
         );
     }
 
-    private function createSession(ObjectManager $manager, array $sessionData, array $prints): PrintSession
-    {
+    private function createSession(
+        ObjectManager $manager,
+        array $sessionData,
+        array $prints,
+    ): PrintSession {
         $session = new PrintSession();
         $session
             ->setDate(new \DateTimeImmutable($sessionData['date']))
@@ -354,6 +410,7 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
         $print = new PrintWork();
         $print
             ->setSession($session)
+            ->setCreatedBy($session->getCreatedBy())
             ->setNumber($data['number'])
             ->setFilmFormat('135')
             ->setContactSheetRef($data['contactSheetRef'])
