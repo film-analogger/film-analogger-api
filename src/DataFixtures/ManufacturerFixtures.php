@@ -14,6 +14,12 @@ class ManufacturerFixtures extends Fixture
     public const ADOX = 'manufacturer-adox';
     public const FOMA = 'manufacturer-foma';
     public const ROLLEI = 'manufacturer-rollei';
+    public const NIKON = 'manufacturer-nikon';
+    public const CANON = 'manufacturer-canon';
+    public const PENTAX = 'manufacturer-pentax';
+    public const LEICA = 'manufacturer-leica';
+    public const HASSELBLAD = 'manufacturer-hasselblad';
+    public const MAMIYA = 'manufacturer-mamiya';
 
     public function load(ObjectManager $manager): void
     {
@@ -51,6 +57,19 @@ class ManufacturerFixtures extends Fixture
             [self::ADOX, 'Adox', 'https://www.adox.de/Photo/en/', '#FFFFFF', '#E48157', null],
             [self::FOMA, 'Foma', 'https://www.foma.cz/en', '#ffffff', '#000000', null],
             [self::ROLLEI, 'Rollei', 'https://www.rollei.de/en', '#FEFEFE', '#000000', null],
+            [self::NIKON, 'Nikon', 'https://www.nikon.com/', '#FFE100', '#000000', null],
+            [self::CANON, 'Canon', 'https://global.canon/', '#DB0011', '#000000', null],
+            [self::PENTAX, 'Pentax', 'https://www.ricoh-imaging.com/', '#003DA5', '#000000', null],
+            [self::LEICA, 'Leica', 'https://leica-camera.com/', '#E20613', '#000000', null],
+            [
+                self::HASSELBLAD,
+                'Hasselblad',
+                'https://www.hasselblad.com/',
+                '#000000',
+                '#FFFFFF',
+                null,
+            ],
+            [self::MAMIYA, 'Mamiya', 'https://mamiya.com/', '#000000', '#FFFFFF', null],
         ];
     }
 }

@@ -3,10 +3,14 @@
 namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use FilmAnalogger\FilmAnaloggerApi\Document\ApproximateDate;
+use FilmAnalogger\FilmAnaloggerApi\Document\Camera;
 use FilmAnalogger\FilmAnaloggerApi\Document\Chemistry;
 use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
+use FilmAnalogger\FilmAnaloggerApi\Document\DevelopmentLog;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
+use FilmAnalogger\FilmAnaloggerApi\Document\Tag;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserMock;
 use Gedmo\Translatable\Document\Translation;
@@ -31,6 +35,9 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->getDocumentCollection(Manufacturer::class)->drop();
         $this->documentManager->getDocumentCollection(Chemistry::class)->drop();
         $this->documentManager->getDocumentCollection(ChemistryType::class)->drop();
+        $this->documentManager->getDocumentCollection(Camera::class)->drop();
+        $this->documentManager->getDocumentCollection(Tag::class)->drop();
+        $this->documentManager->getDocumentCollection(DevelopmentLog::class)->drop();
         $this->documentManager->getDocumentCollection(Translation::class)->drop();
     }
 
@@ -117,6 +124,79 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->flush();
 
         return $film;
+    }
+
+    protected function createCamera(array $overrides = []): Camera
+    {
+        $manufacturer = $overrides['manufacturer'] ?? $this->createManufacturer();
+
+        $camera = new Camera();
+        $camera->setName($overrides['name'] ?? 'F100');
+        $camera->setManufacturer($manufacturer);
+        $camera->setFilmFormat($overrides['filmFormat'] ?? '135');
+
+        if (isset($overrides['description'])) {
+            $camera->setDescription($overrides['description']);
+        }
+
+        $this->documentManager->persist($camera);
+        $this->documentManager->flush();
+
+        return $camera;
+    }
+
+    protected function createTag(array $overrides = []): Tag
+    {
+        $tag = new Tag();
+        $tag->setName($overrides['name'] ?? 'Fogged');
+
+        if (isset($overrides['description'])) {
+            $tag->setDescription($overrides['description']);
+        }
+        if (isset($overrides['primaryColor'])) {
+            $tag->primaryColor = $overrides['primaryColor'];
+        }
+
+        $this->documentManager->persist($tag);
+        $this->documentManager->flush();
+
+        return $tag;
+    }
+
+    protected function createDevelopmentLog(array $overrides = []): DevelopmentLog
+    {
+        $film = $overrides['film'] ?? $this->createFilm();
+
+        $shotAt = new ApproximateDate();
+        $shotAt->setYear($overrides['shotAtYear'] ?? 2024);
+        $shotAt->setMonth($overrides['shotAtMonth'] ?? 6);
+
+        $developmentLog = new DevelopmentLog();
+        $developmentLog
+            ->setFilm($film)
+            ->setCamera($overrides['camera'] ?? null)
+            ->setShotAt($shotAt)
+            ->setIsoShotAt($overrides['isoShotAt'] ?? $film->getSensibility())
+            ->setProcess($overrides['process'] ?? $film->getProcess())
+            ->setDevelopedAt($overrides['developedAt'] ?? new \DateTimeImmutable('2024-06-15'));
+
+        if (isset($overrides['shootingNotes'])) {
+            $developmentLog->setShootingNotes($overrides['shootingNotes']);
+        }
+        if (isset($overrides['developmentNotes'])) {
+            $developmentLog->setDevelopmentNotes($overrides['developmentNotes']);
+        }
+        if (isset($overrides['rating'])) {
+            $developmentLog->setRating($overrides['rating']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $developmentLog->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($developmentLog);
+        $this->documentManager->flush();
+
+        return $developmentLog;
     }
 
     // protected function assertArraysHaveIdenticalValues(array $actual, array $expected): void

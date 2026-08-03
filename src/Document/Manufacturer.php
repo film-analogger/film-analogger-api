@@ -80,6 +80,15 @@ class Manufacturer implements Translatable
     ]
     public Collection $chemistries;
 
+    #[ODM\ReferenceMany(targetDocument: Camera::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public Collection $cameras;
+
     #[ODM\Field(nullable: true)]
     #[Assert\CssColor]
     #[ApiProperty(example: '#FF0000')]
@@ -128,6 +137,7 @@ class Manufacturer implements Translatable
     {
         $this->films = new ArrayCollection();
         $this->chemistries = new ArrayCollection();
+        $this->cameras = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -219,6 +229,27 @@ class Manufacturer implements Translatable
             $chemistry->setManufacturer($this);
         }
         $this->chemistries = $chemistries;
+        return $this;
+    }
+
+    public function addCamera(Camera $camera): static
+    {
+        $camera->setManufacturer($this);
+        $this->cameras->add($camera);
+        return $this;
+    }
+
+    public function getCameras(): Collection
+    {
+        return $this->cameras;
+    }
+
+    public function setCameras(Collection $cameras): static
+    {
+        foreach ($cameras as $camera) {
+            $camera->setManufacturer($this);
+        }
+        $this->cameras = $cameras;
         return $this;
     }
 }
