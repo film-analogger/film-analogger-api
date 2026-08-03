@@ -29,6 +29,9 @@ final class SerializationGroups
 
     const TIMESTAMPABLE_BLAMEABLE_READ_GROUP = 'timestampable-blameable-read';
 
+    const CATALOG_STATUS_READ_GROUP = 'catalog-status-read';
+    const CATALOG_STATUS_WRITE_GROUP = 'catalog-status-write';
+
     const APP_USER_READ_GROUP = 'read-app-user';
     const APP_USER_WRITE_GROUP = 'write-app-user';
     const APP_USER_AVATAR_UPLOAD_GROUP = 'avatar-upload-app-user';

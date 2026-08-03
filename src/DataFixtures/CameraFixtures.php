@@ -5,6 +5,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\DataFixtures;
 use Doctrine\Bundle\MongoDBBundle\Fixture\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Camera;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
@@ -21,7 +22,8 @@ class CameraFixtures extends Fixture implements DependentFixtureInterface
                 ->setName($data['name'])
                 ->setManufacturer($this->getReference($data['manufacturer'], Manufacturer::class))
                 ->setFilmFormat($data['filmFormat'])
-                ->setDescription($data['description'] ?? null);
+                ->setDescription($data['description'] ?? null)
+                ->setStatus(CatalogStatus::OFFICIAL);
 
             $manager->persist($camera);
             $entities[] = [$camera, $data];

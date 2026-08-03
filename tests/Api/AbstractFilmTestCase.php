@@ -11,6 +11,7 @@ use FilmAnalogger\FilmAnaloggerApi\Document\DevelopmentLog;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 use FilmAnalogger\FilmAnaloggerApi\Document\Tag;
+use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ExposureKind;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBase;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBrand;
@@ -59,11 +60,17 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         string $process = 'B&W',
         string $typeCode = 'BW_FILM_DEVELOPER',
         string $typeLabel = 'Film Developer',
+        CatalogStatus $status = CatalogStatus::OFFICIAL,
+        ?string $createdBy = null,
     ): ChemistryType {
         $chemistryType = new ChemistryType();
         $chemistryType->process = $process;
         $chemistryType->setTypeCode($typeCode);
         $chemistryType->setTypeLabel($typeLabel);
+        $chemistryType->setStatus($status);
+        if ($createdBy !== null) {
+            $chemistryType->setCreatedBy($createdBy);
+        }
         $this->documentManager->persist($chemistryType);
         $this->documentManager->flush();
 
@@ -80,12 +87,16 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $chemistry->process = $overrides['process'] ?? 'B&W';
         $chemistry->setChemistryType($chemistryType);
         $chemistry->setManufacturer($manufacturer);
+        $chemistry->setStatus($overrides['status'] ?? CatalogStatus::OFFICIAL);
 
         if (isset($overrides['description'])) {
             $chemistry->setDescription($overrides['description']);
         }
         if (isset($overrides['officialDocumentationUrl'])) {
             $chemistry->setOfficialDocumentationUrl($overrides['officialDocumentationUrl']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $chemistry->setCreatedBy($overrides['createdBy']);
         }
 
         $this->documentManager->persist($chemistry);
@@ -94,10 +105,17 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         return $chemistry;
     }
 
-    protected function createManufacturer(string $name = 'Kodak'): Manufacturer
-    {
+    protected function createManufacturer(
+        string $name = 'Kodak',
+        CatalogStatus $status = CatalogStatus::OFFICIAL,
+        ?string $createdBy = null,
+    ): Manufacturer {
         $manufacturer = new Manufacturer();
         $manufacturer->setName($name);
+        $manufacturer->setStatus($status);
+        if ($createdBy !== null) {
+            $manufacturer->setCreatedBy($createdBy);
+        }
         $this->documentManager->persist($manufacturer);
         $this->documentManager->flush();
 
@@ -114,6 +132,7 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $film->setProcess($overrides['process'] ?? 'C-41');
         $film->setSensibility($overrides['sensibility'] ?? 400);
         $film->setManufacturer($manufacturer);
+        $film->setStatus($overrides['status'] ?? CatalogStatus::OFFICIAL);
 
         if (isset($overrides['emulsionType'])) {
             $film->setEmulsionType($overrides['emulsionType']);
@@ -133,6 +152,9 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         if (isset($overrides['tertiaryColor'])) {
             $film->setTertiaryColor($overrides['tertiaryColor']);
         }
+        if (isset($overrides['createdBy'])) {
+            $film->setCreatedBy($overrides['createdBy']);
+        }
 
         $this->documentManager->persist($film);
         $this->documentManager->flush();
@@ -148,9 +170,13 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $camera->setName($overrides['name'] ?? 'F100');
         $camera->setManufacturer($manufacturer);
         $camera->setFilmFormat($overrides['filmFormat'] ?? '135');
+        $camera->setStatus($overrides['status'] ?? CatalogStatus::OFFICIAL);
 
         if (isset($overrides['description'])) {
             $camera->setDescription($overrides['description']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $camera->setCreatedBy($overrides['createdBy']);
         }
 
         $this->documentManager->persist($camera);
@@ -163,12 +189,16 @@ abstract class AbstractFilmTestCase extends ApiTestCase
     {
         $tag = new Tag();
         $tag->setName($overrides['name'] ?? 'Fogged');
+        $tag->setStatus($overrides['status'] ?? CatalogStatus::OFFICIAL);
 
         if (isset($overrides['description'])) {
             $tag->setDescription($overrides['description']);
         }
         if (isset($overrides['primaryColor'])) {
             $tag->primaryColor = $overrides['primaryColor'];
+        }
+        if (isset($overrides['createdBy'])) {
+            $tag->setCreatedBy($overrides['createdBy']);
         }
 
         $this->documentManager->persist($tag);

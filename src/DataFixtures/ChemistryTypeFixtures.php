@@ -4,6 +4,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\DataFixtures;
 
 use Doctrine\Bundle\MongoDBBundle\Fixture\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
 
@@ -38,7 +39,10 @@ class ChemistryTypeFixtures extends Fixture
         foreach ($this->getData() as $data) {
             $type = new ChemistryType();
             $type->process = $data['process'];
-            $type->setTypeCode($data['typeCode'])->setTypeLabel($data['typeLabel']);
+            $type
+                ->setTypeCode($data['typeCode'])
+                ->setTypeLabel($data['typeLabel'])
+                ->setStatus(CatalogStatus::OFFICIAL);
 
             $manager->persist($type);
             $this->addReference($data['reference'], $type);

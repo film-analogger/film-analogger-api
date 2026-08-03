@@ -4,6 +4,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\DataFixtures;
 
 use Doctrine\Bundle\MongoDBBundle\Fixture\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Document\Tag;
 
 class TagFixtures extends Fixture
@@ -27,6 +28,7 @@ class TagFixtures extends Fixture
             $tag->setName($name);
             $tag->setDescription($description);
             $tag->primaryColor = $primaryColor;
+            $tag->setStatus(CatalogStatus::OFFICIAL);
 
             $manager->persist($tag);
             $this->addReference($reference, $tag);

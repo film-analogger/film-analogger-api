@@ -5,6 +5,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\DataFixtures;
 use Doctrine\Bundle\MongoDBBundle\Fixture\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
@@ -28,7 +29,8 @@ class FilmFixtures extends Fixture implements DependentFixtureInterface
                 ->setOfficialDocumentationUrl($data['officialDocumentationUrl'] ?? null)
                 ->setPrimaryColor($data['primaryColor'] ?? null)
                 ->setSecondaryColor($data['secondaryColor'] ?? null)
-                ->setTertiaryColor($data['tertiaryColor'] ?? null);
+                ->setTertiaryColor($data['tertiaryColor'] ?? null)
+                ->setStatus(CatalogStatus::OFFICIAL);
 
             $manager->persist($film);
             $entities[] = [$film, $data];

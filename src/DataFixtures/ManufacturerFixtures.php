@@ -4,6 +4,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\DataFixtures;
 
 use Doctrine\Bundle\MongoDBBundle\Fixture\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 
 class ManufacturerFixtures extends Fixture
@@ -38,6 +39,7 @@ class ManufacturerFixtures extends Fixture
             $manufacturer->setPrimaryColor($primaryColor);
             $manufacturer->setSecondaryColor($secondaryColor);
             $manufacturer->setTertiaryColor($tertiaryColor);
+            $manufacturer->setStatus(CatalogStatus::OFFICIAL);
 
             $manager->persist($manufacturer);
             $this->addReference($reference, $manufacturer);

@@ -2,6 +2,8 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
+use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -10,6 +12,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
+use FilmAnalogger\FilmAnaloggerApi\Document\Trait\CatalogStatusTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
@@ -28,22 +31,52 @@ use Gedmo\Mapping\Annotation as Gedmo;
                 SerializationGroups::CAMERA_READ_GROUP,
                 SerializationGroups::TRANSLATABLE_READ_GROUP,
                 SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+                SerializationGroups::CATALOG_STATUS_READ_GROUP,
             ],
         ],
-        denormalizationContext: ['groups' => [SerializationGroups::CAMERA_WRITE_GROUP]],
+        denormalizationContext: [
+            'groups' => [
+                SerializationGroups::CAMERA_WRITE_GROUP,
+                SerializationGroups::CATALOG_STATUS_WRITE_GROUP,
+            ],
+        ],
         operations: [
-            new Get(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
+            new Get(
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_READER .
+                    '") and (object.isOfficial() or is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or object.getCreatedBy() === user.getUserIdentifier())',
+            ),
             new GetCollection(security: 'is_granted("' . KeycloakRoles::DATA_READER . '")'),
-            new Post(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
-            new Patch(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
-            new Delete(security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")'),
+            new Post(
+                security: 'is_granted("' . KeycloakRoles::USER . '")',
+                securityPostDenormalize: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or object.isPersonalOrPending()',
+            ),
+            new Patch(
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or (object.getCreatedBy() === user.getUserIdentifier() and object.isOwnerEditableStatus())',
+                securityPostDenormalize: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or object.isPersonalOrPending()',
+            ),
+            new Delete(
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or (object.getCreatedBy() === user.getUserIdentifier() and not object.isOfficial())',
+            ),
         ],
     ),
 ]
+#[ApiFilter(SearchFilter::class, properties: ['status' => 'exact'])]
 class Camera implements Translatable
 {
     use TranslatableTrait;
     use TimestampableBlameableTrait;
+    use CatalogStatusTrait;
 
     #[ODM\Id]
     #[Groups([SerializationGroups::CAMERA_READ_GROUP])]

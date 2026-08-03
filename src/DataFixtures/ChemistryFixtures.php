@@ -5,6 +5,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\DataFixtures;
 use Doctrine\Bundle\MongoDBBundle\Fixture\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Chemistry;
 use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
@@ -34,7 +35,8 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                     $this->getReference($data['chemistryType'], ChemistryType::class),
                 )
                 ->setOfficialDocumentationUrl($data['officialDocumentationUrl'] ?? null)
-                ->setManufacturer($this->getReference($data['manufacturer'], Manufacturer::class));
+                ->setManufacturer($this->getReference($data['manufacturer'], Manufacturer::class))
+                ->setStatus(CatalogStatus::OFFICIAL);
 
             foreach ($data['dilutions'] ?? [] as [$chemParts, $waterParts, $official]) {
                 $chemistry->addDilution(
