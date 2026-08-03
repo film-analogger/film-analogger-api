@@ -1,6 +1,8 @@
 <?php
 
-namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
+namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api\DataApi;
+
+use FilmAnalogger\FilmAnaloggerApi\Tests\Api\AbstractFilmTestCase;
 
 class TagTest extends AbstractFilmTestCase
 {

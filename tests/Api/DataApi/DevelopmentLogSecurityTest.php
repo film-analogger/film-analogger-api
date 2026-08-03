@@ -1,8 +1,9 @@
 <?php
 
-namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api;
+namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api\DataApi;
 
 use ApiPlatform\Symfony\Bundle\Test\Client;
+use FilmAnalogger\FilmAnaloggerApi\Tests\Api\AbstractFilmTestCase;
 
 class DevelopmentLogSecurityTest extends AbstractFilmTestCase
 {
