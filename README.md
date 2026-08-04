@@ -18,8 +18,9 @@ Keycloak (OAuth2 bearer tokens).
     - [Authentication](#authentication)
     - [Roles](#roles)
     - [Resources](#resources)
+    - [Catalog moderation workflow](#catalog-moderation-workflow)
     - [Internationalization](#internationalization)
-    - [Avatar upload](#avatar-upload)
+    - [Custom endpoints](#custom-endpoints)
 - [Tests](#tests)
 - [Code style and commits](#code-style-and-commits)
 - [Project structure](#project-structure)
@@ -28,16 +29,16 @@ Keycloak (OAuth2 bearer tokens).
 
 ## Stack
 
-| Concern        | Technology                              |
-| -------------- | --------------------------------------- |
-| Language       | PHP 8.5+                                |
-| Framework      | Symfony 8.1                             |
-| API            | API Platform 4.3 (REST + GraphQL)       |
-| Database       | MongoDB (Doctrine ODM)                  |
-| Auth           | Keycloak 26 (OAuth2 / OpenID Connect)   |
-| Server         | FrankenPHP (Caddy)                      |
-| i18n           | Gedmo Translatable (`en`, `fr`)         |
-| Infrastructure | Docker Compose, Terraform for Keycloak  |
+| Concern        | Technology                             |
+| -------------- | -------------------------------------- |
+| Language       | PHP 8.5+                               |
+| Framework      | Symfony 8.1                            |
+| API            | API Platform 4.3 (REST + GraphQL)      |
+| Database       | MongoDB (Doctrine ODM)                 |
+| Auth           | Keycloak 26 (OAuth2 / OpenID Connect)  |
+| Server         | FrankenPHP (Caddy)                     |
+| i18n           | Gedmo Translatable (`en`, `fr`)        |
+| Infrastructure | Docker Compose, Terraform for Keycloak |
 
 ## Requirements
 
@@ -59,11 +60,11 @@ yarn install
 
 Once started:
 
-| Service            | URL                                              |
-| ------------------ | ------------------------------------------------ |
-| API / Swagger UI   | http://localhost:1080                            |
-| GraphQL playground | http://localhost:1080/graphql                    |
-| Keycloak admin     | http://localhost:8080 (`admin` / `!ChangeMe!`)   |
+| Service            | URL                                                 |
+| ------------------ | --------------------------------------------------- |
+| API / Swagger UI   | http://localhost:1080                               |
+| GraphQL playground | http://localhost:1080/graphql                       |
+| Keycloak admin     | http://localhost:8080 (`admin` / `!ChangeMe!`)      |
 | MongoDB            | `mongodb://api-platform:!ChangeMe!@localhost:27017` |
 
 The dev port is `1080` (see `compose.override.yaml`). Override it with the `HTTP_PORT` environment
@@ -131,8 +132,9 @@ migrations, indexes and validation rules are just reconciled in place by `schema
 docker compose exec php bin/console doctrine:mongodb:fixtures:load
 ```
 
-Loads manufacturers, films, chemistry types and chemistries, with their English and French
-translations.
+Loads manufacturers, films, cameras, tags, chemistry types and chemistries (with their English
+and French translations), plus a set of print sessions and the admin `AppUser`. There are no
+fixtures for `DevelopmentLog`.
 
 ## API
 
@@ -166,27 +168,57 @@ token claims.
 Roles are Keycloak client roles, mapped to Symfony roles with a `ROLE_` prefix. They are composite,
 each one inheriting the previous:
 
-| Role                | Grants                                              |
-| ------------------- | --------------------------------------------------- |
-| `ROLE_data_reader`  | Read films, manufacturers, chemistries, users        |
-| `ROLE_user`         | `data_reader` + edit your own profile                |
-| `ROLE_data_writer`  | `user` + create, update and delete catalog data      |
-| `ROLE_admin`        | `data_writer` + administration                       |
+| Role               | Grants                                          |
+| ------------------ | ----------------------------------------------- |
+| `ROLE_data_reader` | Read films, manufacturers, chemistries, users   |
+| `ROLE_user`        | `data_reader` + edit your own profile           |
+| `ROLE_data_writer` | `user` + create, update and delete catalog data |
+| `ROLE_admin`       | `data_writer` + administration                  |
 
 Corresponding Keycloak groups: `readers`, `users`, `writers`, `admins`.
 
+`DevelopmentLog`, `PrintSession` and `PrintWork` hold personal data: on top of the role check,
+reading or writing a single record is further restricted to its owner (`createdBy`), unless the
+caller has `ROLE_admin`. Collection listings are scoped to the current user's own records the same
+way.
+
 ### Resources
 
-| Resource        | Operations                                                          | Notes                          |
-| --------------- | ------------------------------------------------------------------- | ------------------------------ |
-| `Film`          | `GET` (item + collection), `POST`, `PATCH`, `DELETE`                | Translatable, timestampable    |
-| `Manufacturer`  | `GET` (item + collection), `POST`, `PATCH`, `DELETE`                | Translatable, timestampable    |
-| `Chemistry`     | `GET` (item + collection), `POST`, `PATCH`, `DELETE`                | Translatable, embeds dilutions |
-| `ChemistryType` | `GET` (item + collection), `POST`, `PATCH`, `DELETE`                | Translatable                   |
-| `AppUser`       | `GET` (item + collection), `PATCH`, `POST /app_users/{id}/avatar`   | Patch limited to your own user |
+| Resource                               | Operations                                                                              | Roles                                                                             | Notes                                                                                                              |
+| -------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `Film`                                 | `GET` (item + collection), `POST`, `PATCH`, `DELETE`; filterable by `status`            | read: `data_reader`; write: `user` (personal/pending) or `data_writer` (official) | Translatable, timestampable, catalog status lifecycle, references `Manufacturer`                                   |
+| `Manufacturer`                         | `GET` (item + collection), `POST`, `PATCH`, `DELETE`; filterable by `status`            | read: `data_reader`; write: `user` (personal/pending) or `data_writer` (official) | Translatable, timestampable, catalog status lifecycle, referenced by `Film`/`Chemistry`/`Camera`                   |
+| `Camera`                               | `GET` (item + collection), `POST`, `PATCH`, `DELETE`; filterable by `status`            | read: `data_reader`; write: `user` (personal/pending) or `data_writer` (official) | Translatable, timestampable, catalog status lifecycle, references `Manufacturer`                                   |
+| `Tag`                                  | `GET` (item + collection), `POST`, `PATCH`, `DELETE`; filterable by `status`            | read: `data_reader`; write: `user` (personal/pending) or `data_writer` (official) | Translatable, timestampable, catalog status lifecycle                                                              |
+| `ChemistryType`                        | `GET` (item + collection), `POST`, `PATCH`, `DELETE`; filterable by `status`            | read: `data_reader`; write: `user` (personal/pending) or `data_writer` (official) | Translatable, timestampable, catalog status lifecycle                                                              |
+| `Chemistry`                            | `GET` (item + collection), `POST`, `PATCH`, `DELETE`; filterable by `status`            | read: `data_reader`; write: `user` (personal/pending) or `data_writer` (official) | Translatable, timestampable, catalog status lifecycle, references `ChemistryType`/`Manufacturer`, embeds dilutions |
+| `DevelopmentLog`                       | `GET` (item + collection), `POST`, `PATCH`, `DELETE`                                    | read: `data_reader`, write: `data_writer` (+ owner)                               | Timestampable, references `Film`/`Camera`/`Tag`, embeds shot date and steps                                        |
+| `PrintSession`                         | `GET` (item + collection), `POST`, `PATCH`, `DELETE`; filterable by `date`              | read: `data_reader`, write: `data_writer` (+ owner)                               | Timestampable, embeds chemical baths, has many `PrintWork`                                                         |
+| `PrintWork` (`Print`, route `/prints`) | `GET` (item + collection), `POST`, `PATCH`, `DELETE`, `GET /print_sessions/{id}/prints` | read: `data_reader`, write: `data_writer` (+ owner via session)                   | Timestampable, references `PrintSession`, cascades exposures                                                       |
+| `AppUser`                              | `GET` (item + collection), `PATCH`, `POST /app_users/{id}/avatar`                       | read: `data_reader`; patch/avatar: self or `admin`                                | Timestampable; some fields (email, name, `keycloakSub`) restricted to self/admin                                   |
+
+`ApproximateDate`, `Dilution`, `DevelopmentStep`, `ChemicalBath` and `Exposure` have no API route
+of their own — they only exist embedded in (or cascaded from) one of the resources above.
 
 Supported formats: `application/ld+json` (JSON-LD/Hydra, default), `application/json` and
 `multipart/form-data` for uploads.
+
+### Catalog moderation workflow
+
+`Film`, `Manufacturer`, `Camera`, `Tag`, `Chemistry` and `ChemistryType` carry a `status`, one of
+`personal`, `pending`, `official` or `rejected`:
+
+- Any `ROLE_user` can `POST` a new entry as `personal` (the default if `status` is omitted) or
+  `pending`; posting `official`/`rejected` directly is rejected (403) unless the caller has
+  `ROLE_data_writer`/`ROLE_admin`, who can post straight to `official` when they don't need review.
+- The owner can freely edit their own `personal`/`rejected` entries and `PATCH` `status` to
+  `pending` to request validation. Once `pending`, only `ROLE_data_writer`/`ROLE_admin` can change
+  it further — to `official` (approve) or `rejected` (decline, editable again by the owner).
+- Once `official`, only `ROLE_data_writer`/`ROLE_admin` can edit or delete the entry.
+- `GET` (item and collection) only returns `official` entries plus the caller's own non-official
+  ones; `ROLE_data_writer`/`ROLE_admin` see every status unfiltered. Combined with the `status`
+  filter, `GET /films?status=pending` is each user's own pending submissions, and the full
+  cross-user review queue for `ROLE_data_writer`/`ROLE_admin`.
 
 ### Internationalization
 
@@ -201,7 +233,9 @@ Responses carry `Content-Language` and advertise the available locales in `Accep
 Unknown locales fall back to the default one. Translatable fields are also exposed as a
 `translations` object so a client can read every locale in a single call.
 
-### Avatar upload
+### Custom endpoints
+
+**Avatar upload**
 
 ```bash
 curl -X POST 'http://localhost:1080/app_users/{id}/avatar' \
@@ -210,6 +244,15 @@ curl -X POST 'http://localhost:1080/app_users/{id}/avatar' \
 ```
 
 Files are stored under `public/avatars` and served from `/avatars`.
+
+**Prints of a print session**
+
+```
+GET /print_sessions/{id}/prints
+```
+
+Sub-resource listing of the `PrintWork` items (route `/prints`) that belong to a given
+`PrintSession`, scoped to the session's owner (or `ROLE_admin`).
 
 ## Tests
 
@@ -263,6 +306,9 @@ src/
   OpenApi/           # OpenAPI/Swagger customization
   Repository/        # Doctrine ODM repositories
   POPO/              # Plain PHP objects (TranslatedField)
+  Constant/          # Business constants (film/paper formats, exposure kinds, ...)
+  Doctrine/          # Doctrine ODM query extensions (owner-scoped collections)
+  Encoder/           # Custom decoders (multipart/form-data)
 config/              # Symfony configuration
 terraform/           # Keycloak realm as code
 tests/Api/           # HTTP integration tests
@@ -274,18 +320,18 @@ frankenphp/          # Caddyfile and PHP ini overrides
 
 Defaults live in `.env`; put local overrides in `.env.local` (git-ignored).
 
-| Variable                            | Description                                            |
-| ----------------------------------- | ------------------------------------------------------ |
-| `APP_ENV`                           | `dev`, `test` or `prod`                                |
-| `APP_SECRET`                        | Symfony secret                                         |
-| `MONGODB_URI` / `MONGODB_DB`        | MongoDB connection                                     |
-| `CORS_ALLOW_ORIGIN`                 | Allowed origins regex                                  |
-| `OAUTH_KEYCLOAK_ISSUER`             | Public Keycloak URL                                    |
-| `OAUTH_KEYCLOAK_ISSUER_DEV_OVERRIDE`| Internal Keycloak URL used from inside the containers   |
-| `OAUTH_KEYCLOAK_REALM`              | Realm name (`film-analogger`)                          |
-| `OAUTH_KEYCLOAK_CLIENT_ID`          | API client id                                          |
-| `OAUTH_KEYCLOAK_CLIENT_SECRET`      | API client secret (from `terraform output`)            |
-| `OAUTH_KEYCLOAK_CLIENT_ID_SWAGGER`  | Public client used by the Swagger UI                   |
+| Variable                             | Description                                           |
+| ------------------------------------ | ----------------------------------------------------- |
+| `APP_ENV`                            | `dev`, `test` or `prod`                               |
+| `APP_SECRET`                         | Symfony secret                                        |
+| `MONGODB_URI` / `MONGODB_DB`         | MongoDB connection                                    |
+| `CORS_ALLOW_ORIGIN`                  | Allowed origins regex                                 |
+| `OAUTH_KEYCLOAK_ISSUER`              | Public Keycloak URL                                   |
+| `OAUTH_KEYCLOAK_ISSUER_DEV_OVERRIDE` | Internal Keycloak URL used from inside the containers |
+| `OAUTH_KEYCLOAK_REALM`               | Realm name (`film-analogger`)                         |
+| `OAUTH_KEYCLOAK_CLIENT_ID`           | API client id                                         |
+| `OAUTH_KEYCLOAK_CLIENT_SECRET`       | API client secret (from `terraform output`)           |
+| `OAUTH_KEYCLOAK_CLIENT_ID_SWAGGER`   | Public client used by the Swagger UI                  |
 
 ## License
 

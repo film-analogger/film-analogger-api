@@ -4,6 +4,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\DataFixtures;
 
 use Doctrine\Bundle\MongoDBBundle\Fixture\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 
 class ManufacturerFixtures extends Fixture
@@ -14,11 +15,19 @@ class ManufacturerFixtures extends Fixture
     public const ADOX = 'manufacturer-adox';
     public const FOMA = 'manufacturer-foma';
     public const ROLLEI = 'manufacturer-rollei';
+    public const NIKON = 'manufacturer-nikon';
+    public const CANON = 'manufacturer-canon';
+    public const PENTAX = 'manufacturer-pentax';
+    public const LEICA = 'manufacturer-leica';
+    public const HASSELBLAD = 'manufacturer-hasselblad';
+    public const MAMIYA = 'manufacturer-mamiya';
     public const CINESTILL = 'manufacturer-cinestill';
     public const LOMOGRAPHY = 'manufacturer-lomography';
     public const BERGGER = 'manufacturer-bergger';
     public const TETENAL = 'manufacturer-tetenal';
     public const GENERIC = 'manufacturer-generic';
+    public const DURST = 'manufacturer-durst';
+    public const MEOPTA = 'manufacturer-meopta';
 
     public function load(ObjectManager $manager): void
     {
@@ -32,6 +41,7 @@ class ManufacturerFixtures extends Fixture
             $manufacturer->setPrimaryColor($primaryColor);
             $manufacturer->setSecondaryColor($secondaryColor);
             $manufacturer->setTertiaryColor($tertiaryColor);
+            $manufacturer->setStatus(CatalogStatus::OFFICIAL);
 
             $manager->persist($manufacturer);
             $this->addReference($reference, $manufacturer);
@@ -56,6 +66,19 @@ class ManufacturerFixtures extends Fixture
             [self::ADOX, 'Adox', 'https://www.adox.de/Photo/en/', '#FFFFFF', '#E48157', null],
             [self::FOMA, 'Foma', 'https://www.foma.cz/en', '#ffffff', '#000000', null],
             [self::ROLLEI, 'Rollei', 'https://www.rollei.de/en', '#FEFEFE', '#000000', null],
+            [self::NIKON, 'Nikon', 'https://www.nikon.com/', '#FFE100', '#000000', null],
+            [self::CANON, 'Canon', 'https://global.canon/', '#DB0011', '#000000', null],
+            [self::PENTAX, 'Pentax', 'https://www.ricoh-imaging.com/', '#003DA5', '#000000', null],
+            [self::LEICA, 'Leica', 'https://leica-camera.com/', '#E20613', '#000000', null],
+            [
+                self::HASSELBLAD,
+                'Hasselblad',
+                'https://www.hasselblad.com/',
+                '#000000',
+                '#FFFFFF',
+                null,
+            ],
+            [self::MAMIYA, 'Mamiya', 'https://mamiya.com/', '#000000', '#FFFFFF', null],
             [
                 self::CINESTILL,
                 'CineStill',
@@ -78,6 +101,8 @@ class ManufacturerFixtures extends Fixture
             // household vinegar stop bath) — not every bath used in a real
             // darkroom session comes from a commercial product line.
             [self::GENERIC, 'Générique / maison', null, null, null, null],
+            [self::DURST, 'Durst', 'https://www.durst-group.com/', '#000000', '#FFFFFF', null],
+            [self::MEOPTA, 'Meopta', 'https://www.meopta.com/', '#003057', '#FFFFFF', null],
         ];
     }
 }

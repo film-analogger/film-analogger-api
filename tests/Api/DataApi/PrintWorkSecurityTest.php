@@ -32,9 +32,7 @@ class PrintWorkSecurityTest extends AbstractFilmTestCase
         return [
             'session' => $sessionIri,
             'number' => $number,
-            'paperBrand' => 'ilford',
-            'paperBase' => 'rc',
-            'paperSurface' => 'glossy',
+            'photoPaper' => '/photo_papers/' . $this->createPhotoPaper()->getId(),
             'paperWidthCm' => 18,
             'paperHeightCm' => 24,
             'exposures' => [['order' => 1, 'kind' => 'base', 'baseSeconds' => 32, 'grade' => '2']],
@@ -64,7 +62,7 @@ class PrintWorkSecurityTest extends AbstractFilmTestCase
                 'date' => '2026-01-15',
                 'lab' => 'Garage',
                 'number' => $number,
-                'enlarger' => 'Durst M805',
+                'enlarger' => '/enlargers/' . $this->createEnlarger()->getId(),
                 'temperatureCelsius' => 20.0,
                 'chemicalBaths' => [
                     ['chemistry' => '/chemistries/' . $developer->getId(), 'durationSeconds' => 60],

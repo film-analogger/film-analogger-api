@@ -2,6 +2,8 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
+use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -11,6 +13,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
+use FilmAnalogger\FilmAnaloggerApi\Document\Trait\CatalogStatusTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Repository\FilmRepository;
@@ -23,13 +26,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use ApiPlatform\OpenApi\Model as Model;
 use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
 
-// /**
-//  * Seul un data write peut mettre un film discontinuated
-//  * Un user peut poster un film mais officiel = false
-//  * Un user voit :
-//  *     - tous les films officiels + ses films non officiels par défaut
-//  */
-
 #[ODM\Document(repositoryClass: FilmRepository::class)]
 #[
     ApiResource(
@@ -39,15 +35,23 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
                 SerializationGroups::FILM_READ_GROUP,
                 SerializationGroups::TRANSLATABLE_READ_GROUP,
                 SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+                SerializationGroups::CATALOG_STATUS_READ_GROUP,
             ],
         ],
         denormalizationContext: [
-            'groups' => [SerializationGroups::FILM_WRITE_GROUP],
+            'groups' => [
+                SerializationGroups::FILM_WRITE_GROUP,
+                SerializationGroups::CATALOG_STATUS_WRITE_GROUP,
+            ],
         ],
 
         operations: [
             new Get(
-                security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_READER .
+                    '") and (object.isOfficial() or is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or object.getCreatedBy() === user.getUserIdentifier())',
                 openapi: new Model\Operation(
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
@@ -65,7 +69,10 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
                 ),
             ),
             new Post(
-                security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
+                security: 'is_granted("' . KeycloakRoles::USER . '")',
+                securityPostDenormalize: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or object.isPersonalOrPending()',
                 openapi: new Model\Operation(
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
@@ -74,7 +81,12 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
                 ),
             ),
             new Patch(
-                security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or (object.getCreatedBy() === user.getUserIdentifier() and object.isOwnerEditableStatus())',
+                securityPostDenormalize: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or object.isPersonalOrPending()',
                 openapi: new Model\Operation(
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
@@ -83,7 +95,9 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
                 ),
             ),
             new Delete(
-                security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or (object.getCreatedBy() === user.getUserIdentifier() and not object.isOfficial())',
                 openapi: new Model\Operation(
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
@@ -94,10 +108,12 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
         ],
     ),
 ]
+#[ApiFilter(SearchFilter::class, properties: ['status' => 'exact'])]
 class Film implements Translatable
 {
     use TranslatableTrait;
     use TimestampableBlameableTrait;
+    use CatalogStatusTrait;
 
     #[ODM\Id]
     #[Groups([SerializationGroups::FILM_READ_GROUP])]

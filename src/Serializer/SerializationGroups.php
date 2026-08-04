@@ -16,9 +16,27 @@ final class SerializationGroups
     const CHEMISTRY_TYPE_READ_GROUP = 'read-chemistry-type';
     const CHEMISTRY_TYPE_WRITE_GROUP = 'write-chemistry-type';
 
+    const CAMERA_READ_GROUP = 'read-camera';
+    const CAMERA_WRITE_GROUP = 'write-camera';
+
+    const ENLARGER_READ_GROUP = 'read-enlarger';
+    const ENLARGER_WRITE_GROUP = 'write-enlarger';
+
+    const PHOTO_PAPER_READ_GROUP = 'read-photo-paper';
+    const PHOTO_PAPER_WRITE_GROUP = 'write-photo-paper';
+
+    const TAG_READ_GROUP = 'read-tag';
+    const TAG_WRITE_GROUP = 'write-tag';
+
+    const DEVELOPMENT_LOG_READ_GROUP = 'read-development-log';
+    const DEVELOPMENT_LOG_WRITE_GROUP = 'write-development-log';
+
     const TRANSLATABLE_READ_GROUP = 'translatable-read';
 
     const TIMESTAMPABLE_BLAMEABLE_READ_GROUP = 'timestampable-blameable-read';
+
+    const CATALOG_STATUS_READ_GROUP = 'catalog-status-read';
+    const CATALOG_STATUS_WRITE_GROUP = 'catalog-status-write';
 
     const APP_USER_READ_GROUP = 'read-app-user';
     const APP_USER_WRITE_GROUP = 'write-app-user';

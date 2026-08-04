@@ -47,7 +47,7 @@ class PrintSessionSecurityTest extends AbstractFilmTestCase
                 'date' => '2026-01-15',
                 'lab' => 'Garage',
                 'number' => $number,
-                'enlarger' => 'Durst M805',
+                'enlarger' => '/enlargers/' . $this->createEnlarger()->getId(),
                 'temperatureCelsius' => 20.0,
                 'chemicalBaths' => [
                     ['chemistry' => '/chemistries/' . $developer->getId(), 'durationSeconds' => 60],

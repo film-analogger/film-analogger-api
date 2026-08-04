@@ -155,4 +155,20 @@ final class ProcessConstants
                 return self::FILM_EMULSION_TYPES;
         }
     }
+
+    const CAMERA_FILM_FORMAT_135 = '135';
+    const CAMERA_FILM_FORMAT_120 = '120';
+    const CAMERA_FILM_FORMAT_4X5 = '4x5';
+    const CAMERA_FILM_FORMAT_8X10 = '8x10';
+    const CAMERA_FILM_FORMAT_INSTANT = 'instant';
+    const CAMERA_FILM_FORMAT_OTHER = 'other';
+
+    const CAMERA_FILM_FORMATS = [
+        self::CAMERA_FILM_FORMAT_135,
+        self::CAMERA_FILM_FORMAT_120,
+        self::CAMERA_FILM_FORMAT_4X5,
+        self::CAMERA_FILM_FORMAT_8X10,
+        self::CAMERA_FILM_FORMAT_INSTANT,
+        self::CAMERA_FILM_FORMAT_OTHER,
+    ];
 }

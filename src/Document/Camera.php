@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\CatalogStatusTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
@@ -27,7 +28,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
         normalizationContext: [
             'skip_null_values' => false,
             'groups' => [
-                SerializationGroups::TAG_READ_GROUP,
+                SerializationGroups::CAMERA_READ_GROUP,
                 SerializationGroups::TRANSLATABLE_READ_GROUP,
                 SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
                 SerializationGroups::CATALOG_STATUS_READ_GROUP,
@@ -35,7 +36,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
         ],
         denormalizationContext: [
             'groups' => [
-                SerializationGroups::TAG_WRITE_GROUP,
+                SerializationGroups::CAMERA_WRITE_GROUP,
                 SerializationGroups::CATALOG_STATUS_WRITE_GROUP,
             ],
         ],
@@ -71,31 +72,42 @@ use Gedmo\Mapping\Annotation as Gedmo;
     ),
 ]
 #[ApiFilter(SearchFilter::class, properties: ['status' => 'exact'])]
-class Tag implements Translatable
+class Camera implements Translatable
 {
     use TranslatableTrait;
     use TimestampableBlameableTrait;
     use CatalogStatusTrait;
 
     #[ODM\Id]
-    #[Groups([SerializationGroups::TAG_READ_GROUP])]
+    #[Groups([SerializationGroups::CAMERA_READ_GROUP])]
     private ?string $id = null;
 
-    #[ODM\Field(type: 'string')]
-    #[Gedmo\Translatable]
+    #[ODM\Field]
     #[Assert\NotBlank]
-    #[Groups([SerializationGroups::TAG_READ_GROUP, SerializationGroups::TAG_WRITE_GROUP])]
-    private string $name;
+    #[Groups([SerializationGroups::CAMERA_READ_GROUP, SerializationGroups::CAMERA_WRITE_GROUP])]
+    public string $name;
 
-    #[ODM\Field(type: 'string', nullable: true)]
-    #[Gedmo\Translatable]
-    #[Groups([SerializationGroups::TAG_READ_GROUP, SerializationGroups::TAG_WRITE_GROUP])]
-    private ?string $description = null;
+    #[ODM\ReferenceOne(targetDocument: Manufacturer::class, inversedBy: 'cameras')]
+    #[Assert\NotNull(message: 'Manufacturer must be set.')]
+    #[Groups([SerializationGroups::CAMERA_READ_GROUP, SerializationGroups::CAMERA_WRITE_GROUP])]
+    public Manufacturer $manufacturer;
 
     #[ODM\Field(nullable: true)]
-    #[Assert\CssColor]
-    #[Groups([SerializationGroups::TAG_READ_GROUP, SerializationGroups::TAG_WRITE_GROUP])]
-    public ?string $primaryColor = null;
+    #[
+        Assert\Choice(
+            choices: ProcessConstants::CAMERA_FILM_FORMATS,
+            message: 'Choose a valid film format.',
+        ),
+    ]
+    #[Groups([SerializationGroups::CAMERA_READ_GROUP, SerializationGroups::CAMERA_WRITE_GROUP])]
+    public ?string $filmFormat = null;
+
+    #[ODM\Field(nullable: true)]
+    #[Gedmo\Translatable]
+    #[Groups([SerializationGroups::CAMERA_READ_GROUP, SerializationGroups::CAMERA_WRITE_GROUP])]
+    public ?string $description = null;
+
+    public function __construct() {}
 
     public function getId(): ?string
     {
@@ -111,6 +123,28 @@ class Tag implements Translatable
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function setManufacturer(Manufacturer $manufacturer): static
+    {
+        $this->manufacturer = $manufacturer;
+        return $this;
+    }
+
+    public function getManufacturer(): Manufacturer
+    {
+        return $this->manufacturer;
+    }
+
+    public function setFilmFormat(?string $filmFormat): static
+    {
+        $this->filmFormat = $filmFormat;
+        return $this;
+    }
+
+    public function getFilmFormat(): ?string
+    {
+        return $this->filmFormat;
     }
 
     public function setDescription(?string $description): static

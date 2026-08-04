@@ -12,9 +12,7 @@ class PrintWorkTest extends AbstractFilmTestCase
             [
                 'session' => $sessionIri,
                 'number' => 1,
-                'paperBrand' => 'ilford',
-                'paperBase' => 'rc',
-                'paperSurface' => 'glossy',
+                'photoPaper' => '/photo_papers/' . $this->createPhotoPaper()->getId(),
                 'paperWidthCm' => 18,
                 'paperHeightCm' => 24,
                 'exposures' => [
@@ -63,17 +61,22 @@ class PrintWorkTest extends AbstractFilmTestCase
     public function testCreatePrint(): void
     {
         $session = $this->createPrintSession();
+        $photoPaper = $this->createPhotoPaper();
 
         $client = self::loggedClientAdmin();
         $response = $client->request(
             'POST',
             '/prints',
-            $this->withJsonLd($this->basePrintPayload('/print_sessions/' . $session->getId())),
+            $this->withJsonLd(
+                $this->basePrintPayload('/print_sessions/' . $session->getId(), [
+                    'photoPaper' => '/photo_papers/' . $photoPaper->getId(),
+                ]),
+            ),
         );
 
         $this->assertResponseStatusCodeSame(201);
         $data = $response->toArray();
-        $this->assertSame('ilford', $data['paperBrand']);
+        $this->assertSame('/photo_papers/' . $photoPaper->getId(), $data['photoPaper']['@id']);
         $this->assertCount(1, $data['exposures']);
         $this->assertEqualsWithDelta(40.3, $data['exposures'][0]['effectiveSeconds'], 0.05);
     }
@@ -133,46 +136,13 @@ class PrintWorkTest extends AbstractFilmTestCase
             'POST',
             '/prints',
             $this->withJsonLd(
-                $this->basePrintPayload('/print_sessions/' . $session->getId(), ['exposures' => []]),
-            ),
-        );
-
-        $this->assertResponseStatusCodeSame(422);
-    }
-
-    public function testCreatePrintWithOtherPaperSurfaceWithoutDetailFails(): void
-    {
-        $session = $this->createPrintSession();
-
-        $client = self::loggedClientAdmin();
-        $client->request(
-            'POST',
-            '/prints',
-            $this->withJsonLd(
-                $this->basePrintPayload('/print_sessions/' . $session->getId(), ['paperSurface' => 'other']),
-            ),
-        );
-
-        $this->assertResponseStatusCodeSame(422);
-    }
-
-    public function testCreatePrintWithOtherPaperSurfaceAndDetailSucceeds(): void
-    {
-        $session = $this->createPrintSession();
-
-        $client = self::loggedClientAdmin();
-        $client->request(
-            'POST',
-            '/prints',
-            $this->withJsonLd(
                 $this->basePrintPayload('/print_sessions/' . $session->getId(), [
-                    'paperSurface' => 'other',
-                    'paperSurfaceOther' => 'semi-matte maison',
+                    'exposures' => [],
                 ]),
             ),
         );
 
-        $this->assertResponseStatusCodeSame(201);
+        $this->assertResponseStatusCodeSame(422);
     }
 
     public function testCreatePrintWithMultipleExposures(): void
@@ -230,16 +200,26 @@ class PrintWorkTest extends AbstractFilmTestCase
         $this->assertResponseStatusCodeSame(404);
     }
 
-    public function testFilterByPaperBrand(): void
+    public function testFilterByPhotoPaper(): void
     {
         $session = $this->createPrintSession();
-        $this->createPrintWork(['session' => $session, 'number' => 1]);
+        $photoPaperA = $this->createPhotoPaper(['name' => 'Multigrade RC Pearl']);
+        $photoPaperB = $this->createPhotoPaper(['name' => 'Multigrade FB Glossy']);
+        $this->createPrintWork([
+            'session' => $session,
+            'number' => 1,
+            'photoPaper' => $photoPaperA,
+        ]);
 
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/prints', ['query' => ['paperBrand' => 'ilford']]);
+        $client->request('GET', '/prints', [
+            'query' => ['photoPaper' => '/photo_papers/' . $photoPaperA->getId()],
+        ]);
         $this->assertJsonContains(['hydra:totalItems' => 1]);
 
-        $client->request('GET', '/prints', ['query' => ['paperBrand' => 'foma']]);
+        $client->request('GET', '/prints', [
+            'query' => ['photoPaper' => '/photo_papers/' . $photoPaperB->getId()],
+        ]);
         $this->assertJsonContains(['hydra:totalItems' => 0]);
     }
 
@@ -251,7 +231,9 @@ class PrintWorkTest extends AbstractFilmTestCase
         $this->createPrintWork(['session' => $sessionB, 'number' => 1]);
 
         $client = self::loggedClientAdmin();
-        $client->request('GET', '/prints', ['query' => ['session' => '/print_sessions/' . $sessionA->getId()]]);
+        $client->request('GET', '/prints', [
+            'query' => ['session' => '/print_sessions/' . $sessionA->getId()],
+        ]);
 
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains(['hydra:totalItems' => 1]);

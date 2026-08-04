@@ -2,6 +2,8 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
+use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -12,6 +14,7 @@ use ApiPlatform\Metadata\Post;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
+use FilmAnalogger\FilmAnaloggerApi\Document\Trait\CatalogStatusTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
@@ -32,12 +35,22 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
                 SerializationGroups::MANUFACTURER_READ_GROUP,
                 SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
                 SerializationGroups::TRANSLATABLE_READ_GROUP,
+                SerializationGroups::CATALOG_STATUS_READ_GROUP,
             ],
         ],
-        denormalizationContext: ['groups' => [SerializationGroups::MANUFACTURER_WRITE_GROUP]],
+        denormalizationContext: [
+            'groups' => [
+                SerializationGroups::MANUFACTURER_WRITE_GROUP,
+                SerializationGroups::CATALOG_STATUS_WRITE_GROUP,
+            ],
+        ],
         operations: [
             new Get(
-                security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_READER .
+                    '") and (object.isOfficial() or is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or object.getCreatedBy() === user.getUserIdentifier())',
                 openapi: new Model\Operation(
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
@@ -55,7 +68,10 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
                 ),
             ),
             new Post(
-                security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
+                security: 'is_granted("' . KeycloakRoles::USER . '")',
+                securityPostDenormalize: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or object.isPersonalOrPending()',
                 openapi: new Model\Operation(
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
@@ -64,7 +80,12 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
                 ),
             ),
             new Patch(
-                security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or (object.getCreatedBy() === user.getUserIdentifier() and object.isOwnerEditableStatus())',
+                securityPostDenormalize: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or object.isPersonalOrPending()',
                 openapi: new Model\Operation(
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
@@ -73,7 +94,9 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
                 ),
             ),
             new Delete(
-                security: 'is_granted("' . KeycloakRoles::DATA_WRITER . '")',
+                security: 'is_granted("' .
+                    KeycloakRoles::DATA_WRITER .
+                    '") or (object.getCreatedBy() === user.getUserIdentifier() and not object.isOfficial())',
                 openapi: new Model\Operation(
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
@@ -84,13 +107,23 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
         ],
     ),
 ]
+#[ApiFilter(SearchFilter::class, properties: ['status' => 'exact'])]
 class Manufacturer implements Translatable
 {
     use TimestampableBlameableTrait;
     use TranslatableTrait;
+    use CatalogStatusTrait;
 
     #[ODM\Id]
-    #[Groups([SerializationGroups::MANUFACTURER_READ_GROUP, SerializationGroups::FILM_READ_GROUP])]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::FILM_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
+        ]),
+    ]
     private ?string $id = null;
 
     #[ODM\Field]
@@ -101,6 +134,9 @@ class Manufacturer implements Translatable
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
             SerializationGroups::FILM_READ_GROUP,
             SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
         ]),
     ]
     public string $name;
@@ -123,6 +159,33 @@ class Manufacturer implements Translatable
     ]
     public Collection $chemistries;
 
+    #[ODM\ReferenceMany(targetDocument: Camera::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public Collection $cameras;
+
+    #[ODM\ReferenceMany(targetDocument: Enlarger::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public Collection $enlargers;
+
+    #[ODM\ReferenceMany(targetDocument: PhotoPaper::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public Collection $photoPapers;
+
     #[ODM\Field(nullable: true)]
     #[Assert\CssColor]
     #[ApiProperty(example: '#FF0000')]
@@ -132,6 +195,9 @@ class Manufacturer implements Translatable
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
             SerializationGroups::FILM_READ_GROUP,
             SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
         ]),
     ]
     public ?string $primaryColor = null;
@@ -145,6 +211,9 @@ class Manufacturer implements Translatable
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
             SerializationGroups::FILM_READ_GROUP,
             SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
         ]),
     ]
     public ?string $secondaryColor = null;
@@ -158,6 +227,9 @@ class Manufacturer implements Translatable
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
             SerializationGroups::FILM_READ_GROUP,
             SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
         ]),
     ]
     public ?string $tertiaryColor = null;
@@ -177,6 +249,9 @@ class Manufacturer implements Translatable
     {
         $this->films = new ArrayCollection();
         $this->chemistries = new ArrayCollection();
+        $this->cameras = new ArrayCollection();
+        $this->enlargers = new ArrayCollection();
+        $this->photoPapers = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -268,6 +343,69 @@ class Manufacturer implements Translatable
             $chemistry->setManufacturer($this);
         }
         $this->chemistries = $chemistries;
+        return $this;
+    }
+
+    public function addCamera(Camera $camera): static
+    {
+        $camera->setManufacturer($this);
+        $this->cameras->add($camera);
+        return $this;
+    }
+
+    public function getCameras(): Collection
+    {
+        return $this->cameras;
+    }
+
+    public function setCameras(Collection $cameras): static
+    {
+        foreach ($cameras as $camera) {
+            $camera->setManufacturer($this);
+        }
+        $this->cameras = $cameras;
+        return $this;
+    }
+
+    public function addEnlarger(Enlarger $enlarger): static
+    {
+        $enlarger->setManufacturer($this);
+        $this->enlargers->add($enlarger);
+        return $this;
+    }
+
+    public function getEnlargers(): Collection
+    {
+        return $this->enlargers;
+    }
+
+    public function setEnlargers(Collection $enlargers): static
+    {
+        foreach ($enlargers as $enlarger) {
+            $enlarger->setManufacturer($this);
+        }
+        $this->enlargers = $enlargers;
+        return $this;
+    }
+
+    public function addPhotoPaper(PhotoPaper $photoPaper): static
+    {
+        $photoPaper->setManufacturer($this);
+        $this->photoPapers->add($photoPaper);
+        return $this;
+    }
+
+    public function getPhotoPapers(): Collection
+    {
+        return $this->photoPapers;
+    }
+
+    public function setPhotoPapers(Collection $photoPapers): static
+    {
+        foreach ($photoPapers as $photoPaper) {
+            $photoPaper->setManufacturer($this);
+        }
+        $this->photoPapers = $photoPapers;
         return $this;
     }
 }

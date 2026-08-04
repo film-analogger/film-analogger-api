@@ -5,21 +5,21 @@ namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api\DataApi;
 use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Tests\Api\AbstractFilmTestCase;
 
-class ChemistrySecurityTest extends AbstractFilmTestCase
+class EnlargerSecurityTest extends AbstractFilmTestCase
 {
     public function testNoConnectedUserGetUnauthorized(): void
     {
-        $chemistry = $this->createChemistry();
+        $enlarger = $this->createEnlarger();
 
         $client = static::createClient();
 
         foreach (
             [
-                ['GET', '/chemistries'],
-                ['GET', '/chemistries/' . $chemistry->getId()],
-                ['PATCH', '/chemistries/' . $chemistry->getId()],
-                ['DELETE', '/chemistries/' . $chemistry->getId()],
-                ['POST', '/chemistries'],
+                ['GET', '/enlargers'],
+                ['GET', '/enlargers/' . $enlarger->getId()],
+                ['PATCH', '/enlargers/' . $enlarger->getId()],
+                ['DELETE', '/enlargers/' . $enlarger->getId()],
+                ['POST', '/enlargers'],
             ]
             as [$method, $uri]
         ) {
@@ -29,63 +29,57 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
 
     public function testAdminCanDoAnything(): void
     {
-        $this->assertChemistrySecurityByRole(self::loggedClientAdmin(), true);
+        $this->assertEnlargerSecurityByRole(self::loggedClientAdmin(), true);
     }
 
     public function testDataWriterCanDoAnything(): void
     {
-        $this->assertChemistrySecurityByRole(self::loggedClientDataWriter(), true);
+        $this->assertEnlargerSecurityByRole(self::loggedClientDataWriter(), true);
     }
 
     public function testDataReaderCanReadDataOnly(): void
     {
-        $this->assertChemistrySecurityByRole(self::loggedClientDataReader(), false);
+        $this->assertEnlargerSecurityByRole(self::loggedClientDataReader(), false);
     }
 
     public function testDataReaderAloneCannotCreate(): void
     {
         $manufacturer = $this->createManufacturer();
-        $chemistryType = $this->createChemistryType();
         $client = self::loggedClientDataReader();
 
-        $this->assertForbiddenAccessDenied($client, 'POST', '/chemistries', [
+        $this->assertForbiddenAccessDenied($client, 'POST', '/enlargers', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'ID-11',
-                'process' => 'B&W',
-                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'name' => 'Anaret',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
             ],
         ]);
     }
 
-    public function testUserCannotWriteOfficialChemistryOfSomeoneElse(): void
+    public function testUserCannotWriteOfficialEnlargerOfSomeoneElse(): void
     {
-        $chemistry = $this->createChemistry([
+        $enlarger = $this->createEnlarger([
             'status' => CatalogStatus::OFFICIAL,
             'createdBy' => 'other_user',
         ]);
         $client = self::loggedClientUser(preferred_username: 'plain_user');
 
-        $this->assertForbiddenAccessDenied($client, 'PATCH', '/chemistries/' . $chemistry->getId(), [
+        $this->assertForbiddenAccessDenied($client, 'PATCH', '/enlargers/' . $enlarger->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => ['name' => 'Renamed'],
         ]);
-        $this->assertForbiddenAccessDenied($client, 'DELETE', '/chemistries/' . $chemistry->getId());
+        $this->assertForbiddenAccessDenied($client, 'DELETE', '/enlargers/' . $enlarger->getId());
     }
 
-    public function testUserCanCreatePersonalChemistryByDefault(): void
+    public function testUserCanCreatePersonalEnlargerByDefault(): void
     {
         $manufacturer = $this->createManufacturer();
-        $chemistryType = $this->createChemistryType();
         $client = self::loggedClientUser();
 
-        $client->request('POST', '/chemistries', [
+        $client->request('POST', '/enlargers', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'My Homemade Developer',
-                'process' => 'B&W',
-                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'name' => 'My Homemade Enlarger',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
             ],
         ]);
@@ -94,33 +88,30 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
         $this->assertJsonContains(['status' => 'personal']);
     }
 
-    public function testUserCannotCreateOfficialChemistryDirectly(): void
+    public function testUserCannotCreateOfficialEnlargerDirectly(): void
     {
         $manufacturer = $this->createManufacturer();
-        $chemistryType = $this->createChemistryType();
         $client = self::loggedClientUser();
 
-        $this->assertForbiddenAccessDenied($client, 'POST', '/chemistries', [
+        $this->assertForbiddenAccessDenied($client, 'POST', '/enlargers', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'My Homemade Developer',
-                'process' => 'B&W',
-                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'name' => 'My Homemade Enlarger',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
                 'status' => 'official',
             ],
         ]);
     }
 
-    public function testUserCanEditOwnPersonalChemistryAndSubmitForValidation(): void
+    public function testUserCanEditOwnPersonalEnlargerAndSubmitForValidation(): void
     {
         $client = self::loggedClientUser(preferred_username: 'plain_user');
-        $chemistry = $this->createChemistry([
+        $enlarger = $this->createEnlarger([
             'status' => CatalogStatus::PERSONAL,
             'createdBy' => 'plain_user',
         ]);
 
-        $client->request('PATCH', '/chemistries/' . $chemistry->getId(), [
+        $client->request('PATCH', '/enlargers/' . $enlarger->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => ['status' => 'pending'],
         ]);
@@ -129,30 +120,30 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
         $this->assertJsonContains(['status' => 'pending']);
     }
 
-    public function testUserCannotSeeOthersPersonalChemistry(): void
+    public function testUserCannotSeeOthersPersonalEnlarger(): void
     {
-        $chemistry = $this->createChemistry([
+        $enlarger = $this->createEnlarger([
             'status' => CatalogStatus::PERSONAL,
             'createdBy' => 'other_user',
         ]);
 
         $client = self::loggedClientUser(preferred_username: 'plain_user');
-        $this->assertForbiddenAccessDenied($client, 'GET', '/chemistries/' . $chemistry->getId());
+        $this->assertForbiddenAccessDenied($client, 'GET', '/enlargers/' . $enlarger->getId());
     }
 
     public function testDataWriterSeesEveryStatusAndCanApprovePending(): void
     {
-        $chemistry = $this->createChemistry([
+        $enlarger = $this->createEnlarger([
             'status' => CatalogStatus::PENDING,
             'createdBy' => 'plain_user',
         ]);
 
         $client = self::loggedClientDataWriter();
-        $client->request('GET', '/chemistries?status=pending');
+        $client->request('GET', '/enlargers?status=pending');
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains(['hydra:totalItems' => 1]);
 
-        $client->request('PATCH', '/chemistries/' . $chemistry->getId(), [
+        $client->request('PATCH', '/enlargers/' . $enlarger->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => ['status' => 'official'],
         ]);
@@ -160,28 +151,25 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
         $this->assertJsonContains(['status' => 'official']);
     }
 
-    private function assertChemistrySecurityByRole($client, bool $canWrite): void
+    private function assertEnlargerSecurityByRole($client, bool $canWrite): void
     {
-        $chemistry = $this->createChemistry();
+        $enlarger = $this->createEnlarger();
         $manufacturer = $this->createManufacturer();
-        $chemistryTypeForChemistry = $this->createChemistryType();
 
-        $this->assertSuccessfulStatus($client, 'GET', '/chemistries', 200);
-        $this->assertSuccessfulStatus($client, 'GET', '/chemistries/' . $chemistry->getId(), 200);
+        $this->assertSuccessfulStatus($client, 'GET', '/enlargers', 200);
+        $this->assertSuccessfulStatus($client, 'GET', '/enlargers/' . $enlarger->getId(), 200);
 
-        $patchChemistryOptions = [
+        $patchEnlargerOptions = [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
-                'name' => 'D-76 Updated',
+                'name' => 'M805 Updated',
             ],
         ];
 
-        $postChemistryOptions = [
+        $postEnlargerOptions = [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'ID-11',
-                'process' => 'B&W',
-                'chemistryType' => '/chemistry_types/' . $chemistryTypeForChemistry->getId(),
+                'name' => 'Anaret',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
             ],
         ];
@@ -190,23 +178,17 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
             $this->assertSuccessfulStatus(
                 $client,
                 'PATCH',
-                '/chemistries/' . $chemistry->getId(),
+                '/enlargers/' . $enlarger->getId(),
                 200,
-                $patchChemistryOptions,
+                $patchEnlargerOptions,
             );
             $this->assertSuccessfulStatus(
                 $client,
                 'DELETE',
-                '/chemistries/' . $chemistry->getId(),
+                '/enlargers/' . $enlarger->getId(),
                 204,
             );
-            $this->assertSuccessfulStatus(
-                $client,
-                'POST',
-                '/chemistries',
-                201,
-                $postChemistryOptions,
-            );
+            $this->assertSuccessfulStatus($client, 'POST', '/enlargers', 201, $postEnlargerOptions);
 
             return;
         }
@@ -214,14 +196,10 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
         $this->assertForbiddenAccessDenied(
             $client,
             'PATCH',
-            '/chemistries/' . $chemistry->getId(),
-            $patchChemistryOptions,
+            '/enlargers/' . $enlarger->getId(),
+            $patchEnlargerOptions,
         );
-        $this->assertForbiddenAccessDenied(
-            $client,
-            'DELETE',
-            '/chemistries/' . $chemistry->getId(),
-        );
-        $this->assertForbiddenAccessDenied($client, 'POST', '/chemistries', $postChemistryOptions);
+        $this->assertForbiddenAccessDenied($client, 'DELETE', '/enlargers/' . $enlarger->getId());
+        $this->assertForbiddenAccessDenied($client, 'POST', '/enlargers', $postEnlargerOptions);
     }
 }

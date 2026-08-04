@@ -5,21 +5,21 @@ namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api\DataApi;
 use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Tests\Api\AbstractFilmTestCase;
 
-class ChemistrySecurityTest extends AbstractFilmTestCase
+class PhotoPaperSecurityTest extends AbstractFilmTestCase
 {
     public function testNoConnectedUserGetUnauthorized(): void
     {
-        $chemistry = $this->createChemistry();
+        $photoPaper = $this->createPhotoPaper();
 
         $client = static::createClient();
 
         foreach (
             [
-                ['GET', '/chemistries'],
-                ['GET', '/chemistries/' . $chemistry->getId()],
-                ['PATCH', '/chemistries/' . $chemistry->getId()],
-                ['DELETE', '/chemistries/' . $chemistry->getId()],
-                ['POST', '/chemistries'],
+                ['GET', '/photo_papers'],
+                ['GET', '/photo_papers/' . $photoPaper->getId()],
+                ['PATCH', '/photo_papers/' . $photoPaper->getId()],
+                ['DELETE', '/photo_papers/' . $photoPaper->getId()],
+                ['POST', '/photo_papers'],
             ]
             as [$method, $uri]
         ) {
@@ -29,64 +29,71 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
 
     public function testAdminCanDoAnything(): void
     {
-        $this->assertChemistrySecurityByRole(self::loggedClientAdmin(), true);
+        $this->assertPhotoPaperSecurityByRole(self::loggedClientAdmin(), true);
     }
 
     public function testDataWriterCanDoAnything(): void
     {
-        $this->assertChemistrySecurityByRole(self::loggedClientDataWriter(), true);
+        $this->assertPhotoPaperSecurityByRole(self::loggedClientDataWriter(), true);
     }
 
     public function testDataReaderCanReadDataOnly(): void
     {
-        $this->assertChemistrySecurityByRole(self::loggedClientDataReader(), false);
+        $this->assertPhotoPaperSecurityByRole(self::loggedClientDataReader(), false);
     }
 
     public function testDataReaderAloneCannotCreate(): void
     {
         $manufacturer = $this->createManufacturer();
-        $chemistryType = $this->createChemistryType();
         $client = self::loggedClientDataReader();
 
-        $this->assertForbiddenAccessDenied($client, 'POST', '/chemistries', [
+        $this->assertForbiddenAccessDenied($client, 'POST', '/photo_papers', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'ID-11',
-                'process' => 'B&W',
-                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'name' => 'Multigrade RC Pearl',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'paperBase' => 'rc',
+                'paperSurface' => 'pearl',
             ],
         ]);
     }
 
-    public function testUserCannotWriteOfficialChemistryOfSomeoneElse(): void
+    public function testUserCannotWriteOfficialPhotoPaperOfSomeoneElse(): void
     {
-        $chemistry = $this->createChemistry([
+        $photoPaper = $this->createPhotoPaper([
             'status' => CatalogStatus::OFFICIAL,
             'createdBy' => 'other_user',
         ]);
         $client = self::loggedClientUser(preferred_username: 'plain_user');
 
-        $this->assertForbiddenAccessDenied($client, 'PATCH', '/chemistries/' . $chemistry->getId(), [
-            'headers' => ['Content-Type' => 'application/merge-patch+json'],
-            'json' => ['name' => 'Renamed'],
-        ]);
-        $this->assertForbiddenAccessDenied($client, 'DELETE', '/chemistries/' . $chemistry->getId());
+        $this->assertForbiddenAccessDenied(
+            $client,
+            'PATCH',
+            '/photo_papers/' . $photoPaper->getId(),
+            [
+                'headers' => ['Content-Type' => 'application/merge-patch+json'],
+                'json' => ['name' => 'Renamed'],
+            ],
+        );
+        $this->assertForbiddenAccessDenied(
+            $client,
+            'DELETE',
+            '/photo_papers/' . $photoPaper->getId(),
+        );
     }
 
-    public function testUserCanCreatePersonalChemistryByDefault(): void
+    public function testUserCanCreatePersonalPhotoPaperByDefault(): void
     {
         $manufacturer = $this->createManufacturer();
-        $chemistryType = $this->createChemistryType();
         $client = self::loggedClientUser();
 
-        $client->request('POST', '/chemistries', [
+        $client->request('POST', '/photo_papers', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'My Homemade Developer',
-                'process' => 'B&W',
-                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'name' => 'Papier maison',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'paperBase' => 'rc',
+                'paperSurface' => 'glossy',
             ],
         ]);
 
@@ -94,33 +101,32 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
         $this->assertJsonContains(['status' => 'personal']);
     }
 
-    public function testUserCannotCreateOfficialChemistryDirectly(): void
+    public function testUserCannotCreateOfficialPhotoPaperDirectly(): void
     {
         $manufacturer = $this->createManufacturer();
-        $chemistryType = $this->createChemistryType();
         $client = self::loggedClientUser();
 
-        $this->assertForbiddenAccessDenied($client, 'POST', '/chemistries', [
+        $this->assertForbiddenAccessDenied($client, 'POST', '/photo_papers', [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'My Homemade Developer',
-                'process' => 'B&W',
-                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'name' => 'Papier maison',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'paperBase' => 'rc',
+                'paperSurface' => 'glossy',
                 'status' => 'official',
             ],
         ]);
     }
 
-    public function testUserCanEditOwnPersonalChemistryAndSubmitForValidation(): void
+    public function testUserCanEditOwnPersonalPhotoPaperAndSubmitForValidation(): void
     {
         $client = self::loggedClientUser(preferred_username: 'plain_user');
-        $chemistry = $this->createChemistry([
+        $photoPaper = $this->createPhotoPaper([
             'status' => CatalogStatus::PERSONAL,
             'createdBy' => 'plain_user',
         ]);
 
-        $client->request('PATCH', '/chemistries/' . $chemistry->getId(), [
+        $client->request('PATCH', '/photo_papers/' . $photoPaper->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => ['status' => 'pending'],
         ]);
@@ -129,30 +135,30 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
         $this->assertJsonContains(['status' => 'pending']);
     }
 
-    public function testUserCannotSeeOthersPersonalChemistry(): void
+    public function testUserCannotSeeOthersPersonalPhotoPaper(): void
     {
-        $chemistry = $this->createChemistry([
+        $photoPaper = $this->createPhotoPaper([
             'status' => CatalogStatus::PERSONAL,
             'createdBy' => 'other_user',
         ]);
 
         $client = self::loggedClientUser(preferred_username: 'plain_user');
-        $this->assertForbiddenAccessDenied($client, 'GET', '/chemistries/' . $chemistry->getId());
+        $this->assertForbiddenAccessDenied($client, 'GET', '/photo_papers/' . $photoPaper->getId());
     }
 
     public function testDataWriterSeesEveryStatusAndCanApprovePending(): void
     {
-        $chemistry = $this->createChemistry([
+        $photoPaper = $this->createPhotoPaper([
             'status' => CatalogStatus::PENDING,
             'createdBy' => 'plain_user',
         ]);
 
         $client = self::loggedClientDataWriter();
-        $client->request('GET', '/chemistries?status=pending');
+        $client->request('GET', '/photo_papers?status=pending');
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains(['hydra:totalItems' => 1]);
 
-        $client->request('PATCH', '/chemistries/' . $chemistry->getId(), [
+        $client->request('PATCH', '/photo_papers/' . $photoPaper->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => ['status' => 'official'],
         ]);
@@ -160,29 +166,28 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
         $this->assertJsonContains(['status' => 'official']);
     }
 
-    private function assertChemistrySecurityByRole($client, bool $canWrite): void
+    private function assertPhotoPaperSecurityByRole($client, bool $canWrite): void
     {
-        $chemistry = $this->createChemistry();
+        $photoPaper = $this->createPhotoPaper();
         $manufacturer = $this->createManufacturer();
-        $chemistryTypeForChemistry = $this->createChemistryType();
 
-        $this->assertSuccessfulStatus($client, 'GET', '/chemistries', 200);
-        $this->assertSuccessfulStatus($client, 'GET', '/chemistries/' . $chemistry->getId(), 200);
+        $this->assertSuccessfulStatus($client, 'GET', '/photo_papers', 200);
+        $this->assertSuccessfulStatus($client, 'GET', '/photo_papers/' . $photoPaper->getId(), 200);
 
-        $patchChemistryOptions = [
+        $patchPhotoPaperOptions = [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
-                'name' => 'D-76 Updated',
+                'name' => 'Multigrade RC Pearl Updated',
             ],
         ];
 
-        $postChemistryOptions = [
+        $postPhotoPaperOptions = [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
-                'name' => 'ID-11',
-                'process' => 'B&W',
-                'chemistryType' => '/chemistry_types/' . $chemistryTypeForChemistry->getId(),
+                'name' => 'Fomabrom RC Matt',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'paperBase' => 'rc',
+                'paperSurface' => 'matt',
             ],
         ];
 
@@ -190,22 +195,22 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
             $this->assertSuccessfulStatus(
                 $client,
                 'PATCH',
-                '/chemistries/' . $chemistry->getId(),
+                '/photo_papers/' . $photoPaper->getId(),
                 200,
-                $patchChemistryOptions,
+                $patchPhotoPaperOptions,
             );
             $this->assertSuccessfulStatus(
                 $client,
                 'DELETE',
-                '/chemistries/' . $chemistry->getId(),
+                '/photo_papers/' . $photoPaper->getId(),
                 204,
             );
             $this->assertSuccessfulStatus(
                 $client,
                 'POST',
-                '/chemistries',
+                '/photo_papers',
                 201,
-                $postChemistryOptions,
+                $postPhotoPaperOptions,
             );
 
             return;
@@ -214,14 +219,19 @@ class ChemistrySecurityTest extends AbstractFilmTestCase
         $this->assertForbiddenAccessDenied(
             $client,
             'PATCH',
-            '/chemistries/' . $chemistry->getId(),
-            $patchChemistryOptions,
+            '/photo_papers/' . $photoPaper->getId(),
+            $patchPhotoPaperOptions,
         );
         $this->assertForbiddenAccessDenied(
             $client,
             'DELETE',
-            '/chemistries/' . $chemistry->getId(),
+            '/photo_papers/' . $photoPaper->getId(),
         );
-        $this->assertForbiddenAccessDenied($client, 'POST', '/chemistries', $postChemistryOptions);
+        $this->assertForbiddenAccessDenied(
+            $client,
+            'POST',
+            '/photo_papers',
+            $postPhotoPaperOptions,
+        );
     }
 }
