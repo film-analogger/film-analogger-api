@@ -291,6 +291,12 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         if (isset($overrides['rating'])) {
             $developmentLog->setRating($overrides['rating']);
         }
+        if (isset($overrides['binderId'])) {
+            $developmentLog->setBinderId($overrides['binderId']);
+        }
+        if (isset($overrides['contactSheetNumber'])) {
+            $developmentLog->setContactSheetNumber($overrides['contactSheetNumber']);
+        }
         if (isset($overrides['createdBy'])) {
             $developmentLog->setCreatedBy($overrides['createdBy']);
         }

@@ -206,6 +206,27 @@ class DevelopmentLog
     ]
     public Collection $tags;
 
+    // ── Archiving ────────────────────────────────────────────────────────
+
+    #[ODM\Field(nullable: true)]
+    #[
+        Groups([
+            SerializationGroups::DEVELOPMENT_LOG_READ_GROUP,
+            SerializationGroups::DEVELOPMENT_LOG_WRITE_GROUP,
+        ]),
+    ]
+    public ?string $binderId = null;
+
+    #[ODM\Field(nullable: true)]
+    #[Assert\Positive]
+    #[
+        Groups([
+            SerializationGroups::DEVELOPMENT_LOG_READ_GROUP,
+            SerializationGroups::DEVELOPMENT_LOG_WRITE_GROUP,
+        ]),
+    ]
+    public ?int $contactSheetNumber = null;
+
     public function __construct()
     {
         $this->steps = new ArrayCollection();
@@ -346,6 +367,28 @@ class DevelopmentLog
     public function removeTag(Tag $tag): void
     {
         $this->tags->removeElement($tag);
+    }
+
+    public function setBinderId(?string $binderId): static
+    {
+        $this->binderId = $binderId;
+        return $this;
+    }
+
+    public function getBinderId(): ?string
+    {
+        return $this->binderId;
+    }
+
+    public function setContactSheetNumber(?int $contactSheetNumber): static
+    {
+        $this->contactSheetNumber = $contactSheetNumber;
+        return $this;
+    }
+
+    public function getContactSheetNumber(): ?int
+    {
+        return $this->contactSheetNumber;
     }
 
     /**

@@ -35,6 +35,8 @@ class DevelopmentLogTest extends AbstractFilmTestCase
                 ],
                 'developmentNotes' => 'Slightly denser than usual, as expected for a push.',
                 'rating' => 4,
+                'binderId' => '00',
+                'contactSheetNumber' => 87,
             ],
         ]);
 
@@ -47,6 +49,8 @@ class DevelopmentLogTest extends AbstractFilmTestCase
         $this->assertCount(1, $data['steps']);
         $this->assertSame(720, $data['steps'][0]['durationSeconds']);
         $this->assertSame('test_user_admin', $data['createdBy']);
+        $this->assertSame('00', $data['binderId']);
+        $this->assertSame(87, $data['contactSheetNumber']);
     }
 
     public function testShotAtWithYearOnly(): void
@@ -156,6 +160,22 @@ class DevelopmentLogTest extends AbstractFilmTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertSame(5, $response->toArray()['rating']);
+    }
+
+    public function testUpdateDevelopmentLogArchivingInfo(): void
+    {
+        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_admin']);
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request('PATCH', '/development_logs/' . $developmentLog->getId(), [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => ['binderId' => '00', 'contactSheetNumber' => 87],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+        $this->assertSame('00', $data['binderId']);
+        $this->assertSame(87, $data['contactSheetNumber']);
     }
 
     public function testDeleteDevelopmentLog(): void
