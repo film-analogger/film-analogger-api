@@ -23,6 +23,15 @@ use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
+// No PRINT_SESSION_ITEM_READ_GROUP here: embedding `prints` in
+// every row of a collection listing would trigger one extra
+// PrintWork query per session (N+1). Fetch a session's prints
+// via GET /print_sessions/{id} or /print_sessions/{id}/prints.
+// Deep-embeds enlarger/chemistry/photoPaper (and their own
+// manufacturer) instead of leaving them as bare IRIs, so a
+// session page renders from a single request. Scoped to this
+// item Get only — see the no-PRINT_SESSION_ITEM_READ_GROUP
+// note above the class for why GetCollection must not do this.
 #[ApiFilter(DateFilter::class, properties: ['date'])]
 #[ODM\Document(repositoryClass: PrintSessionRepository::class)]
 #[
@@ -45,6 +54,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                         SerializationGroups::PRINT_SESSION_READ_GROUP,
                         SerializationGroups::PRINT_SESSION_ITEM_READ_GROUP,
                         SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+                        SerializationGroups::ENLARGER_READ_GROUP,
+                        SerializationGroups::CHEMISTRY_READ_GROUP,
+                        SerializationGroups::PHOTO_PAPER_READ_GROUP,
+                        SerializationGroups::PRINT_READ_GROUP,
+                        SerializationGroups::TRANSLATABLE_READ_GROUP,
+                        SerializationGroups::CATALOG_STATUS_READ_GROUP,
                     ],
                 ],
                 security: 'is_granted("' .
@@ -60,10 +75,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ),
             ),
             new GetCollection(
-                // No PRINT_SESSION_ITEM_READ_GROUP here: embedding `prints` in
-                // every row of a collection listing would trigger one extra
-                // PrintWork query per session (N+1). Fetch a session's prints
-                // via GET /print_sessions/{id} or /print_sessions/{id}/prints.
                 security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
                 openapi: new Model\Operation(
                     responses: [
@@ -164,15 +175,15 @@ class PrintSession
     ]
     public int $number;
 
-    #[ODM\Field]
-    #[Assert\NotBlank]
+    #[ODM\ReferenceOne(targetDocument: Enlarger::class)]
+    #[Assert\NotNull(message: 'Enlarger must be set.')]
     #[
         Groups([
             SerializationGroups::PRINT_SESSION_READ_GROUP,
             SerializationGroups::PRINT_SESSION_WRITE_GROUP,
         ]),
     ]
-    public string $enlarger;
+    public Enlarger $enlarger;
 
     #[ODM\Field(type: 'float')]
     #[Assert\NotNull]
@@ -228,7 +239,13 @@ class PrintSession
     ]
     public ?string $notes = null;
 
-    #[ODM\ReferenceMany(targetDocument: PrintWork::class, mappedBy: 'session', sort: ['number' => 1])]
+    #[
+        ODM\ReferenceMany(
+            targetDocument: PrintWork::class,
+            mappedBy: 'session',
+            sort: ['number' => 1],
+        ),
+    ]
     #[Groups([SerializationGroups::PRINT_SESSION_ITEM_READ_GROUP])]
     public Collection $prints;
 
@@ -276,12 +293,12 @@ class PrintSession
         return $this;
     }
 
-    public function getEnlarger(): string
+    public function getEnlarger(): Enlarger
     {
         return $this->enlarger;
     }
 
-    public function setEnlarger(string $enlarger): static
+    public function setEnlarger(Enlarger $enlarger): static
     {
         $this->enlarger = $enlarger;
         return $this;

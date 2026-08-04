@@ -115,7 +115,15 @@ class Manufacturer implements Translatable
     use CatalogStatusTrait;
 
     #[ODM\Id]
-    #[Groups([SerializationGroups::MANUFACTURER_READ_GROUP, SerializationGroups::FILM_READ_GROUP])]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::FILM_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
+        ]),
+    ]
     private ?string $id = null;
 
     #[ODM\Field]
@@ -126,6 +134,9 @@ class Manufacturer implements Translatable
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
             SerializationGroups::FILM_READ_GROUP,
             SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
         ]),
     ]
     public string $name;
@@ -157,6 +168,24 @@ class Manufacturer implements Translatable
     ]
     public Collection $cameras;
 
+    #[ODM\ReferenceMany(targetDocument: Enlarger::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public Collection $enlargers;
+
+    #[ODM\ReferenceMany(targetDocument: PhotoPaper::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public Collection $photoPapers;
+
     #[ODM\Field(nullable: true)]
     #[Assert\CssColor]
     #[ApiProperty(example: '#FF0000')]
@@ -166,6 +195,9 @@ class Manufacturer implements Translatable
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
             SerializationGroups::FILM_READ_GROUP,
             SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
         ]),
     ]
     public ?string $primaryColor = null;
@@ -179,6 +211,9 @@ class Manufacturer implements Translatable
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
             SerializationGroups::FILM_READ_GROUP,
             SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
         ]),
     ]
     public ?string $secondaryColor = null;
@@ -192,6 +227,9 @@ class Manufacturer implements Translatable
             SerializationGroups::MANUFACTURER_WRITE_GROUP,
             SerializationGroups::FILM_READ_GROUP,
             SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::ENLARGER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::CAMERA_READ_GROUP,
         ]),
     ]
     public ?string $tertiaryColor = null;
@@ -212,6 +250,8 @@ class Manufacturer implements Translatable
         $this->films = new ArrayCollection();
         $this->chemistries = new ArrayCollection();
         $this->cameras = new ArrayCollection();
+        $this->enlargers = new ArrayCollection();
+        $this->photoPapers = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -324,6 +364,48 @@ class Manufacturer implements Translatable
             $camera->setManufacturer($this);
         }
         $this->cameras = $cameras;
+        return $this;
+    }
+
+    public function addEnlarger(Enlarger $enlarger): static
+    {
+        $enlarger->setManufacturer($this);
+        $this->enlargers->add($enlarger);
+        return $this;
+    }
+
+    public function getEnlargers(): Collection
+    {
+        return $this->enlargers;
+    }
+
+    public function setEnlargers(Collection $enlargers): static
+    {
+        foreach ($enlargers as $enlarger) {
+            $enlarger->setManufacturer($this);
+        }
+        $this->enlargers = $enlargers;
+        return $this;
+    }
+
+    public function addPhotoPaper(PhotoPaper $photoPaper): static
+    {
+        $photoPaper->setManufacturer($this);
+        $this->photoPapers->add($photoPaper);
+        return $this;
+    }
+
+    public function getPhotoPapers(): Collection
+    {
+        return $this->photoPapers;
+    }
+
+    public function setPhotoPapers(Collection $photoPapers): static
+    {
+        foreach ($photoPapers as $photoPaper) {
+            $photoPaper->setManufacturer($this);
+        }
+        $this->photoPapers = $photoPapers;
         return $this;
     }
 }

@@ -26,6 +26,8 @@ class ManufacturerFixtures extends Fixture
     public const BERGGER = 'manufacturer-bergger';
     public const TETENAL = 'manufacturer-tetenal';
     public const GENERIC = 'manufacturer-generic';
+    public const DURST = 'manufacturer-durst';
+    public const MEOPTA = 'manufacturer-meopta';
 
     public function load(ObjectManager $manager): void
     {
@@ -99,6 +101,8 @@ class ManufacturerFixtures extends Fixture
             // household vinegar stop bath) — not every bath used in a real
             // darkroom session comes from a commercial product line.
             [self::GENERIC, 'Générique / maison', null, null, null, null],
+            [self::DURST, 'Durst', 'https://www.durst-group.com/', '#000000', '#FFFFFF', null],
+            [self::MEOPTA, 'Meopta', 'https://www.meopta.com/', '#003057', '#FFFFFF', null],
         ];
     }
 }

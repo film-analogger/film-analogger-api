@@ -24,6 +24,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
 // This mirrors the PrintSession/PrintWork convention: DATA_READER/DATA_WRITER
 // gate the role, ownership is checked per-item via object.getCreatedBy().
 
+// Deep-embeds film/camera (and their own manufacturer) and
+// tags instead of leaving them as bare IRIs, so a log entry
+// renders from a single request. Scoped to this item Get
+// only: GetCollection keeps the base (shallow) context below
+// so listing many logs doesn't trigger a Film/Camera lookup
+// per row.
 #[ODM\Document]
 #[
     ApiResource(
@@ -37,6 +43,18 @@ use Symfony\Component\Serializer\Attribute\Groups;
         denormalizationContext: ['groups' => [SerializationGroups::DEVELOPMENT_LOG_WRITE_GROUP]],
         operations: [
             new Get(
+                normalizationContext: [
+                    'skip_null_values' => false,
+                    'groups' => [
+                        SerializationGroups::DEVELOPMENT_LOG_READ_GROUP,
+                        SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+                        SerializationGroups::FILM_READ_GROUP,
+                        SerializationGroups::CAMERA_READ_GROUP,
+                        SerializationGroups::TAG_READ_GROUP,
+                        SerializationGroups::TRANSLATABLE_READ_GROUP,
+                        SerializationGroups::CATALOG_STATUS_READ_GROUP,
+                    ],
+                ],
                 security: 'is_granted("' .
                     KeycloakRoles::DATA_READER .
                     '") and (is_granted("' .

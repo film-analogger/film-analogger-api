@@ -9,13 +9,12 @@ use FilmAnalogger\FilmAnaloggerApi\Constant\Condenser;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ExposureKind;
 use FilmAnalogger\FilmAnaloggerApi\Constant\FocalLength;
 use FilmAnalogger\FilmAnaloggerApi\Constant\NegativeFormat;
-use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBase;
-use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBrand;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperGrade;
-use FilmAnalogger\FilmAnaloggerApi\Constant\PaperSurface;
 use FilmAnalogger\FilmAnaloggerApi\Document\ChemicalBath;
 use FilmAnalogger\FilmAnaloggerApi\Document\Chemistry;
+use FilmAnalogger\FilmAnaloggerApi\Document\Enlarger;
 use FilmAnalogger\FilmAnaloggerApi\Document\Exposure;
+use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaper;
 use FilmAnalogger\FilmAnaloggerApi\Document\PrintSession;
 use FilmAnalogger\FilmAnaloggerApi\Document\PrintWork;
 
@@ -44,13 +43,16 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
             Chemistry::class,
         );
         $fixer = $this->getReference(ChemistryFixtures::ILFORD_RAPID_FIXER, Chemistry::class);
+        $enlargerM805 = $this->getReference(EnlargerFixtures::M805, Enlarger::class);
+        $enlargerM605 = $this->getReference(EnlargerFixtures::M605, Enlarger::class);
+        $enlargerAnaret = $this->getReference(EnlargerFixtures::ANARET, Enlarger::class);
 
         $sessionOne = new PrintSession();
         $sessionOne
             ->setDate(new \DateTimeImmutable('2026-07-28'))
             ->setLab('Garage')
             ->setNumber(1)
-            ->setEnlarger('Durst M805')
+            ->setEnlarger($enlargerM805)
             ->setTemperatureCelsius(27.0)
             ->setWash("Bain d'eau")
             ->setCreatedBy(AppUserFixtures::TEST_WRITER_USERNAME)
@@ -116,7 +118,7 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
             ->setDate(new \DateTimeImmutable('2026-07-29'))
             ->setLab('Garage')
             ->setNumber(2)
-            ->setEnlarger('Durst M805')
+            ->setEnlarger($enlargerM805)
             ->setTemperatureCelsius(27.0)
             ->setWash('2 bains 5 min')
             ->setNotes(
@@ -189,7 +191,7 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                 'date' => '2026-07-25',
                 'lab' => 'Salle de bain',
                 'number' => 1,
-                'enlarger' => 'Meopta Anaret',
+                'enlarger' => $enlargerAnaret,
                 'temperatureCelsius' => 20.0,
                 'wash' => "Bain d'eau",
                 'createdBy' => AppUserFixtures::TEST_READER_USERNAME,
@@ -220,7 +222,7 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                 'date' => '2026-07-27',
                 'lab' => 'Salle de bain',
                 'number' => 2,
-                'enlarger' => 'Meopta Anaret',
+                'enlarger' => $enlargerAnaret,
                 'temperatureCelsius' => 20.5,
                 'wash' => "Bain d'eau",
                 'createdBy' => AppUserFixtures::TEST_READER_USERNAME,
@@ -253,7 +255,7 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                 'date' => '2026-07-26',
                 'lab' => 'Garage',
                 'number' => 1,
-                'enlarger' => 'Durst M805',
+                'enlarger' => $enlargerM805,
                 'temperatureCelsius' => 21.5,
                 'wash' => "Bain d'eau",
                 'createdBy' => AppUserFixtures::TEST_USER_USERNAME,
@@ -284,7 +286,7 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                 'date' => '2026-07-27',
                 'lab' => 'Garage',
                 'number' => 2,
-                'enlarger' => 'Durst M805',
+                'enlarger' => $enlargerM805,
                 'temperatureCelsius' => 22.0,
                 'wash' => "Bain d'eau",
                 'createdBy' => AppUserFixtures::TEST_USER_USERNAME,
@@ -316,7 +318,7 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                 'date' => '2026-07-30',
                 'lab' => 'Labo École',
                 'number' => 1,
-                'enlarger' => 'Durst M605',
+                'enlarger' => $enlargerM605,
                 'temperatureCelsius' => 19.0,
                 'wash' => '2 bains 5 min',
                 'createdBy' => AppUserFixtures::TEST_ADMIN_USERNAME,
@@ -347,7 +349,7 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
                 'date' => '2026-08-01',
                 'lab' => 'Labo École',
                 'number' => 2,
-                'enlarger' => 'Durst M605',
+                'enlarger' => $enlargerM605,
                 'temperatureCelsius' => 18.5,
                 'wash' => '2 bains 5 min',
                 'createdBy' => AppUserFixtures::TEST_ADMIN_USERNAME,
@@ -423,10 +425,12 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
             ->setPaperHeightCm($data['paperHeightCm'])
             ->setBorderCm(1.4)
             ->setCopies(1)
-            ->setPaperBrand(PaperBrand::ILFORD)
-            ->setPaperModel('Multigrade')
-            ->setPaperBase(PaperBase::RC)
-            ->setPaperSurface(PaperSurface::PEARL)
+            ->setPhotoPaper(
+                $this->getReference(
+                    PhotoPaperFixtures::ILFORD_MULTIGRADE_RC_PEARL,
+                    PhotoPaper::class,
+                ),
+            )
             ->setMaskingNotes($data['maskingNotes'] ?? null)
             ->setNotes($data['notes'] ?? null);
 
@@ -449,6 +453,11 @@ class PrintSessionFixtures extends Fixture implements DependentFixtureInterface
 
     public function getDependencies(): array
     {
-        return [ChemistryFixtures::class, AppUserFixtures::class];
+        return [
+            ChemistryFixtures::class,
+            AppUserFixtures::class,
+            EnlargerFixtures::class,
+            PhotoPaperFixtures::class,
+        ];
     }
 }

@@ -9,14 +9,16 @@ use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Document\Camera;
 use FilmAnalogger\FilmAnaloggerApi\Document\Chemistry;
 use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
+use FilmAnalogger\FilmAnaloggerApi\Document\Enlarger;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
+use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaper;
 use FilmAnalogger\FilmAnaloggerApi\Document\Tag;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * Film/Manufacturer/Camera/Tag/Chemistry/ChemistryType are shared catalog
+ * Film/Manufacturer/Camera/Enlarger/PhotoPaper/Tag/Chemistry/ChemistryType are shared catalog
  * data, but a ROLE_user can now contribute personal/pending/rejected entries
  * (see CatalogStatusTrait). A collection listing must only surface "official"
  * entries plus the current user's own, non-official ones — ROLE_data_writer/
@@ -29,6 +31,8 @@ final class CatalogVisibilityExtension implements AggregationCollectionExtension
         Film::class,
         Manufacturer::class,
         Camera::class,
+        Enlarger::class,
+        PhotoPaper::class,
         Tag::class,
         Chemistry::class,
         ChemistryType::class,
@@ -53,9 +57,14 @@ final class CatalogVisibilityExtension implements AggregationCollectionExtension
         $user = $this->security->getUser();
         $identifier = $user?->getUserIdentifier() ?? '__no_user__';
 
-        $aggregationBuilder->match()->addOr(
-            $aggregationBuilder->matchExpr()->field('status')->equals(CatalogStatus::OFFICIAL->value),
-            $aggregationBuilder->matchExpr()->field('createdBy')->equals($identifier),
-        );
+        $aggregationBuilder
+            ->match()
+            ->addOr(
+                $aggregationBuilder
+                    ->matchExpr()
+                    ->field('status')
+                    ->equals(CatalogStatus::OFFICIAL->value),
+                $aggregationBuilder->matchExpr()->field('createdBy')->equals($identifier),
+            );
     }
 }

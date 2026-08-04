@@ -19,6 +19,12 @@ final class SerializationGroups
     const CAMERA_READ_GROUP = 'read-camera';
     const CAMERA_WRITE_GROUP = 'write-camera';
 
+    const ENLARGER_READ_GROUP = 'read-enlarger';
+    const ENLARGER_WRITE_GROUP = 'write-enlarger';
+
+    const PHOTO_PAPER_READ_GROUP = 'read-photo-paper';
+    const PHOTO_PAPER_WRITE_GROUP = 'write-photo-paper';
+
     const TAG_READ_GROUP = 'read-tag';
     const TAG_WRITE_GROUP = 'write-tag';
 

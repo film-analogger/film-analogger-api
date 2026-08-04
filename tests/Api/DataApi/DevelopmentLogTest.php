@@ -104,6 +104,46 @@ class DevelopmentLogTest extends AbstractFilmTestCase
         $this->assertResponseStatusCodeSame(422);
     }
 
+    public function testGetDevelopmentLogDeepEmbedsRelatedCatalogEntries(): void
+    {
+        $filmManufacturer = $this->createManufacturer('Ilford');
+        $film = $this->createFilm(['name' => 'HP5 Plus', 'manufacturer' => $filmManufacturer]);
+        $cameraManufacturer = $this->createManufacturer('Nikon');
+        $camera = $this->createCamera(['name' => 'F100', 'manufacturer' => $cameraManufacturer]);
+        $tag = $this->createTag(['name' => 'Fogged']);
+
+        $developmentLog = $this->createDevelopmentLog([
+            'film' => $film,
+            'camera' => $camera,
+            'createdBy' => 'test_user_admin',
+        ]);
+        $developmentLog->addTag($tag);
+        $this->documentManager->persist($developmentLog);
+        $this->documentManager->flush();
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request('GET', '/development_logs/' . $developmentLog->getId());
+        $data = $response->toArray();
+
+        $this->assertSame('HP5 Plus', $data['film']['name']);
+        $this->assertSame('Ilford', $data['film']['manufacturer']['name']);
+        $this->assertSame('F100', $data['camera']['name']);
+        $this->assertSame('Nikon', $data['camera']['manufacturer']['name']);
+        $this->assertSame('Fogged', $data['tags'][0]['name']);
+    }
+
+    public function testGetCollectionDoesNotDeepEmbedRelatedCatalogEntries(): void
+    {
+        $film = $this->createFilm(['manufacturer' => $this->createManufacturer('Ilford')]);
+        $this->createDevelopmentLog(['film' => $film, 'createdBy' => 'test_user_admin']);
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request('GET', '/development_logs');
+        $data = $response->toArray()['hydra:member'][0];
+
+        $this->assertArrayNotHasKey('name', $data['film']);
+    }
+
     public function testUpdateDevelopmentLog(): void
     {
         $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_admin']);
