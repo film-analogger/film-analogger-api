@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ODM\EmbeddedDocument]
 class DevelopmentStep
 {
-    #[ODM\ReferenceOne(targetDocument: Chemistry::class)]
+    #[ODM\ReferenceOne(targetDocument: Chemistry::class, storeAs: 'id')]
     #[
         Groups([
             SerializationGroups::DEVELOPMENT_LOG_READ_GROUP,

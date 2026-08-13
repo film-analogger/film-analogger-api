@@ -2,6 +2,11 @@
 
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
+use ApiPlatform\Doctrine\Odm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Odm\Filter\RangeFilter;
+use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -12,6 +17,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
+use FilmAnalogger\FilmAnaloggerApi\Doctrine\Filter\PushPullFilter;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
@@ -80,6 +86,34 @@ use Symfony\Component\Serializer\Attribute\Groups;
         ],
     ),
 ]
+#[
+    ApiFilter(
+        SearchFilter::class,
+        properties: [
+            'film' => 'exact',
+            'camera' => 'exact',
+            'shotAt.year' => 'exact',
+            'shotAt.month' => 'exact',
+            'isoShotAt' => 'exact',
+            'shootingNotes' => 'ipartial',
+            'process' => 'exact',
+            'steps.chemistry.name' => 'ipartial',
+            'rating' => 'exact',
+            'tags' => 'exact',
+            'binderId' => 'partial',
+            'contactSheetNumber' => 'exact',
+        ],
+    ),
+]
+#[ApiFilter(RangeFilter::class, properties: ['rating'])]
+#[ApiFilter(DateFilter::class, properties: ['developedAt'])]
+#[ApiFilter(PushPullFilter::class)]
+#[
+    ApiFilter(
+        OrderFilter::class,
+        properties: ['shotAt', 'developedAt', 'binderId', 'contactSheetNumber'],
+    ),
+]
 class DevelopmentLog
 {
     use TimestampableBlameableTrait;
@@ -90,7 +124,7 @@ class DevelopmentLog
 
     // ── Shooting ─────────────────────────────────────────────────────────
 
-    #[ODM\ReferenceOne(targetDocument: Film::class)]
+    #[ODM\ReferenceOne(targetDocument: Film::class, storeAs: 'id')]
     #[Assert\NotNull(message: 'Film must be set.')]
     #[
         Groups([
@@ -100,7 +134,7 @@ class DevelopmentLog
     ]
     public Film $film;
 
-    #[ODM\ReferenceOne(targetDocument: Camera::class)]
+    #[ODM\ReferenceOne(targetDocument: Camera::class, storeAs: 'id')]
     #[
         Groups([
             SerializationGroups::DEVELOPMENT_LOG_READ_GROUP,

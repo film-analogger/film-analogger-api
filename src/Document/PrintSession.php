@@ -3,6 +3,8 @@
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
 use ApiPlatform\Doctrine\Odm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
@@ -33,6 +35,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 // item Get only — see the no-PRINT_SESSION_ITEM_READ_GROUP
 // note above the class for why GetCollection must not do this.
 #[ApiFilter(DateFilter::class, properties: ['date'])]
+#[
+    ApiFilter(
+        SearchFilter::class,
+        properties: [
+            'lab' => 'ipartial',
+            'enlarger' => 'exact',
+            'chemicalBaths.chemistry.name' => 'ipartial',
+            'notes' => 'ipartial',
+        ],
+    ),
+]
+#[ApiFilter(OrderFilter::class, properties: ['date', 'number'])]
 #[ODM\Document(repositoryClass: PrintSessionRepository::class)]
 #[
     ApiResource(
@@ -175,7 +189,7 @@ class PrintSession
     ]
     public int $number;
 
-    #[ODM\ReferenceOne(targetDocument: Enlarger::class)]
+    #[ODM\ReferenceOne(targetDocument: Enlarger::class, storeAs: 'id')]
     #[Assert\NotNull(message: 'Enlarger must be set.')]
     #[
         Groups([

@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ODM\EmbeddedDocument]
 class ChemicalBath
 {
-    #[ODM\ReferenceOne(targetDocument: Chemistry::class)]
+    #[ODM\ReferenceOne(targetDocument: Chemistry::class, storeAs: 'id')]
     #[Assert\NotNull(message: 'Chemistry must be set.')]
     #[
         Groups([
