@@ -154,6 +154,51 @@ final class UserApiTest extends AbstractFilmTestCase
     }
 
     // -------------------------------------------------------------------------
+    // GET /me
+    // -------------------------------------------------------------------------
+
+    public function testMeReturnsUnauthorizedWithoutToken(): void
+    {
+        $client = static::createClient();
+        $this->assertUnauthorizedMissingToken($client, 'GET', '/me');
+    }
+
+    public function testMeReturnsCurrentUserRegardlessOfRoles(): void
+    {
+        $client = self::loggedClientWithUserAndRoles(
+            [],
+            preferred_username: 'no_roles_user',
+            email: 'no_roles_user@example.test',
+        );
+
+        $client->request('GET', '/me');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJsonContains([
+            'username' => 'no_roles_user',
+            'email' => 'no_roles_user@example.test',
+        ]);
+    }
+
+    public function testMeReturnsOnlyTheAuthenticatedUsersOwnProfile(): void
+    {
+        $this->createAppUser(
+            sub: 'sub-other-me',
+            username: 'other_me_user',
+            email: 'other@example.test',
+        );
+
+        $client = self::loggedClientDataReader(preferred_username: 'test_user_data_reader');
+        $response = $client->request('GET', '/me');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJsonContains([
+            'username' => 'test_user_data_reader',
+        ]);
+        $this->assertNotSame('other_me_user', $response->toArray()['username']);
+    }
+
+    // -------------------------------------------------------------------------
     // GET collection
     // -------------------------------------------------------------------------
 

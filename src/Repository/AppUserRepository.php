@@ -11,4 +11,9 @@ class AppUserRepository extends DocumentRepository
     {
         return $this->findOneBy(['keycloakSub' => $sub]);
     }
+
+    public function findOneByUsername(string $username): ?AppUser
+    {
+        return $this->findOneBy(['username' => $username]);
+    }
 }
