@@ -141,7 +141,25 @@ class Manufacturer implements Translatable
     ]
     public string $name;
 
+    #[ODM\Field(nullable: true)]
+    #[Gedmo\Translatable]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public ?string $description = null;
+
+    // writableLink: false on all six collections below forces the OpenAPI
+    // write schema back to plain IRI strings. Without it, API Platform sees
+    // that Film/Chemistry/Camera/Enlarger/PhotoPaper/EnlargerLens's own
+    // $status shares CATALOG_STATUS_WRITE_GROUP with this resource's
+    // denormalizationContext and documents each collection as an array of
+    // embeddable objects requiring `status`, even though only IRIs are ever
+    // needed.
     #[ODM\ReferenceMany(targetDocument: Film::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[ApiProperty(writableLink: false)]
     #[
         Groups([
             SerializationGroups::MANUFACTURER_READ_GROUP,
@@ -151,6 +169,7 @@ class Manufacturer implements Translatable
     public Collection $films;
 
     #[ODM\ReferenceMany(targetDocument: Chemistry::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[ApiProperty(writableLink: false)]
     #[
         Groups([
             SerializationGroups::MANUFACTURER_READ_GROUP,
@@ -160,6 +179,7 @@ class Manufacturer implements Translatable
     public Collection $chemistries;
 
     #[ODM\ReferenceMany(targetDocument: Camera::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[ApiProperty(writableLink: false)]
     #[
         Groups([
             SerializationGroups::MANUFACTURER_READ_GROUP,
@@ -169,6 +189,7 @@ class Manufacturer implements Translatable
     public Collection $cameras;
 
     #[ODM\ReferenceMany(targetDocument: Enlarger::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[ApiProperty(writableLink: false)]
     #[
         Groups([
             SerializationGroups::MANUFACTURER_READ_GROUP,
@@ -178,6 +199,7 @@ class Manufacturer implements Translatable
     public Collection $enlargers;
 
     #[ODM\ReferenceMany(targetDocument: PhotoPaper::class, mappedBy: 'manufacturer', storeAs: 'id')]
+    #[ApiProperty(writableLink: false)]
     #[
         Groups([
             SerializationGroups::MANUFACTURER_READ_GROUP,
@@ -185,6 +207,22 @@ class Manufacturer implements Translatable
         ]),
     ]
     public Collection $photoPapers;
+
+    #[
+        ODM\ReferenceMany(
+            targetDocument: EnlargerLens::class,
+            mappedBy: 'manufacturer',
+            storeAs: 'id',
+        ),
+    ]
+    #[ApiProperty(writableLink: false)]
+    #[
+        Groups([
+            SerializationGroups::MANUFACTURER_READ_GROUP,
+            SerializationGroups::MANUFACTURER_WRITE_GROUP,
+        ]),
+    ]
+    public Collection $enlargerLenses;
 
     #[ODM\Field(nullable: true)]
     #[Assert\CssColor]
@@ -252,6 +290,7 @@ class Manufacturer implements Translatable
         $this->cameras = new ArrayCollection();
         $this->enlargers = new ArrayCollection();
         $this->photoPapers = new ArrayCollection();
+        $this->enlargerLenses = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -279,6 +318,17 @@ class Manufacturer implements Translatable
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
     }
 
     public function setPrimaryColor(?string $primaryColor): static
@@ -406,6 +456,27 @@ class Manufacturer implements Translatable
             $photoPaper->setManufacturer($this);
         }
         $this->photoPapers = $photoPapers;
+        return $this;
+    }
+
+    public function addEnlargerLens(EnlargerLens $enlargerLens): static
+    {
+        $enlargerLens->setManufacturer($this);
+        $this->enlargerLenses->add($enlargerLens);
+        return $this;
+    }
+
+    public function getEnlargerLenses(): Collection
+    {
+        return $this->enlargerLenses;
+    }
+
+    public function setEnlargerLenses(Collection $enlargerLenses): static
+    {
+        foreach ($enlargerLenses as $enlargerLens) {
+            $enlargerLens->setManufacturer($this);
+        }
+        $this->enlargerLenses = $enlargerLenses;
         return $this;
     }
 }

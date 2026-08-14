@@ -179,9 +179,15 @@ class Film implements Translatable
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     public ?string $tertiaryColor = null;
 
+    // writableLink: false forces the OpenAPI write schema back to a plain
+    // IRI string. Without it, API Platform sees that Manufacturer::$status
+    // shares CATALOG_STATUS_WRITE_GROUP with this resource's own
+    // denormalizationContext and documents `manufacturer` as an embeddable
+    // object requiring `status`, even though only an IRI is ever needed.
     #[ODM\ReferenceOne(targetDocument: Manufacturer::class, inversedBy: 'films')]
     #[Groups([SerializationGroups::FILM_READ_GROUP, SerializationGroups::FILM_WRITE_GROUP])]
     #[Assert\NotNull(message: 'Manufacturer must be set.')]
+    #[ApiProperty(writableLink: false)]
     public Manufacturer $manufacturer;
 
     public function __construct() {}

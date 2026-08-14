@@ -53,6 +53,8 @@ class EnlargerTest extends AbstractFilmTestCase
                 'name' => 'Anaret',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
                 'lightSource' => 'condenser',
+                'filmFormats' => ['135'],
+                'negativeFormats' => ['24x36'],
             ],
         ]);
 
@@ -60,6 +62,30 @@ class EnlargerTest extends AbstractFilmTestCase
         $this->assertJsonContains([
             'name' => 'Anaret',
             'lightSource' => 'condenser',
+            'filmFormats' => ['135'],
+            'negativeFormats' => ['24x36'],
+        ]);
+    }
+
+    public function testCreateEnlargerWithMultipleFormats(): void
+    {
+        $manufacturer = $this->createManufacturer('Durst');
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/enlargers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'M805',
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'filmFormats' => ['135', '120'],
+                'negativeFormats' => ['24x36', '6x6', '6x7', '6x9'],
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(201);
+        $this->assertJsonContains([
+            'filmFormats' => ['135', '120'],
+            'negativeFormats' => ['24x36', '6x6', '6x7', '6x9'],
         ]);
     }
 
@@ -102,6 +128,40 @@ class EnlargerTest extends AbstractFilmTestCase
                 'name' => 'M805',
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
                 'lightSource' => 'not-a-light-source',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testCreateEnlargerWithInvalidFilmFormatFails(): void
+    {
+        $manufacturer = $this->createManufacturer();
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/enlargers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'M805',
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'filmFormats' => ['not-a-format'],
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testCreateEnlargerWithInvalidNegativeFormatFails(): void
+    {
+        $manufacturer = $this->createManufacturer();
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/enlargers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'M805',
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'negativeFormats' => ['not-a-format'],
             ],
         ]);
 

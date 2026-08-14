@@ -7,6 +7,8 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\EnlargerLightSource;
+use FilmAnalogger\FilmAnaloggerApi\Constant\NegativeFormat;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Enlarger;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 
@@ -26,6 +28,8 @@ class EnlargerFixtures extends Fixture implements DependentFixtureInterface
                 ->setName($data['name'])
                 ->setManufacturer($this->getReference($data['manufacturer'], Manufacturer::class))
                 ->setLightSource($data['lightSource'])
+                ->setFilmFormats($data['filmFormats'])
+                ->setNegativeFormats($data['negativeFormats'])
                 ->setDescription($data['description'] ?? null)
                 ->setStatus(CatalogStatus::OFFICIAL);
 
@@ -58,6 +62,16 @@ class EnlargerFixtures extends Fixture implements DependentFixtureInterface
                 'description' => 'Modular condenser enlarger for medium-format darkroom printing.',
                 'manufacturer' => ManufacturerFixtures::DURST,
                 'lightSource' => EnlargerLightSource::CONDENSER,
+                'filmFormats' => [
+                    ProcessConstants::CAMERA_FILM_FORMAT_135,
+                    ProcessConstants::CAMERA_FILM_FORMAT_120,
+                ],
+                'negativeFormats' => [
+                    NegativeFormat::F_24X36->value,
+                    NegativeFormat::F_6X6->value,
+                    NegativeFormat::F_6X7->value,
+                    NegativeFormat::F_6X9->value,
+                ],
                 'translations' => [
                     'fr' => [
                         'description' =>
@@ -71,6 +85,11 @@ class EnlargerFixtures extends Fixture implements DependentFixtureInterface
                 'description' => 'Compact condenser enlarger for 35mm and medium-format printing.',
                 'manufacturer' => ManufacturerFixtures::DURST,
                 'lightSource' => EnlargerLightSource::CONDENSER,
+                'filmFormats' => [
+                    ProcessConstants::CAMERA_FILM_FORMAT_135,
+                    ProcessConstants::CAMERA_FILM_FORMAT_120,
+                ],
+                'negativeFormats' => [NegativeFormat::F_24X36->value, NegativeFormat::F_6X6->value],
                 'translations' => [
                     'fr' => [
                         'description' =>
@@ -84,6 +103,8 @@ class EnlargerFixtures extends Fixture implements DependentFixtureInterface
                 'description' => 'Entry-level condenser enlarger for 35mm printing.',
                 'manufacturer' => ManufacturerFixtures::MEOPTA,
                 'lightSource' => EnlargerLightSource::CONDENSER,
+                'filmFormats' => [ProcessConstants::CAMERA_FILM_FORMAT_135],
+                'negativeFormats' => [NegativeFormat::F_24X36->value],
                 'translations' => [
                     'fr' => [
                         'description' =>

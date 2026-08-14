@@ -22,6 +22,9 @@ final class SerializationGroups
     const ENLARGER_READ_GROUP = 'read-enlarger';
     const ENLARGER_WRITE_GROUP = 'write-enlarger';
 
+    const ENLARGER_LENS_READ_GROUP = 'read-enlarger-lens';
+    const ENLARGER_LENS_WRITE_GROUP = 'write-enlarger-lens';
+
     const PHOTO_PAPER_READ_GROUP = 'read-photo-paper';
     const PHOTO_PAPER_WRITE_GROUP = 'write-photo-paper';
 

@@ -171,4 +171,6 @@ final class ProcessConstants
         self::CAMERA_FILM_FORMAT_INSTANT,
         self::CAMERA_FILM_FORMAT_OTHER,
     ];
+
+    const PHOTO_PAPER_PROCESSES = [self::CHEMISTRY_BW_PRINT, self::CHEMISTRY_RA4];
 }

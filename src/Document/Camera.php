@@ -4,6 +4,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
 use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -87,8 +88,14 @@ class Camera implements Translatable
     #[Groups([SerializationGroups::CAMERA_READ_GROUP, SerializationGroups::CAMERA_WRITE_GROUP])]
     public string $name;
 
+    // writableLink: false forces the OpenAPI write schema back to a plain
+    // IRI string. Without it, API Platform sees that Manufacturer::$status
+    // shares CATALOG_STATUS_WRITE_GROUP with this resource's own
+    // denormalizationContext and documents `manufacturer` as an embeddable
+    // object requiring `status`, even though only an IRI is ever needed.
     #[ODM\ReferenceOne(targetDocument: Manufacturer::class, inversedBy: 'cameras')]
     #[Assert\NotNull(message: 'Manufacturer must be set.')]
+    #[ApiProperty(writableLink: false)]
     #[Groups([SerializationGroups::CAMERA_READ_GROUP, SerializationGroups::CAMERA_WRITE_GROUP])]
     public Manufacturer $manufacturer;
 

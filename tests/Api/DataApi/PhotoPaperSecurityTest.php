@@ -3,6 +3,7 @@
 namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api\DataApi;
 
 use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Tests\Api\AbstractFilmTestCase;
 
 class PhotoPaperSecurityTest extends AbstractFilmTestCase
@@ -94,6 +95,7 @@ class PhotoPaperSecurityTest extends AbstractFilmTestCase
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
                 'paperBase' => 'rc',
                 'paperSurface' => 'glossy',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
             ],
         ]);
 
@@ -188,6 +190,7 @@ class PhotoPaperSecurityTest extends AbstractFilmTestCase
                 'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
                 'paperBase' => 'rc',
                 'paperSurface' => 'matt',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
             ],
         ];
 

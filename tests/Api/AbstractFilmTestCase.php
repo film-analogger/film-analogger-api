@@ -9,12 +9,14 @@ use FilmAnalogger\FilmAnaloggerApi\Document\Chemistry;
 use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
 use FilmAnalogger\FilmAnaloggerApi\Document\DevelopmentLog;
 use FilmAnalogger\FilmAnaloggerApi\Document\Enlarger;
+use FilmAnalogger\FilmAnaloggerApi\Document\EnlargerLens;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaper;
 use FilmAnalogger\FilmAnaloggerApi\Document\Tag;
 use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ExposureKind;
+use FilmAnalogger\FilmAnaloggerApi\Constant\FocalLength;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBase;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperGrade;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperSurface;
@@ -50,6 +52,7 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->getDocumentCollection(ChemistryType::class)->drop();
         $this->documentManager->getDocumentCollection(Camera::class)->drop();
         $this->documentManager->getDocumentCollection(Enlarger::class)->drop();
+        $this->documentManager->getDocumentCollection(EnlargerLens::class)->drop();
         $this->documentManager->getDocumentCollection(PhotoPaper::class)->drop();
         $this->documentManager->getDocumentCollection(Tag::class)->drop();
         $this->documentManager->getDocumentCollection(DevelopmentLog::class)->drop();
@@ -200,6 +203,12 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         if (isset($overrides['lightSource'])) {
             $enlarger->setLightSource($overrides['lightSource']);
         }
+        if (isset($overrides['filmFormats'])) {
+            $enlarger->setFilmFormats($overrides['filmFormats']);
+        }
+        if (isset($overrides['negativeFormats'])) {
+            $enlarger->setNegativeFormats($overrides['negativeFormats']);
+        }
         if (isset($overrides['description'])) {
             $enlarger->setDescription($overrides['description']);
         }
@@ -213,6 +222,30 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         return $enlarger;
     }
 
+    protected function createEnlargerLens(array $overrides = []): EnlargerLens
+    {
+        $manufacturer = $overrides['manufacturer'] ?? $this->createManufacturer();
+
+        $enlargerLens = new EnlargerLens();
+        $enlargerLens->setName($overrides['name'] ?? 'EL-Nikkor 50mm');
+        $enlargerLens->setManufacturer($manufacturer);
+        $enlargerLens->setFocalLength($overrides['focalLength'] ?? FocalLength::F50);
+        $enlargerLens->setMaxAperture($overrides['maxAperture'] ?? 2.8);
+        $enlargerLens->setStatus($overrides['status'] ?? CatalogStatus::OFFICIAL);
+
+        if (isset($overrides['description'])) {
+            $enlargerLens->setDescription($overrides['description']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $enlargerLens->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($enlargerLens);
+        $this->documentManager->flush();
+
+        return $enlargerLens;
+    }
+
     protected function createPhotoPaper(array $overrides = []): PhotoPaper
     {
         $manufacturer = $overrides['manufacturer'] ?? $this->createManufacturer();
@@ -222,6 +255,7 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $photoPaper->setManufacturer($manufacturer);
         $photoPaper->setPaperBase($overrides['paperBase'] ?? PaperBase::RC);
         $photoPaper->setPaperSurface($overrides['paperSurface'] ?? PaperSurface::PEARL);
+        $photoPaper->setProcess($overrides['process'] ?? ProcessConstants::CHEMISTRY_BW_PRINT);
         $photoPaper->setStatus($overrides['status'] ?? CatalogStatus::OFFICIAL);
 
         if (isset($overrides['paperSurfaceOther'])) {
@@ -229,6 +263,15 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         }
         if (isset($overrides['variableContrast'])) {
             $photoPaper->setVariableContrast($overrides['variableContrast']);
+        }
+        if (isset($overrides['grade'])) {
+            $photoPaper->setGrade($overrides['grade']);
+        }
+        if (isset($overrides['availableFormats'])) {
+            $photoPaper->setAvailableFormats($overrides['availableFormats']);
+        }
+        if (isset($overrides['officialDocumentationUrl'])) {
+            $photoPaper->setOfficialDocumentationUrl($overrides['officialDocumentationUrl']);
         }
         if (isset($overrides['description'])) {
             $photoPaper->setDescription($overrides['description']);

@@ -59,7 +59,10 @@ class ManufacturerI18nTest extends AbstractFilmTestCase
         $this->assertJsonContains([
             'name' => 'Kodak',
             'website' => 'https://www.kodak.fr',
-            'translations' => [['locale' => 'fr', 'field' => 'website']],
+            'translations' => [
+                ['locale' => 'fr', 'field' => 'description'],
+                ['locale' => 'fr', 'field' => 'website'],
+            ],
             'isTranslated' => true,
         ]);
     }

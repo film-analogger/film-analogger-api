@@ -7,7 +7,10 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBase;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperFormat;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperGrade;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperSurface;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaper;
 
@@ -29,6 +32,10 @@ class PhotoPaperFixtures extends Fixture implements DependentFixtureInterface
                 ->setPaperBase($data['paperBase'])
                 ->setPaperSurface($data['paperSurface'])
                 ->setVariableContrast($data['variableContrast'] ?? null)
+                ->setGrade($data['grade'] ?? null)
+                ->setProcess($data['process'])
+                ->setAvailableFormats($data['availableFormats'] ?? [])
+                ->setOfficialDocumentationUrl($data['officialDocumentationUrl'] ?? null)
                 ->setDescription($data['description'] ?? null)
                 ->setStatus(CatalogStatus::OFFICIAL);
 
@@ -44,6 +51,9 @@ class PhotoPaperFixtures extends Fixture implements DependentFixtureInterface
                 $photoPaper->setTranslatableLocale($locale);
                 if (isset($translations['description'])) {
                     $photoPaper->setDescription($translations['description']);
+                }
+                if (isset($translations['officialDocumentationUrl'])) {
+                    $photoPaper->setOfficialDocumentationUrl($translations['officialDocumentationUrl']);
                 }
                 $manager->persist($photoPaper);
             }
@@ -63,6 +73,14 @@ class PhotoPaperFixtures extends Fixture implements DependentFixtureInterface
                 'paperBase' => PaperBase::RC,
                 'paperSurface' => PaperSurface::PEARL,
                 'variableContrast' => true,
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'availableFormats' => [
+                    PaperFormat::F_9X13->value,
+                    PaperFormat::F_13X18->value,
+                    PaperFormat::F_18X24->value,
+                    PaperFormat::F_20X25->value,
+                ],
+                'officialDocumentationUrl' => 'https://www.ilfordphoto.com/multigrade-rc-deluxe/',
                 'translations' => [
                     'fr' => [
                         'description' => 'Papier RC à contraste variable avec une surface perlée.',
@@ -77,6 +95,9 @@ class PhotoPaperFixtures extends Fixture implements DependentFixtureInterface
                 'paperBase' => PaperBase::FB,
                 'paperSurface' => PaperSurface::GLOSSY,
                 'variableContrast' => true,
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'availableFormats' => [PaperFormat::F_18X24->value, PaperFormat::F_24X30->value],
+                'officialDocumentationUrl' => 'https://www.ilfordphoto.com/multigrade-fb-classic/',
                 'translations' => [
                     'fr' => [
                         'description' =>
@@ -92,6 +113,10 @@ class PhotoPaperFixtures extends Fixture implements DependentFixtureInterface
                 'paperBase' => PaperBase::RC,
                 'paperSurface' => PaperSurface::MATT,
                 'variableContrast' => false,
+                'grade' => PaperGrade::G2,
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'availableFormats' => [PaperFormat::F_9X13->value, PaperFormat::F_13X18->value],
+                'officialDocumentationUrl' => 'https://www.foma.cz/en/photographic-paper/fomabrom',
                 'translations' => [
                     'fr' => [
                         'description' => 'Papier RC à grade fixe avec une surface mate.',

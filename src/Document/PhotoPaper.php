@@ -4,6 +4,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
 use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -13,7 +14,10 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\OpenApi\Model as Model;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBase;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperFormat;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperGrade;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperSurface;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\CatalogStatusTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
@@ -128,8 +132,14 @@ class PhotoPaper implements Translatable
     ]
     public string $name;
 
+    // writableLink: false forces the OpenAPI write schema back to a plain
+    // IRI string. Without it, API Platform sees that Manufacturer::$status
+    // shares CATALOG_STATUS_WRITE_GROUP with this resource's own
+    // denormalizationContext and documents `manufacturer` as an embeddable
+    // object requiring `status`, even though only an IRI is ever needed.
     #[ODM\ReferenceOne(targetDocument: Manufacturer::class, inversedBy: 'photoPapers')]
     #[Assert\NotNull(message: 'Manufacturer must be set.')]
+    #[ApiProperty(writableLink: false)]
     #[
         Groups([
             SerializationGroups::PHOTO_PAPER_READ_GROUP,
@@ -175,6 +185,57 @@ class PhotoPaper implements Translatable
         ]),
     ]
     public ?bool $variableContrast = null;
+
+    // Nullable: only meaningful for fixed-grade (non-VC) papers, which are
+    // manufactured at one specific contrast grade. Variable-contrast papers
+    // don't have an intrinsic grade — the grade is chosen per exposure (see
+    // Exposure::$grade) via VC filters/head.
+    #[ODM\Field(nullable: true, enumType: PaperGrade::class)]
+    #[
+        Groups([
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_WRITE_GROUP,
+        ]),
+    ]
+    public ?PaperGrade $grade = null;
+
+    #[ODM\Field]
+    #[Assert\NotBlank]
+    #[
+        Assert\Choice(
+            choices: ProcessConstants::PHOTO_PAPER_PROCESSES,
+            message: 'Choose a valid process.',
+        ),
+    ]
+    #[
+        Groups([
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_WRITE_GROUP,
+        ]),
+    ]
+    public string $process;
+
+    /** @var string[] */
+    #[ODM\Field(type: 'collection')]
+    #[Assert\All([new Assert\Choice(callback: [PaperFormat::class, 'values'])])]
+    #[
+        Groups([
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_WRITE_GROUP,
+        ]),
+    ]
+    public array $availableFormats = [];
+
+    #[ODM\Field(nullable: true)]
+    #[Assert\Url]
+    #[Gedmo\Translatable]
+    #[
+        Groups([
+            SerializationGroups::PHOTO_PAPER_READ_GROUP,
+            SerializationGroups::PHOTO_PAPER_WRITE_GROUP,
+        ]),
+    ]
+    public ?string $officialDocumentationUrl = null;
 
     #[ODM\Field(nullable: true)]
     #[Gedmo\Translatable]
@@ -257,6 +318,50 @@ class PhotoPaper implements Translatable
     public function getVariableContrast(): ?bool
     {
         return $this->variableContrast;
+    }
+
+    public function setGrade(?PaperGrade $grade): static
+    {
+        $this->grade = $grade;
+        return $this;
+    }
+
+    public function getGrade(): ?PaperGrade
+    {
+        return $this->grade;
+    }
+
+    public function setProcess(string $process): static
+    {
+        $this->process = $process;
+        return $this;
+    }
+
+    public function getProcess(): string
+    {
+        return $this->process;
+    }
+
+    public function setAvailableFormats(array $availableFormats): static
+    {
+        $this->availableFormats = $availableFormats;
+        return $this;
+    }
+
+    public function getAvailableFormats(): array
+    {
+        return $this->availableFormats;
+    }
+
+    public function setOfficialDocumentationUrl(?string $officialDocumentationUrl): static
+    {
+        $this->officialDocumentationUrl = $officialDocumentationUrl;
+        return $this;
+    }
+
+    public function getOfficialDocumentationUrl(): ?string
+    {
+        return $this->officialDocumentationUrl;
     }
 
     public function setDescription(?string $description): static

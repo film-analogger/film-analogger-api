@@ -49,6 +49,7 @@ class PrintSessionTest extends AbstractFilmTestCase
         $photoPaper = $this->createPhotoPaper([
             'name' => 'Multigrade RC Pearl',
             'manufacturer' => $paperManufacturer,
+            'availableFormats' => ['18x24'],
         ]);
         $chemistryManufacturer = $this->createManufacturer('Kodak');
         $chemistry = $this->createPaperChemistry('BW_PAPER_DEVELOPER', [
@@ -93,19 +94,25 @@ class PrintSessionTest extends AbstractFilmTestCase
         $this->assertSame('Kodak', $data['chemicalBaths'][0]['chemistry']['manufacturer']['name']);
         $this->assertSame('Multigrade RC Pearl', $data['prints'][0]['photoPaper']['name']);
         $this->assertSame('Ilford', $data['prints'][0]['photoPaper']['manufacturer']['name']);
+        $this->assertSame(['18x24'], $data['prints'][0]['photoPaper']['availableFormats']);
     }
 
-    public function testGetCollectionDoesNotDeepEmbedRelatedCatalogEntries(): void
+    public function testGetCollectionDeepEmbedsEnlargerButNotOtherCatalogEntries(): void
     {
-        $enlarger = $this->createEnlarger(['manufacturer' => $this->createManufacturer('Durst')]);
+        $enlarger = $this->createEnlarger([
+            'name' => 'M805',
+            'manufacturer' => $this->createManufacturer('Durst'),
+        ]);
         $this->createPrintSession(['enlarger' => $enlarger]);
 
         $client = self::loggedClientAdmin();
         $response = $client->request('GET', '/print_sessions');
         $data = $response->toArray()['hydra:member'][0];
 
-        $this->assertArrayNotHasKey('name', $data['enlarger']);
+        $this->assertSame('M805', $data['enlarger']['name']);
+        $this->assertSame('Durst', $data['enlarger']['manufacturer']['name']);
         $this->assertArrayNotHasKey('prints', $data);
+        $this->assertArrayNotHasKey('name', $data['chemicalBaths'][0]['chemistry']);
     }
 
     private function baseSessionPayload(array $chemicalBaths, array $overrides = []): array
