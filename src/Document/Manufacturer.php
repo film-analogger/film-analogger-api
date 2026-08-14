@@ -122,6 +122,7 @@ class Manufacturer implements Translatable
             SerializationGroups::ENLARGER_READ_GROUP,
             SerializationGroups::PHOTO_PAPER_READ_GROUP,
             SerializationGroups::CAMERA_READ_GROUP,
+            SerializationGroups::ENLARGER_LENS_READ_GROUP,
         ]),
     ]
     private ?string $id = null;
@@ -137,6 +138,7 @@ class Manufacturer implements Translatable
             SerializationGroups::ENLARGER_READ_GROUP,
             SerializationGroups::PHOTO_PAPER_READ_GROUP,
             SerializationGroups::CAMERA_READ_GROUP,
+            SerializationGroups::ENLARGER_LENS_READ_GROUP,
         ]),
     ]
     public string $name;
@@ -236,6 +238,7 @@ class Manufacturer implements Translatable
             SerializationGroups::ENLARGER_READ_GROUP,
             SerializationGroups::PHOTO_PAPER_READ_GROUP,
             SerializationGroups::CAMERA_READ_GROUP,
+            SerializationGroups::ENLARGER_LENS_READ_GROUP,
         ]),
     ]
     public ?string $primaryColor = null;
@@ -252,6 +255,7 @@ class Manufacturer implements Translatable
             SerializationGroups::ENLARGER_READ_GROUP,
             SerializationGroups::PHOTO_PAPER_READ_GROUP,
             SerializationGroups::CAMERA_READ_GROUP,
+            SerializationGroups::ENLARGER_LENS_READ_GROUP,
         ]),
     ]
     public ?string $secondaryColor = null;
@@ -268,6 +272,7 @@ class Manufacturer implements Translatable
             SerializationGroups::ENLARGER_READ_GROUP,
             SerializationGroups::PHOTO_PAPER_READ_GROUP,
             SerializationGroups::CAMERA_READ_GROUP,
+            SerializationGroups::ENLARGER_LENS_READ_GROUP,
         ]),
     ]
     public ?string $tertiaryColor = null;

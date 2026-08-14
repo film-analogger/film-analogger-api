@@ -6,17 +6,22 @@ use ApiPlatform\Doctrine\Odm\Extension\AggregationCollectionExtensionInterface;
 use ApiPlatform\Metadata\Operation;
 use Doctrine\ODM\MongoDB\Aggregation\Builder;
 use FilmAnalogger\FilmAnaloggerApi\Document\DevelopmentLog;
+use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaperStock;
 use FilmAnalogger\FilmAnaloggerApi\Document\PrintSession;
 use FilmAnalogger\FilmAnaloggerApi\Document\PrintWork;
+use FilmAnalogger\FilmAnaloggerApi\Document\UserCamera;
+use FilmAnalogger\FilmAnaloggerApi\Document\UserEnlarger;
+use FilmAnalogger\FilmAnaloggerApi\Document\UserEnlargerLens;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * PrintSession/PrintWork/DevelopmentLog are personal darkroom-journal data,
- * not shared catalog data: a collection listing must only return the
- * current user's own records (ROLE_admin sees everything). API Platform's
- * `security` expression on GetCollection has no `object` to check per row,
- * so the scoping has to happen here instead.
+ * PrintSession/PrintWork/DevelopmentLog/PhotoPaperStock/UserCamera/
+ * UserEnlarger/UserEnlargerLens are personal data, not shared catalog data:
+ * a collection listing must only return the current user's own records
+ * (ROLE_admin sees everything). API Platform's `security` expression on
+ * GetCollection has no `object` to check per row, so the scoping has to
+ * happen here instead.
  */
 final class OwnedByCurrentUserExtension implements AggregationCollectionExtensionInterface
 {
@@ -24,6 +29,10 @@ final class OwnedByCurrentUserExtension implements AggregationCollectionExtensio
         PrintSession::class,
         PrintWork::class,
         DevelopmentLog::class,
+        PhotoPaperStock::class,
+        UserCamera::class,
+        UserEnlarger::class,
+        UserEnlargerLens::class,
     ];
 
     public function __construct(private readonly Security $security) {}

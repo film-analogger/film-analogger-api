@@ -13,11 +13,16 @@ use FilmAnalogger\FilmAnaloggerApi\Document\EnlargerLens;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaper;
+use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaperStock;
 use FilmAnalogger\FilmAnaloggerApi\Document\Tag;
+use FilmAnalogger\FilmAnaloggerApi\Document\UserCamera;
+use FilmAnalogger\FilmAnaloggerApi\Document\UserEnlarger;
+use FilmAnalogger\FilmAnaloggerApi\Document\UserEnlargerLens;
 use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ExposureKind;
 use FilmAnalogger\FilmAnaloggerApi\Constant\FocalLength;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBase;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperFormat;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperGrade;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperSurface;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
@@ -61,6 +66,10 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->getDocumentCollection(PrintSession::class)->drop();
         $this->documentManager->getDocumentCollection(PrintWork::class)->drop();
         $this->documentManager->getDocumentCollection(Exposure::class)->drop();
+        $this->documentManager->getDocumentCollection(PhotoPaperStock::class)->drop();
+        $this->documentManager->getDocumentCollection(UserCamera::class)->drop();
+        $this->documentManager->getDocumentCollection(UserEnlarger::class)->drop();
+        $this->documentManager->getDocumentCollection(UserEnlargerLens::class)->drop();
     }
 
     protected function createChemistryType(
@@ -285,6 +294,104 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->flush();
 
         return $photoPaper;
+    }
+
+    protected function createPhotoPaperStock(array $overrides = []): PhotoPaperStock
+    {
+        $photoPaper = $overrides['photoPaper'] ?? $this->createPhotoPaper();
+
+        $photoPaperStock = new PhotoPaperStock();
+        $photoPaperStock
+            ->setPhotoPaper($photoPaper)
+            ->setFormat($overrides['format'] ?? PaperFormat::F_18X24)
+            ->setQuantity($overrides['quantity'] ?? 10);
+
+        if (isset($overrides['purchasedAt'])) {
+            $photoPaperStock->setPurchasedAt($overrides['purchasedAt']);
+        }
+        if (isset($overrides['expiresAt'])) {
+            $photoPaperStock->setExpiresAt($overrides['expiresAt']);
+        }
+        if (isset($overrides['notes'])) {
+            $photoPaperStock->setNotes($overrides['notes']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $photoPaperStock->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($photoPaperStock);
+        $this->documentManager->flush();
+
+        return $photoPaperStock;
+    }
+
+    protected function createUserCamera(array $overrides = []): UserCamera
+    {
+        $camera = $overrides['camera'] ?? $this->createCamera();
+
+        $userCamera = new UserCamera();
+        $userCamera->setCamera($camera)->setQuantity($overrides['quantity'] ?? 1);
+
+        if (isset($overrides['acquiredAt'])) {
+            $userCamera->setAcquiredAt($overrides['acquiredAt']);
+        }
+        if (isset($overrides['notes'])) {
+            $userCamera->setNotes($overrides['notes']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $userCamera->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($userCamera);
+        $this->documentManager->flush();
+
+        return $userCamera;
+    }
+
+    protected function createUserEnlarger(array $overrides = []): UserEnlarger
+    {
+        $enlarger = $overrides['enlarger'] ?? $this->createEnlarger();
+
+        $userEnlarger = new UserEnlarger();
+        $userEnlarger->setEnlarger($enlarger)->setQuantity($overrides['quantity'] ?? 1);
+
+        if (isset($overrides['acquiredAt'])) {
+            $userEnlarger->setAcquiredAt($overrides['acquiredAt']);
+        }
+        if (isset($overrides['notes'])) {
+            $userEnlarger->setNotes($overrides['notes']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $userEnlarger->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($userEnlarger);
+        $this->documentManager->flush();
+
+        return $userEnlarger;
+    }
+
+    protected function createUserEnlargerLens(array $overrides = []): UserEnlargerLens
+    {
+        $enlargerLens = $overrides['enlargerLens'] ?? $this->createEnlargerLens();
+
+        $userEnlargerLens = new UserEnlargerLens();
+        $userEnlargerLens->setEnlargerLens($enlargerLens)->setQuantity($overrides['quantity'] ?? 1);
+
+        if (isset($overrides['acquiredAt'])) {
+            $userEnlargerLens->setAcquiredAt($overrides['acquiredAt']);
+        }
+        if (isset($overrides['notes'])) {
+            $userEnlargerLens->setNotes($overrides['notes']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $userEnlargerLens->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($userEnlargerLens);
+        $this->documentManager->flush();
+
+        return $userEnlargerLens;
     }
 
     protected function createTag(array $overrides = []): Tag

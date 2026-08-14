@@ -54,4 +54,16 @@ final class SerializationGroups
 
     const PRINT_READ_GROUP = 'read-print';
     const PRINT_WRITE_GROUP = 'write-print';
+
+    const PHOTO_PAPER_STOCK_READ_GROUP = 'read-photo-paper-stock';
+    const PHOTO_PAPER_STOCK_WRITE_GROUP = 'write-photo-paper-stock';
+
+    const USER_CAMERA_READ_GROUP = 'read-user-camera';
+    const USER_CAMERA_WRITE_GROUP = 'write-user-camera';
+
+    const USER_ENLARGER_READ_GROUP = 'read-user-enlarger';
+    const USER_ENLARGER_WRITE_GROUP = 'write-user-enlarger';
+
+    const USER_ENLARGER_LENS_READ_GROUP = 'read-user-enlarger-lens';
+    const USER_ENLARGER_LENS_WRITE_GROUP = 'write-user-enlarger-lens';
 }
