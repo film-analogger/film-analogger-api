@@ -1,6 +1,9 @@
 api_platform:
     version: 0.1.4
-    title: Hello API Platform
+    title: Film Analogger API
+    description: 'Film Analogger API is a REST API to manage your analog photography workflow.
+        It allows you to manage your films, cameras, and photo papers, as well as your
+        development processes.'
     serializer:
         hydra_prefix: true
     formats:
