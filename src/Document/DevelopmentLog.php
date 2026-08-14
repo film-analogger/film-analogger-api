@@ -7,22 +7,29 @@ use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Odm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\OpenApi\Model as Model;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Doctrine\Filter\PushPullFilter;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
+use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
+use FilmAnalogger\FilmAnaloggerApi\State\ContactSheetPhotoUploadProcessor;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
+use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
 
 // A DevelopmentLog is personal data: it belongs only to its creator (see
 // FilmAnalogger\FilmAnaloggerApi\Doctrine\OwnedByCurrentUserExtension for the
@@ -37,6 +44,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 // so listing many logs doesn't trigger a Film/Camera lookup
 // per row.
 #[ODM\Document]
+#[Uploadable]
 #[
     ApiResource(
         normalizationContext: [
@@ -82,6 +90,42 @@ use Symfony\Component\Serializer\Attribute\Groups;
                     '") and (is_granted("' .
                     KeycloakRoles::ADMIN .
                     '") or object.getCreatedBy() === user.getUserIdentifier())',
+            ),
+            new Post(
+                uriTemplate: '/development_logs/{id}/contact_sheet_photo',
+                name: 'upload_contact_sheet_photo',
+                processor: ContactSheetPhotoUploadProcessor::class,
+                inputFormats: ['multipart' => ['multipart/form-data']],
+                security: 'is_granted("' .
+                    KeycloakRoles::USER .
+                    '") and (is_granted("' .
+                    KeycloakRoles::ADMIN .
+                    '") or object.getCreatedBy() === user.getUserIdentifier())',
+                openapi: new Model\Operation(
+                    summary: 'Upload contact sheet photo',
+                    description: 'Upload or replace the contact sheet photo for a development log.',
+                    requestBody: new Model\RequestBody(
+                        content: new \ArrayObject([
+                            'multipart/form-data' => new Model\MediaType(
+                                schema: new \ArrayObject([
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'contactSheetPhotoFile' => [
+                                            'type' => 'string',
+                                            'format' => 'binary',
+                                            'description' => 'The contact sheet photo file',
+                                        ],
+                                    ],
+                                    'required' => ['contactSheetPhotoFile'],
+                                ]),
+                            ),
+                        ]),
+                    ),
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
             ),
         ],
     ),
@@ -261,6 +305,17 @@ class DevelopmentLog
     ]
     public ?int $contactSheetNumber = null;
 
+    #[ApiProperty(types: ['https://schema.org/contentUrl'], writable: false)]
+    #[Groups([SerializationGroups::DEVELOPMENT_LOG_READ_GROUP])]
+    public ?string $contactSheetPhotoUrl = null;
+
+    #[ODM\Field(nullable: true)]
+    public ?string $contactSheetPhotoPath = null;
+
+    #[ApiProperty(writable: false)]
+    #[UploadableField(mapping: 'contact_sheet', fileNameProperty: 'contactSheetPhotoPath')]
+    private ?File $contactSheetPhotoFile = null;
+
     public function __construct()
     {
         $this->steps = new ArrayCollection();
@@ -423,6 +478,28 @@ class DevelopmentLog
     public function getContactSheetNumber(): ?int
     {
         return $this->contactSheetNumber;
+    }
+
+    public function getContactSheetPhotoPath(): ?string
+    {
+        return $this->contactSheetPhotoPath;
+    }
+
+    public function setContactSheetPhotoPath(?string $contactSheetPhotoPath): static
+    {
+        $this->contactSheetPhotoPath = $contactSheetPhotoPath;
+        return $this;
+    }
+
+    public function getContactSheetPhotoFile(): ?File
+    {
+        return $this->contactSheetPhotoFile;
+    }
+
+    public function setContactSheetPhotoFile(?File $contactSheetPhotoFile): static
+    {
+        $this->contactSheetPhotoFile = $contactSheetPhotoFile;
+        return $this;
     }
 
     /**

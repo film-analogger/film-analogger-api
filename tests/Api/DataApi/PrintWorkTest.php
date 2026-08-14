@@ -243,4 +243,48 @@ class PrintWorkTest extends AbstractFilmTestCase
     {
         return ['headers' => ['Content-Type' => 'application/ld+json'], 'json' => $json];
     }
+
+    private function uploadOptions(string $fieldName): array
+    {
+        return [
+            'headers' => ['Content-Type' => 'multipart/form-data'],
+            'extra' => ['files' => [$fieldName => $this->uploadedTestImage('photo.jpg')]],
+        ];
+    }
+
+    public function testUploadPrintPhoto(): void
+    {
+        $print = $this->createPrintWork();
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request(
+            'POST',
+            '/prints/' . $print->getId() . '/photo',
+            $this->uploadOptions('printPhotoFile'),
+        );
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString(
+            '/print_photos/',
+            $response->toArray()['printPhotoUrl'],
+        );
+    }
+
+    public function testUploadMaskingSchemaPhoto(): void
+    {
+        $print = $this->createPrintWork();
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request(
+            'POST',
+            '/prints/' . $print->getId() . '/masking_schema_photo',
+            $this->uploadOptions('maskingSchemaPhotoFile'),
+        );
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString(
+            '/masking_schemas/',
+            $response->toArray()['maskingSchemaPhotoUrl'],
+        );
+    }
 }

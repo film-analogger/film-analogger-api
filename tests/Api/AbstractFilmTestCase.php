@@ -31,6 +31,7 @@ use FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserMock;
 use Gedmo\Translatable\Document\Translation;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 abstract class AbstractFilmTestCase extends ApiTestCase
 {
@@ -475,6 +476,17 @@ abstract class AbstractFilmTestCase extends ApiTestCase
     //         $this->assertContains($expectedItem, $actual);
     //     }
     // }
+
+    // A "test mode" UploadedFile moves its source via rename() rather than
+    // copying it, so pointing it directly at the committed fixture would
+    // delete it on first use. Copy to a throwaway temp path per call instead.
+    protected function uploadedTestImage(string $originalName = 'photo.jpg'): UploadedFile
+    {
+        $tmpPath = tempnam(sys_get_temp_dir(), 'upload_test_');
+        copy(__DIR__ . '/../resources/test.jpg', $tmpPath);
+
+        return new UploadedFile($tmpPath, $originalName, 'image/jpeg', null, true);
+    }
 
     protected function assertUnauthorizedMissingToken(
         Client $client,

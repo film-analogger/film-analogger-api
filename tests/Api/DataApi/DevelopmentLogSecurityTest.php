@@ -131,4 +131,53 @@ class DevelopmentLogSecurityTest extends AbstractFilmTestCase
         $admin->request('GET', '/development_logs');
         $this->assertJsonContains(['hydra:totalItems' => 2]);
     }
+
+    private function contactSheetPhotoUploadOptions(): array
+    {
+        return [
+            'headers' => ['Content-Type' => 'multipart/form-data'],
+            'extra' => [
+                'files' => ['contactSheetPhotoFile' => $this->uploadedTestImage('contact-sheet.jpg')],
+            ],
+        ];
+    }
+
+    public function testOwnerWithPlainUserRoleCanUploadContactSheetPhoto(): void
+    {
+        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'plain_user']);
+
+        $client = self::loggedClientUser(preferred_username: 'plain_user');
+        $client->request(
+            'POST',
+            '/development_logs/' . $developmentLog->getId() . '/contact_sheet_photo',
+            $this->contactSheetPhotoUploadOptions(),
+        );
+
+        $this->assertResponseIsSuccessful();
+    }
+
+    public function testOtherUserCannotUploadContactSheetPhotoOnSomeoneElsesLog(): void
+    {
+        [, $id] = $this->createLogAsOwner();
+
+        $otherClient = self::loggedClientUser(preferred_username: 'other_user');
+        $this->assertForbiddenAccessDenied(
+            $otherClient,
+            'POST',
+            '/development_logs/' . $id . '/contact_sheet_photo',
+            $this->contactSheetPhotoUploadOptions(),
+        );
+    }
+
+    public function testNoConnectedUserCannotUploadContactSheetPhoto(): void
+    {
+        $developmentLog = $this->createDevelopmentLog();
+        $client = static::createClient();
+
+        $this->assertUnauthorizedMissingToken(
+            $client,
+            'POST',
+            '/development_logs/' . $developmentLog->getId() . '/contact_sheet_photo',
+        );
+    }
 }

@@ -4,6 +4,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
 use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -24,9 +25,14 @@ use FilmAnalogger\FilmAnaloggerApi\OpenApi\AuthenticationErrorResponse;
 use FilmAnalogger\FilmAnaloggerApi\Repository\PrintWorkRepository;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
+use FilmAnalogger\FilmAnaloggerApi\State\MaskingSchemaPhotoUploadProcessor;
+use FilmAnalogger\FilmAnaloggerApi\State\PrintPhotoUploadProcessor;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
+use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
 
 // The PHP class is named PrintWork because `print` is a reserved language
 // construct and cannot be used as a class name. The API-facing resource
@@ -44,6 +50,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 // deferred — see plan notes. session/photoPaper/contactSheetRef/
 // negativeNumber are plain PrintWork properties and filter directly.
 #[ODM\Document(repositoryClass: PrintWorkRepository::class)]
+#[Uploadable]
 #[
     ApiResource(
         shortName: 'Print',
@@ -129,6 +136,78 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
                     KeycloakRoles::ADMIN .
                     '") or object.getCreatedBy() === user.getUserIdentifier())',
                 openapi: new Model\Operation(
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
+            new Post(
+                uriTemplate: '/prints/{id}/photo',
+                name: 'upload_print_photo',
+                processor: PrintPhotoUploadProcessor::class,
+                inputFormats: ['multipart' => ['multipart/form-data']],
+                security: 'is_granted("' .
+                    KeycloakRoles::USER .
+                    '") and (is_granted("' .
+                    KeycloakRoles::ADMIN .
+                    '") or object.session.getCreatedBy() === user.getUserIdentifier())',
+                openapi: new Model\Operation(
+                    summary: 'Upload print photo',
+                    description: 'Upload or replace the photo of the finished print.',
+                    requestBody: new Model\RequestBody(
+                        content: new \ArrayObject([
+                            'multipart/form-data' => new Model\MediaType(
+                                schema: new \ArrayObject([
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'printPhotoFile' => [
+                                            'type' => 'string',
+                                            'format' => 'binary',
+                                            'description' => 'The print photo file',
+                                        ],
+                                    ],
+                                    'required' => ['printPhotoFile'],
+                                ]),
+                            ),
+                        ]),
+                    ),
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
+                        '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
+            new Post(
+                uriTemplate: '/prints/{id}/masking_schema_photo',
+                name: 'upload_masking_schema_photo',
+                processor: MaskingSchemaPhotoUploadProcessor::class,
+                inputFormats: ['multipart' => ['multipart/form-data']],
+                security: 'is_granted("' .
+                    KeycloakRoles::USER .
+                    '") and (is_granted("' .
+                    KeycloakRoles::ADMIN .
+                    '") or object.session.getCreatedBy() === user.getUserIdentifier())',
+                openapi: new Model\Operation(
+                    summary: 'Upload masking schema photo',
+                    description: 'Upload or replace the photo of the dodge/burn masking schema sketch for the print.',
+                    requestBody: new Model\RequestBody(
+                        content: new \ArrayObject([
+                            'multipart/form-data' => new Model\MediaType(
+                                schema: new \ArrayObject([
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'maskingSchemaPhotoFile' => [
+                                            'type' => 'string',
+                                            'format' => 'binary',
+                                            'description' => 'The masking schema photo file',
+                                        ],
+                                    ],
+                                    'required' => ['maskingSchemaPhotoFile'],
+                                ]),
+                            ),
+                        ]),
+                    ),
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
                         '403' => AuthenticationErrorResponse::RESPONSE_403,
@@ -254,8 +333,8 @@ class PrintWork
 
     // Free-text description of any dodge/burn masks used (e.g. "rectangle +
     // 2 personnages"). Distinct from the paper-form's raw notes field. The
-    // mask shape itself isn't modelled — the sheet's own sketch/photo is the
-    // record (see PrintAttachment, out of scope for this iteration).
+    // mask shape itself isn't modelled as structured data — maskingSchemaPhotoUrl
+    // below holds a photo of the sheet's own sketch as the record.
     #[ODM\Field(nullable: true)]
     #[Groups([SerializationGroups::PRINT_READ_GROUP, SerializationGroups::PRINT_WRITE_GROUP])]
     public ?string $maskingNotes = null;
@@ -263,6 +342,28 @@ class PrintWork
     #[ODM\Field(nullable: true)]
     #[Groups([SerializationGroups::PRINT_READ_GROUP, SerializationGroups::PRINT_WRITE_GROUP])]
     public ?string $notes = null;
+
+    #[ApiProperty(types: ['https://schema.org/contentUrl'], writable: false)]
+    #[Groups([SerializationGroups::PRINT_READ_GROUP])]
+    public ?string $printPhotoUrl = null;
+
+    #[ODM\Field(nullable: true)]
+    public ?string $printPhotoPath = null;
+
+    #[ApiProperty(writable: false)]
+    #[UploadableField(mapping: 'print_photo', fileNameProperty: 'printPhotoPath')]
+    private ?File $printPhotoFile = null;
+
+    #[ApiProperty(types: ['https://schema.org/contentUrl'], writable: false)]
+    #[Groups([SerializationGroups::PRINT_READ_GROUP])]
+    public ?string $maskingSchemaPhotoUrl = null;
+
+    #[ODM\Field(nullable: true)]
+    public ?string $maskingSchemaPhotoPath = null;
+
+    #[ApiProperty(writable: false)]
+    #[UploadableField(mapping: 'masking_schema', fileNameProperty: 'maskingSchemaPhotoPath')]
+    private ?File $maskingSchemaPhotoFile = null;
 
     public function __construct()
     {
@@ -458,6 +559,50 @@ class PrintWork
     public function setNotes(?string $notes): static
     {
         $this->notes = $notes;
+        return $this;
+    }
+
+    public function getPrintPhotoPath(): ?string
+    {
+        return $this->printPhotoPath;
+    }
+
+    public function setPrintPhotoPath(?string $printPhotoPath): static
+    {
+        $this->printPhotoPath = $printPhotoPath;
+        return $this;
+    }
+
+    public function getPrintPhotoFile(): ?File
+    {
+        return $this->printPhotoFile;
+    }
+
+    public function setPrintPhotoFile(?File $printPhotoFile): static
+    {
+        $this->printPhotoFile = $printPhotoFile;
+        return $this;
+    }
+
+    public function getMaskingSchemaPhotoPath(): ?string
+    {
+        return $this->maskingSchemaPhotoPath;
+    }
+
+    public function setMaskingSchemaPhotoPath(?string $maskingSchemaPhotoPath): static
+    {
+        $this->maskingSchemaPhotoPath = $maskingSchemaPhotoPath;
+        return $this;
+    }
+
+    public function getMaskingSchemaPhotoFile(): ?File
+    {
+        return $this->maskingSchemaPhotoFile;
+    }
+
+    public function setMaskingSchemaPhotoFile(?File $maskingSchemaPhotoFile): static
+    {
+        $this->maskingSchemaPhotoFile = $maskingSchemaPhotoFile;
         return $this;
     }
 

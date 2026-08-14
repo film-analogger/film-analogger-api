@@ -212,3 +212,6 @@ terraform-output.json
 
 
 **/public/avatars/*
+**/public/contact_sheets/*
+**/public/print_photos/*
+**/public/masking_schemas/*

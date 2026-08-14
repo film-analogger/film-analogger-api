@@ -187,4 +187,29 @@ class DevelopmentLogTest extends AbstractFilmTestCase
 
         $this->assertResponseStatusCodeSame(204);
     }
+
+    public function testUploadContactSheetPhoto(): void
+    {
+        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_admin']);
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request(
+            'POST',
+            '/development_logs/' . $developmentLog->getId() . '/contact_sheet_photo',
+            [
+                'headers' => ['Content-Type' => 'multipart/form-data'],
+                'extra' => [
+                    'files' => [
+                        'contactSheetPhotoFile' => $this->uploadedTestImage('contact-sheet.jpg'),
+                    ],
+                ],
+            ],
+        );
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString(
+            '/contact_sheets/',
+            $response->toArray()['contactSheetPhotoUrl'],
+        );
+    }
 }

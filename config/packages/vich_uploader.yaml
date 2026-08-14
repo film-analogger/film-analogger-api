@@ -7,3 +7,15 @@ vich_uploader:
             uri_prefix: /avatars
             upload_destination: '%kernel.project_dir%/public/avatars'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        contact_sheet:
+            uri_prefix: /contact_sheets
+            upload_destination: '%kernel.project_dir%/public/contact_sheets'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        print_photo:
+            uri_prefix: /print_photos
+            upload_destination: '%kernel.project_dir%/public/print_photos'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        masking_schema:
+            uri_prefix: /masking_schemas
+            upload_destination: '%kernel.project_dir%/public/masking_schemas'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
