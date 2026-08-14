@@ -116,6 +116,138 @@ class ChemistryTest extends AbstractFilmTestCase
         ]);
     }
 
+    public function testCreateChemistryWithTemperatureRangeAndShelfLife(): void
+    {
+        $manufacturer = $this->createManufacturer();
+        $chemistryType = $this->createChemistryType();
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/chemistries', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'D-76',
+                'process' => 'B&W',
+                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'referenceTemperatureMin' => 20.5,
+                'referenceTemperatureMax' => 24.5,
+                'openShelfLifeDays' => 180,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(201);
+        $this->assertJsonContains([
+            'referenceTemperatureMin' => 20.5,
+            'referenceTemperatureMax' => 24.5,
+            'openShelfLifeDays' => 180,
+        ]);
+    }
+
+    public function testCreateChemistryWithInvertedTemperatureRangeFails(): void
+    {
+        $manufacturer = $this->createManufacturer();
+        $chemistryType = $this->createChemistryType();
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/chemistries', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'D-76',
+                'process' => 'B&W',
+                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'referenceTemperatureMin' => 24.0,
+                'referenceTemperatureMax' => 20.0,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testCreateChemistryWithNegativeOpenShelfLifeFails(): void
+    {
+        $manufacturer = $this->createManufacturer();
+        $chemistryType = $this->createChemistryType();
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/chemistries', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'D-76',
+                'process' => 'B&W',
+                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'openShelfLifeDays' => -1,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testCreateChemistryWithFullDilutionDetails(): void
+    {
+        $manufacturer = $this->createManufacturer();
+        $chemistryType = $this->createChemistryType();
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request('POST', '/chemistries', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'HC-110',
+                'process' => 'B&W',
+                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 31,
+                        'official' => true,
+                        'description' => '1+31 film',
+                        'reusable' => true,
+                        'topUpRequired' => true,
+                        'notes' => 'Reusable for 8-10 films per litre, add 10% to the time for each film.',
+                        'capacity' => '10 films/litre',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(201);
+        $data = $response->toArray();
+        $this->assertSame('1+31 film', $data['dilutions'][0]['description']);
+        $this->assertTrue($data['dilutions'][0]['reusable']);
+        $this->assertTrue($data['dilutions'][0]['topUpRequired']);
+        $this->assertSame(
+            'Reusable for 8-10 films per litre, add 10% to the time for each film.',
+            $data['dilutions'][0]['notes'],
+        );
+        $this->assertSame('10 films/litre', $data['dilutions'][0]['capacity']);
+        $this->assertSame(1, $data['dilutions'][0]['dilutedShelfLifeDays']);
+    }
+
+    public function testCreateChemistryWithTopUpRequiredWithoutReusableFails(): void
+    {
+        $manufacturer = $this->createManufacturer();
+        $chemistryType = $this->createChemistryType();
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/chemistries', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'HC-110',
+                'process' => 'B&W',
+                'chemistryType' => '/chemistry_types/' . $chemistryType->getId(),
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'dilutions' => [
+                    ['chemistryParts' => 1, 'waterParts' => 31, 'official' => true, 'topUpRequired' => true],
+                ],
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
     public function testCreateChemistryWithoutNameFails(): void
     {
         $manufacturer = $this->createManufacturer();

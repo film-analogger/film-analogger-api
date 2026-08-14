@@ -111,6 +111,116 @@ class DilutionTest extends TestCase
         self::assertCount(0, $violations);
     }
 
+    public function testGetDescriptionDefault(): void
+    {
+        self::assertNull($this->dilution->getDescription());
+    }
+
+    public function testSetDescription(): void
+    {
+        $result = $this->dilution->setDescription('1+4 film, 1+9 paper');
+
+        self::assertSame('1+4 film, 1+9 paper', $this->dilution->getDescription());
+        self::assertSame($this->dilution, $result);
+    }
+
+    public function testIsReusableDefault(): void
+    {
+        self::assertFalse($this->dilution->isReusable());
+    }
+
+    public function testSetReusable(): void
+    {
+        $result = $this->dilution->setReusable(true);
+
+        self::assertTrue($this->dilution->isReusable());
+        self::assertSame($this->dilution, $result);
+    }
+
+    public function testIsTopUpRequiredDefault(): void
+    {
+        self::assertFalse($this->dilution->isTopUpRequired());
+    }
+
+    public function testSetTopUpRequired(): void
+    {
+        $result = $this->dilution->setReusable(true)->setTopUpRequired(true);
+
+        self::assertTrue($this->dilution->isTopUpRequired());
+        self::assertSame($this->dilution, $result);
+    }
+
+    public function testGetNotesDefault(): void
+    {
+        self::assertNull($this->dilution->getNotes());
+    }
+
+    public function testSetNotes(): void
+    {
+        $result = $this->dilution->setNotes('Reusable for 8-10 films per litre, add 10% to the time for each film.');
+
+        self::assertSame(
+            'Reusable for 8-10 films per litre, add 10% to the time for each film.',
+            $this->dilution->getNotes(),
+        );
+        self::assertSame($this->dilution, $result);
+    }
+
+    public function testGetCapacityDefault(): void
+    {
+        self::assertNull($this->dilution->getCapacity());
+    }
+
+    public function testSetCapacity(): void
+    {
+        $result = $this->dilution->setCapacity('10 films/litre');
+
+        self::assertSame('10 films/litre', $this->dilution->getCapacity());
+        self::assertSame($this->dilution, $result);
+    }
+
+    public function testGetDilutedShelfLifeDaysDefault(): void
+    {
+        self::assertNull($this->dilution->getDilutedShelfLifeDays());
+    }
+
+    public function testSetDilutedShelfLifeDays(): void
+    {
+        $result = $this->dilution->setDilutedShelfLifeDays(30);
+
+        self::assertSame(30, $this->dilution->getDilutedShelfLifeDays());
+        self::assertSame($this->dilution, $result);
+    }
+
+    public function testDilutedShelfLifeDaysValidation(): void
+    {
+        $this->dilution->setDilutedShelfLifeDays(-1);
+        $violations = $this->getValidator()->validate($this->dilution);
+        self::assertCount(1, $violations);
+        self::assertStringContainsString(
+            'This value should be either positive or zero.',
+            $violations[0]->getMessage(),
+        );
+    }
+
+    public function testTopUpRequiredWithoutReusableFails(): void
+    {
+        $this->dilution->setTopUpRequired(true);
+        $violations = $this->getValidator()->validate($this->dilution);
+        self::assertCount(1, $violations);
+        self::assertStringContainsString(
+            'topUpRequired can only be set when reusable is true.',
+            $violations[0]->getMessage(),
+        );
+    }
+
+    public function testTopUpRequiredWithReusableIsValid(): void
+    {
+        $this->dilution->setReusable(true)->setTopUpRequired(true);
+        $violations = $this->getValidator()->validate($this->dilution);
+        self::assertCount(0, $violations);
+    }
+
     private function getValidator(): \Symfony\Component\Validator\Validator\ValidatorInterface
     {
         return \Symfony\Component\Validator\Validation::createValidatorBuilder()

@@ -36,14 +36,23 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 )
                 ->setOfficialDocumentationUrl($data['officialDocumentationUrl'] ?? null)
                 ->setManufacturer($this->getReference($data['manufacturer'], Manufacturer::class))
+                ->setReferenceTemperatureMin($data['referenceTemperatureMin'] ?? null)
+                ->setReferenceTemperatureMax($data['referenceTemperatureMax'] ?? null)
+                ->setOpenShelfLifeDays($data['openShelfLifeDays'] ?? null)
                 ->setStatus(CatalogStatus::OFFICIAL);
 
-            foreach ($data['dilutions'] ?? [] as [$chemParts, $waterParts, $official]) {
+            foreach ($data['dilutions'] ?? [] as $dilutionData) {
                 $chemistry->addDilution(
                     new Dilution()
-                        ->setChemistryParts($chemParts)
-                        ->setWaterParts($waterParts)
-                        ->setOfficial($official),
+                        ->setChemistryParts($dilutionData['chemistryParts'])
+                        ->setWaterParts($dilutionData['waterParts'])
+                        ->setOfficial($dilutionData['official'])
+                        ->setDescription($dilutionData['description'] ?? null)
+                        ->setReusable($dilutionData['reusable'] ?? false)
+                        ->setTopUpRequired($dilutionData['topUpRequired'] ?? false)
+                        ->setNotes($dilutionData['notes'] ?? null)
+                        ->setCapacity($dilutionData['capacity'] ?? null)
+                        ->setDilutedShelfLifeDays($dilutionData['dilutedShelfLifeDays'] ?? null),
                 );
             }
 
@@ -80,7 +89,31 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::KODAK,
-                'dilutions' => [[1, 0, true], [1, 1, true]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 180,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 0,
+                        'official' => true,
+                        'description' => 'Stock solution',
+                        'reusable' => true,
+                        'notes' =>
+                            'Reusable for about 8-10 films per litre; add 10% to the development time for each additional film.',
+                        'capacity' => '8-10 films/litre',
+                        'dilutedShelfLifeDays' => 180,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 1,
+                        'official' => true,
+                        'description' => '1+1, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'capacity' => '1 film per 300ml',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://business.kodakmoments.com/sites/default/files/files/resources/j78.pdf',
                 'translations' => [
@@ -97,7 +130,29 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::KODAK,
-                'dilutions' => [[1, 15, true], [1, 31, true]],
+                'referenceTemperatureMin' => 20.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 15,
+                        'official' => true,
+                        'description' => 'Dilution B (normal)',
+                        'notes' => 'Mixed fresh from the syrup concentrate for each session; one-shot.',
+                        'capacity' => '1 film per 300ml',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 31,
+                        'official' => true,
+                        'description' => 'Dilution H (extended/economy)',
+                        'notes' => 'Mixed fresh from the syrup concentrate for each session; one-shot.',
+                        'capacity' => '1 film per 500ml',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://business.kodakmoments.com/sites/default/files/wysiwyg/pro/chemistry/j24.pdf',
                 'translations' => [
@@ -114,7 +169,47 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::KODAK,
-                'dilutions' => [[1, 0, true], [1, 1, true], [1, 2, false], [1, 3, false]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 180,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 0,
+                        'official' => true,
+                        'description' => 'Stock solution',
+                        'reusable' => true,
+                        'topUpRequired' => true,
+                        'notes' => 'Can be replenished with XT-3 replenisher for higher-volume, ongoing use.',
+                        'capacity' => '~8 films/litre one-shot, more with replenishment',
+                        'dilutedShelfLifeDays' => 180,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 1,
+                        'official' => true,
+                        'description' => '1+1, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'capacity' => '1 film per 500ml',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 2,
+                        'official' => false,
+                        'description' => '1+2, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 3,
+                        'official' => false,
+                        'description' => '1+3, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://business.kodakmoments.com/sites/default/files/wysiwyg/pro/chemistry/J-109_Feb_2018.pdf',
                 'translations' => [
@@ -133,7 +228,20 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FIXER,
                 'manufacturer' => ManufacturerFixtures::KODAK,
-                'dilutions' => [[1, 5, true]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 5,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Reusable until exhausted; check with a fixer-check solution.',
+                        'capacity' => '~24 films/litre',
+                        'dilutedShelfLifeDays' => 60,
+                    ],
+                ],
                 'officialDocumentationUrl' => null,
                 'translations' => [
                     'fr' => [
@@ -151,7 +259,16 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_WETTING_AGENT,
                 'manufacturer' => ManufacturerFixtures::KODAK,
-                'dilutions' => [[1, 200, true]],
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 200,
+                        'official' => true,
+                        'notes' => 'Mix fresh for each session to avoid contamination and streaking.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' => null,
                 'translations' => [
                     'fr' => [
@@ -169,7 +286,39 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 0, true], [1, 1, true], [1, 3, true]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 180,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 0,
+                        'official' => true,
+                        'description' => 'Stock solution',
+                        'reusable' => true,
+                        'notes' =>
+                            'Reusable for about 8-10 films per litre; add 10% to the development time for each additional film.',
+                        'capacity' => '8-10 films/litre',
+                        'dilutedShelfLifeDays' => 180,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 1,
+                        'official' => true,
+                        'description' => '1+1, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'capacity' => '1 film per 500ml',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 3,
+                        'official' => true,
+                        'description' => '1+3, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/wp/wp-content/uploads/2024/09/ILFORD-POWDER-CHEM-190824.pdf',
                 'translations' => [
@@ -186,7 +335,28 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 9, true], [1, 14, true]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 180,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 9,
+                        'official' => true,
+                        'description' => '1+9, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'capacity' => '1 film per 300ml',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 14,
+                        'official' => true,
+                        'description' => '1+14, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/wp/wp-content/uploads/2024/09/Ilfosol3-Sept2024.pdf',
                 'translations' => [
@@ -203,7 +373,38 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 0, true], [1, 1, true], [1, 3, true]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 180,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 0,
+                        'official' => true,
+                        'description' => 'Stock solution',
+                        'reusable' => true,
+                        'notes' =>
+                            'Reusable for about 8-10 films per litre; add 10% to the development time for each additional film.',
+                        'capacity' => '8-10 films/litre',
+                        'dilutedShelfLifeDays' => 180,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 1,
+                        'official' => true,
+                        'description' => '1+1, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 3,
+                        'official' => true,
+                        'description' => '1+3, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/wp/wp-content/uploads/2024/09/ILFORD-POWDER-CHEM-190824.pdf',
                 'translations' => [
@@ -222,7 +423,31 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FIXER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 4, true], [1, 9, true]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 4,
+                        'official' => true,
+                        'description' => '1+4 film',
+                        'reusable' => true,
+                        'notes' => 'Reusable until exhausted; check with a fixer-check solution.',
+                        'capacity' => '~24 films/litre',
+                        'dilutedShelfLifeDays' => 60,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 9,
+                        'official' => true,
+                        'description' => '1+9 paper',
+                        'reusable' => true,
+                        'notes' => 'Reusable until exhausted; check with a fixer-check solution.',
+                        'capacity' => '~1.5m² of paper per litre',
+                        'dilutedShelfLifeDays' => 60,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/amfile/file/download/file/1833/product/711/',
                 'translations' => [
@@ -241,7 +466,20 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_STOP,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 19, true]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 19,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Reusable until the indicator changes colour.',
+                        'capacity' => '~20 films per litre',
+                        'dilutedShelfLifeDays' => 90,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/amfile/file/download/file/1865/product/669/',
                 'translations' => [
@@ -260,7 +498,16 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_WETTING_AGENT,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 200, true]],
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 200,
+                        'official' => true,
+                        'notes' => 'Mix fresh for each session to avoid contamination and streaking.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/amfile/file/download/file/1865/product/673/',
                 'translations' => [
@@ -279,7 +526,36 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW,
                 'chemistryType' => ChemistryTypeFixtures::BW_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ADOX,
-                'dilutions' => [[1, 25, true], [1, 50, true], [1, 100, false]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 1095,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 25,
+                        'official' => true,
+                        'description' => '1+25, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'capacity' => '1 film per 300ml',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 50,
+                        'official' => true,
+                        'description' => '1+50, one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 100,
+                        'official' => false,
+                        'description' => '1+100 (stand development), one-shot',
+                        'notes' => 'One-shot dilution; discard after use.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.fotoimpex.com/shop/images/products/media/56415_4_PDF-Datenblatt.pdf',
                 'translations' => [
@@ -298,7 +574,19 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_C41,
                 'chemistryType' => ChemistryTypeFixtures::C41_COLOR_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::TETENAL,
-                'dilutions' => [[1, 4, true]],
+                'referenceTemperatureMin' => 29.5,
+                'referenceTemperatureMax' => 30.5,
+                'openShelfLifeDays' => 42,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 4,
+                        'official' => true,
+                        'notes' => 'Mixed to working strength for the session; one-shot for consistent colour.',
+                        'capacity' => '1 film per working-solution batch',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102221/colortec-c-41-kit-for-1l',
                 'translations' => [
@@ -315,7 +603,19 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_C41,
                 'chemistryType' => ChemistryTypeFixtures::C41_BLEACH,
                 'manufacturer' => ManufacturerFixtures::TETENAL,
-                'dilutions' => [[1, 4, true]],
+                'referenceTemperatureMin' => 20.0,
+                'referenceTemperatureMax' => 40.0,
+                'openShelfLifeDays' => 90,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 4,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Less temperature-critical than the developer; can be reused across several sessions.',
+                        'dilutedShelfLifeDays' => 90,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102221/colortec-c-41-kit-for-1l',
                 'translations' => [
@@ -332,7 +632,19 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_C41,
                 'chemistryType' => ChemistryTypeFixtures::C41_STABILIZER,
                 'manufacturer' => ManufacturerFixtures::TETENAL,
-                'dilutions' => [[1, 200, true]],
+                'referenceTemperatureMin' => 20.0,
+                'referenceTemperatureMax' => 30.0,
+                'openShelfLifeDays' => 90,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 200,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Final rinse; can be reused across several sessions.',
+                        'dilutedShelfLifeDays' => 90,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102221/colortec-c-41-kit-for-1l',
                 'translations' => [
@@ -351,7 +663,20 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_E6,
                 'chemistryType' => ChemistryTypeFixtures::E6_FILM_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::TETENAL,
-                'dilutions' => [[1, 0, true]],
+                'referenceTemperatureMin' => 37.5,
+                'referenceTemperatureMax' => 38.5,
+                'openShelfLifeDays' => 42,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 0,
+                        'official' => true,
+                        'description' => 'Stock, one-shot',
+                        'notes' => 'Mixed to working strength for the session; one-shot for consistent colour.',
+                        'capacity' => '1 film per working-solution batch',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102035/colortec-e-6-3-bath-kit-for-1-l',
                 'translations' => [
@@ -368,7 +693,20 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_E6,
                 'chemistryType' => ChemistryTypeFixtures::E6_COLOR_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::TETENAL,
-                'dilutions' => [[1, 0, true]],
+                'referenceTemperatureMin' => 37.5,
+                'referenceTemperatureMax' => 38.5,
+                'openShelfLifeDays' => 42,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 0,
+                        'official' => true,
+                        'description' => 'Stock, one-shot',
+                        'notes' => 'Mixed to working strength for the session; one-shot for consistent colour.',
+                        'capacity' => '1 film per working-solution batch',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102035/colortec-e-6-3-bath-kit-for-1-l',
                 'translations' => [
@@ -385,7 +723,20 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_E6,
                 'chemistryType' => ChemistryTypeFixtures::E6_BLEACH,
                 'manufacturer' => ManufacturerFixtures::TETENAL,
-                'dilutions' => [[1, 0, true]],
+                'referenceTemperatureMin' => 20.0,
+                'referenceTemperatureMax' => 40.0,
+                'openShelfLifeDays' => 90,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 0,
+                        'official' => true,
+                        'description' => 'Stock',
+                        'reusable' => true,
+                        'notes' => 'Less temperature-critical than the developer; can be reused across several sessions.',
+                        'dilutedShelfLifeDays' => 90,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102035/colortec-e-6-3-bath-kit-for-1-l',
                 'translations' => [
@@ -402,7 +753,19 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_E6,
                 'chemistryType' => ChemistryTypeFixtures::E6_STABILIZER,
                 'manufacturer' => ManufacturerFixtures::TETENAL,
-                'dilutions' => [[1, 200, true]],
+                'referenceTemperatureMin' => 20.0,
+                'referenceTemperatureMax' => 30.0,
+                'openShelfLifeDays' => 90,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 200,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Final rinse; can be reused across several sessions.',
+                        'dilutedShelfLifeDays' => 90,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102035/colortec-e-6-3-bath-kit-for-1-l',
                 'translations' => [
@@ -421,7 +784,19 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_RA4,
                 'chemistryType' => ChemistryTypeFixtures::RA4_COLOR_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::TETENAL,
-                'dilutions' => [[1, 1, true]],
+                'referenceTemperatureMin' => 33.0,
+                'referenceTemperatureMax' => 35.0,
+                'openShelfLifeDays' => 42,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 1,
+                        'official' => true,
+                        'notes' => 'Mixed to working strength for the session; one-shot for consistent colour.',
+                        'capacity' => '~1.5m² of paper per working-solution batch',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102124/colortec-ra-4-kit-for-5-l',
                 'translations' => [
@@ -438,7 +813,20 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_RA4,
                 'chemistryType' => ChemistryTypeFixtures::RA4_BLEACH,
                 'manufacturer' => ManufacturerFixtures::TETENAL,
-                'dilutions' => [[1, 1, true]],
+                'referenceTemperatureMin' => 20.0,
+                'referenceTemperatureMax' => 35.0,
+                'openShelfLifeDays' => 90,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 1,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Less temperature-critical than the developer; can be reused across several sessions.',
+                        'capacity' => '~1.5m² of paper per litre',
+                        'dilutedShelfLifeDays' => 90,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://tetenal.com/en/homepage/consumer-shop/color-chemistry/colortec/102124/colortec-ra-4-kit-for-5-l',
                 'translations' => [
@@ -458,7 +846,28 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
                 'chemistryType' => ChemistryTypeFixtures::BW_PRINT_PAPER_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 9, true], [1, 14, false]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 180,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 9,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Reusable for the duration of a printing session; discard afterwards.',
+                        'capacity' => '~1.5m² of paper per litre (~24 sheets of 18x24cm)',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 14,
+                        'official' => false,
+                        'reusable' => true,
+                        'notes' => 'Economy dilution; reusable for the duration of a printing session.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/amfile/file/download/file/1/product/670/',
                 'translations' => [
@@ -476,7 +885,20 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
                 'chemistryType' => ChemistryTypeFixtures::BW_PRINT_STOP,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 19, true]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 19,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Reusable until the indicator changes colour.',
+                        'capacity' => '~1.5m² of paper per litre',
+                        'dilutedShelfLifeDays' => 90,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/amfile/file/download/file/3/product/671/',
                 'translations' => [
@@ -494,7 +916,31 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
                 'chemistryType' => ChemistryTypeFixtures::BW_PRINT_FIXER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 9, true], [1, 4, false]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 9,
+                        'official' => true,
+                        'description' => '1+9 paper',
+                        'reusable' => true,
+                        'notes' => 'Reusable until exhausted; check with a fixer-check solution.',
+                        'capacity' => '~1.5m² of paper per litre',
+                        'dilutedShelfLifeDays' => 60,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 4,
+                        'official' => false,
+                        'description' => '1+4 film',
+                        'reusable' => true,
+                        'notes' => 'Reusable until exhausted; check with a fixer-check solution.',
+                        'capacity' => '~24 films/litre',
+                        'dilutedShelfLifeDays' => 60,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/amfile/file/download/file/5/product/672/',
                 'translations' => [
@@ -512,7 +958,31 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
                 'chemistryType' => ChemistryTypeFixtures::BW_PRINT_TONER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 9, true], [1, 4, false]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 9,
+                        'official' => true,
+                        'description' => 'Mild split-tone',
+                        'reusable' => true,
+                        'notes' => 'Reusable across multiple toning sessions; store in a sealed bottle between uses.',
+                        'capacity' => '~20-30 prints (18x24cm) per litre',
+                        'dilutedShelfLifeDays' => 180,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 4,
+                        'official' => false,
+                        'description' => 'Deep purple-brown',
+                        'reusable' => true,
+                        'notes' => 'Reusable across multiple toning sessions; store in a sealed bottle between uses.',
+                        'capacity' => '~20-30 prints (18x24cm) per litre',
+                        'dilutedShelfLifeDays' => 180,
+                    ],
+                ],
                 'officialDocumentationUrl' =>
                     'https://www.ilfordphoto.com/amfile/file/download/file/7/product/673/',
                 'translations' => [
@@ -530,7 +1000,28 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
                 'chemistryType' => ChemistryTypeFixtures::BW_PRINT_PAPER_DEVELOPER,
                 'manufacturer' => ManufacturerFixtures::ILFORD,
-                'dilutions' => [[1, 3, true], [1, 9, false]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 180,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 3,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Reusable for the duration of a printing session; discard afterwards.',
+                        'capacity' => '~1.5m² of paper per litre (~24 sheets of 18x24cm)',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 9,
+                        'official' => false,
+                        'reusable' => true,
+                        'notes' => 'Economy dilution; reusable for the duration of a printing session.',
+                        'dilutedShelfLifeDays' => 1,
+                    ],
+                ],
                 'translations' => [
                     'fr' => [
                         'description' =>
@@ -546,7 +1037,20 @@ class ChemistryFixtures extends Fixture implements DependentFixtureInterface
                 'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
                 'chemistryType' => ChemistryTypeFixtures::BW_PRINT_STOP,
                 'manufacturer' => ManufacturerFixtures::GENERIC,
-                'dilutions' => [[1, 9, true]],
+                'referenceTemperatureMin' => 18.0,
+                'referenceTemperatureMax' => 24.0,
+                'openShelfLifeDays' => 365,
+                'dilutions' => [
+                    [
+                        'chemistryParts' => 1,
+                        'waterParts' => 9,
+                        'official' => true,
+                        'reusable' => true,
+                        'notes' => 'Reusable until it smells weak or a session\'s worth of prints has passed through it.',
+                        'capacity' => '~1.5m² of paper per litre',
+                        'dilutedShelfLifeDays' => 90,
+                    ],
+                ],
                 'translations' => [
                     'fr' => [
                         'description' =>
