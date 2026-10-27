@@ -35,6 +35,8 @@ class DevelopmentLogTest extends AbstractFilmTestCase
                 ],
                 'developmentNotes' => 'Slightly denser than usual, as expected for a push.',
                 'rating' => 4,
+                'binderId' => '00',
+                'contactSheetNumber' => 87,
             ],
         ]);
 
@@ -47,6 +49,8 @@ class DevelopmentLogTest extends AbstractFilmTestCase
         $this->assertCount(1, $data['steps']);
         $this->assertSame(720, $data['steps'][0]['durationSeconds']);
         $this->assertSame('test_user_admin', $data['createdBy']);
+        $this->assertSame('00', $data['binderId']);
+        $this->assertSame(87, $data['contactSheetNumber']);
     }
 
     public function testShotAtWithYearOnly(): void
@@ -158,6 +162,22 @@ class DevelopmentLogTest extends AbstractFilmTestCase
         $this->assertSame(5, $response->toArray()['rating']);
     }
 
+    public function testUpdateDevelopmentLogArchivingInfo(): void
+    {
+        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_admin']);
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request('PATCH', '/development_logs/' . $developmentLog->getId(), [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => ['binderId' => '00', 'contactSheetNumber' => 87],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $data = $response->toArray();
+        $this->assertSame('00', $data['binderId']);
+        $this->assertSame(87, $data['contactSheetNumber']);
+    }
+
     public function testDeleteDevelopmentLog(): void
     {
         $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_admin']);
@@ -166,5 +186,30 @@ class DevelopmentLogTest extends AbstractFilmTestCase
         $client->request('DELETE', '/development_logs/' . $developmentLog->getId());
 
         $this->assertResponseStatusCodeSame(204);
+    }
+
+    public function testUploadContactSheetPhoto(): void
+    {
+        $developmentLog = $this->createDevelopmentLog(['createdBy' => 'test_user_admin']);
+
+        $client = self::loggedClientAdmin();
+        $response = $client->request(
+            'POST',
+            '/development_logs/' . $developmentLog->getId() . '/contact_sheet_photo',
+            [
+                'headers' => ['Content-Type' => 'multipart/form-data'],
+                'extra' => [
+                    'files' => [
+                        'contactSheetPhotoFile' => $this->uploadedTestImage('contact-sheet.jpg'),
+                    ],
+                ],
+            ],
+        );
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString(
+            '/contact_sheets/',
+            $response->toArray()['contactSheetPhotoUrl'],
+        );
     }
 }

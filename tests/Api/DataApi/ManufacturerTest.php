@@ -59,6 +59,7 @@ class ManufacturerTest extends AbstractFilmTestCase
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Kodak',
+                'description' => 'American manufacturer of photographic film.',
                 'primaryColor' => '#FAB617',
                 'secondaryColor' => '#ED0000',
                 'tertiaryColor' => '#FFFFFF',
@@ -69,6 +70,7 @@ class ManufacturerTest extends AbstractFilmTestCase
         $this->assertResponseStatusCodeSame(201);
         $this->assertJsonContains([
             'name' => 'Kodak',
+            'description' => 'American manufacturer of photographic film.',
             'primaryColor' => '#FAB617',
             'secondaryColor' => '#ED0000',
             'tertiaryColor' => '#FFFFFF',
@@ -184,6 +186,7 @@ class ManufacturerTest extends AbstractFilmTestCase
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Minimal Manufacturer',
+                'description' => null,
                 'primaryColor' => null,
                 'secondaryColor' => null,
                 'tertiaryColor' => null,
@@ -194,6 +197,7 @@ class ManufacturerTest extends AbstractFilmTestCase
         $this->assertResponseStatusCodeSame(201);
         $this->assertJsonContains([
             'name' => 'Minimal Manufacturer',
+            'description' => null,
             'primaryColor' => null,
             'secondaryColor' => null,
             'tertiaryColor' => null,
@@ -256,6 +260,24 @@ class ManufacturerTest extends AbstractFilmTestCase
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
             'website' => 'https://www.fujifilm.com',
+        ]);
+    }
+
+    public function testUpdateManufacturerDescription(): void
+    {
+        $manufacturer = $this->createManufacturer('Fujifilm');
+
+        $client = self::loggedClientAdmin();
+        $client->request('PATCH', '/manufacturers/' . $manufacturer->getId(), [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => [
+                'description' => 'Japanese manufacturer of colour and instant film.',
+            ],
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJsonContains([
+            'description' => 'Japanese manufacturer of colour and instant film.',
         ]);
     }
 

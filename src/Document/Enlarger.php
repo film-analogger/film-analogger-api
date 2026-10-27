@@ -4,6 +4,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
 use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -13,6 +14,8 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\OpenApi\Model as Model;
 use Doctrine\ODM\MongoDB\Mapping\Attribute as ODM;
 use FilmAnalogger\FilmAnaloggerApi\Constant\EnlargerLightSource;
+use FilmAnalogger\FilmAnaloggerApi\Constant\NegativeFormat;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\CatalogStatusTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
@@ -121,14 +124,39 @@ class Enlarger implements Translatable
     #[Groups([SerializationGroups::ENLARGER_READ_GROUP, SerializationGroups::ENLARGER_WRITE_GROUP])]
     public string $name;
 
+    // writableLink: false forces the OpenAPI write schema back to a plain
+    // IRI string. Without it, API Platform sees that Manufacturer::$status
+    // shares CATALOG_STATUS_WRITE_GROUP with this resource's own
+    // denormalizationContext and documents `manufacturer` as an embeddable
+    // object requiring `status`, even though only an IRI is ever needed.
     #[ODM\ReferenceOne(targetDocument: Manufacturer::class, inversedBy: 'enlargers')]
     #[Assert\NotNull(message: 'Manufacturer must be set.')]
+    #[ApiProperty(writableLink: false)]
     #[Groups([SerializationGroups::ENLARGER_READ_GROUP, SerializationGroups::ENLARGER_WRITE_GROUP])]
     public Manufacturer $manufacturer;
 
     #[ODM\Field(nullable: true, enumType: EnlargerLightSource::class)]
     #[Groups([SerializationGroups::ENLARGER_READ_GROUP, SerializationGroups::ENLARGER_WRITE_GROUP])]
     public ?EnlargerLightSource $lightSource = null;
+
+    // Film formats this enlarger can print from (via its interchangeable
+    // negative carriers/condensers/lenses), e.g. a modular enlarger might
+    // support both 135 and 120. Plural, unlike Camera::$filmFormat, since
+    // one enlarger can handle several.
+    /** @var string[] */
+    #[ODM\Field(type: 'collection')]
+    #[Assert\All([new Assert\Choice(choices: ProcessConstants::CAMERA_FILM_FORMATS)])]
+    #[Groups([SerializationGroups::ENLARGER_READ_GROUP, SerializationGroups::ENLARGER_WRITE_GROUP])]
+    public array $filmFormats = [];
+
+    // Negative formats this enlarger can print from, e.g. 120 roll film
+    // itself can yield 6x6, 6x7 or 6x9 negatives depending on the camera
+    // back — this is the frame size, distinct from filmFormats above.
+    /** @var string[] */
+    #[ODM\Field(type: 'collection')]
+    #[Assert\All([new Assert\Choice(callback: [NegativeFormat::class, 'values'])])]
+    #[Groups([SerializationGroups::ENLARGER_READ_GROUP, SerializationGroups::ENLARGER_WRITE_GROUP])]
+    public array $negativeFormats = [];
 
     #[ODM\Field(nullable: true)]
     #[Gedmo\Translatable]
@@ -173,6 +201,28 @@ class Enlarger implements Translatable
     public function getLightSource(): ?EnlargerLightSource
     {
         return $this->lightSource;
+    }
+
+    public function setFilmFormats(array $filmFormats): static
+    {
+        $this->filmFormats = $filmFormats;
+        return $this;
+    }
+
+    public function getFilmFormats(): array
+    {
+        return $this->filmFormats;
+    }
+
+    public function setNegativeFormats(array $negativeFormats): static
+    {
+        $this->negativeFormats = $negativeFormats;
+        return $this;
+    }
+
+    public function getNegativeFormats(): array
+    {
+        return $this->negativeFormats;
     }
 
     public function setDescription(?string $description): static

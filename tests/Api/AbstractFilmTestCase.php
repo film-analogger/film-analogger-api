@@ -9,13 +9,20 @@ use FilmAnalogger\FilmAnaloggerApi\Document\Chemistry;
 use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
 use FilmAnalogger\FilmAnaloggerApi\Document\DevelopmentLog;
 use FilmAnalogger\FilmAnaloggerApi\Document\Enlarger;
+use FilmAnalogger\FilmAnaloggerApi\Document\EnlargerLens;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaper;
+use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaperStock;
 use FilmAnalogger\FilmAnaloggerApi\Document\Tag;
+use FilmAnalogger\FilmAnaloggerApi\Document\UserCamera;
+use FilmAnalogger\FilmAnaloggerApi\Document\UserEnlarger;
+use FilmAnalogger\FilmAnaloggerApi\Document\UserEnlargerLens;
 use FilmAnalogger\FilmAnaloggerApi\Constant\CatalogStatus;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ExposureKind;
+use FilmAnalogger\FilmAnaloggerApi\Constant\FocalLength;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBase;
+use FilmAnalogger\FilmAnaloggerApi\Constant\PaperFormat;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperGrade;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperSurface;
 use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
@@ -29,6 +36,7 @@ use FilmAnalogger\FilmAnaloggerApi\Security\Mock\KeycloakBearerUserMock;
 use Gedmo\Translatable\Document\Translation;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 abstract class AbstractFilmTestCase extends ApiTestCase
 {
@@ -50,6 +58,7 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->getDocumentCollection(ChemistryType::class)->drop();
         $this->documentManager->getDocumentCollection(Camera::class)->drop();
         $this->documentManager->getDocumentCollection(Enlarger::class)->drop();
+        $this->documentManager->getDocumentCollection(EnlargerLens::class)->drop();
         $this->documentManager->getDocumentCollection(PhotoPaper::class)->drop();
         $this->documentManager->getDocumentCollection(Tag::class)->drop();
         $this->documentManager->getDocumentCollection(DevelopmentLog::class)->drop();
@@ -57,6 +66,10 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->getDocumentCollection(PrintSession::class)->drop();
         $this->documentManager->getDocumentCollection(PrintWork::class)->drop();
         $this->documentManager->getDocumentCollection(Exposure::class)->drop();
+        $this->documentManager->getDocumentCollection(PhotoPaperStock::class)->drop();
+        $this->documentManager->getDocumentCollection(UserCamera::class)->drop();
+        $this->documentManager->getDocumentCollection(UserEnlarger::class)->drop();
+        $this->documentManager->getDocumentCollection(UserEnlargerLens::class)->drop();
     }
 
     protected function createChemistryType(
@@ -200,6 +213,12 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         if (isset($overrides['lightSource'])) {
             $enlarger->setLightSource($overrides['lightSource']);
         }
+        if (isset($overrides['filmFormats'])) {
+            $enlarger->setFilmFormats($overrides['filmFormats']);
+        }
+        if (isset($overrides['negativeFormats'])) {
+            $enlarger->setNegativeFormats($overrides['negativeFormats']);
+        }
         if (isset($overrides['description'])) {
             $enlarger->setDescription($overrides['description']);
         }
@@ -213,6 +232,30 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         return $enlarger;
     }
 
+    protected function createEnlargerLens(array $overrides = []): EnlargerLens
+    {
+        $manufacturer = $overrides['manufacturer'] ?? $this->createManufacturer();
+
+        $enlargerLens = new EnlargerLens();
+        $enlargerLens->setName($overrides['name'] ?? 'EL-Nikkor 50mm');
+        $enlargerLens->setManufacturer($manufacturer);
+        $enlargerLens->setFocalLength($overrides['focalLength'] ?? FocalLength::F50);
+        $enlargerLens->setMaxAperture($overrides['maxAperture'] ?? 2.8);
+        $enlargerLens->setStatus($overrides['status'] ?? CatalogStatus::OFFICIAL);
+
+        if (isset($overrides['description'])) {
+            $enlargerLens->setDescription($overrides['description']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $enlargerLens->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($enlargerLens);
+        $this->documentManager->flush();
+
+        return $enlargerLens;
+    }
+
     protected function createPhotoPaper(array $overrides = []): PhotoPaper
     {
         $manufacturer = $overrides['manufacturer'] ?? $this->createManufacturer();
@@ -222,6 +265,7 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $photoPaper->setManufacturer($manufacturer);
         $photoPaper->setPaperBase($overrides['paperBase'] ?? PaperBase::RC);
         $photoPaper->setPaperSurface($overrides['paperSurface'] ?? PaperSurface::PEARL);
+        $photoPaper->setProcess($overrides['process'] ?? ProcessConstants::CHEMISTRY_BW_PRINT);
         $photoPaper->setStatus($overrides['status'] ?? CatalogStatus::OFFICIAL);
 
         if (isset($overrides['paperSurfaceOther'])) {
@@ -229,6 +273,15 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         }
         if (isset($overrides['variableContrast'])) {
             $photoPaper->setVariableContrast($overrides['variableContrast']);
+        }
+        if (isset($overrides['grade'])) {
+            $photoPaper->setGrade($overrides['grade']);
+        }
+        if (isset($overrides['availableFormats'])) {
+            $photoPaper->setAvailableFormats($overrides['availableFormats']);
+        }
+        if (isset($overrides['officialDocumentationUrl'])) {
+            $photoPaper->setOfficialDocumentationUrl($overrides['officialDocumentationUrl']);
         }
         if (isset($overrides['description'])) {
             $photoPaper->setDescription($overrides['description']);
@@ -241,6 +294,104 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         $this->documentManager->flush();
 
         return $photoPaper;
+    }
+
+    protected function createPhotoPaperStock(array $overrides = []): PhotoPaperStock
+    {
+        $photoPaper = $overrides['photoPaper'] ?? $this->createPhotoPaper();
+
+        $photoPaperStock = new PhotoPaperStock();
+        $photoPaperStock
+            ->setPhotoPaper($photoPaper)
+            ->setFormat($overrides['format'] ?? PaperFormat::F_18X24)
+            ->setQuantity($overrides['quantity'] ?? 10);
+
+        if (isset($overrides['purchasedAt'])) {
+            $photoPaperStock->setPurchasedAt($overrides['purchasedAt']);
+        }
+        if (isset($overrides['expiresAt'])) {
+            $photoPaperStock->setExpiresAt($overrides['expiresAt']);
+        }
+        if (isset($overrides['notes'])) {
+            $photoPaperStock->setNotes($overrides['notes']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $photoPaperStock->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($photoPaperStock);
+        $this->documentManager->flush();
+
+        return $photoPaperStock;
+    }
+
+    protected function createUserCamera(array $overrides = []): UserCamera
+    {
+        $camera = $overrides['camera'] ?? $this->createCamera();
+
+        $userCamera = new UserCamera();
+        $userCamera->setCamera($camera)->setQuantity($overrides['quantity'] ?? 1);
+
+        if (isset($overrides['acquiredAt'])) {
+            $userCamera->setAcquiredAt($overrides['acquiredAt']);
+        }
+        if (isset($overrides['notes'])) {
+            $userCamera->setNotes($overrides['notes']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $userCamera->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($userCamera);
+        $this->documentManager->flush();
+
+        return $userCamera;
+    }
+
+    protected function createUserEnlarger(array $overrides = []): UserEnlarger
+    {
+        $enlarger = $overrides['enlarger'] ?? $this->createEnlarger();
+
+        $userEnlarger = new UserEnlarger();
+        $userEnlarger->setEnlarger($enlarger)->setQuantity($overrides['quantity'] ?? 1);
+
+        if (isset($overrides['acquiredAt'])) {
+            $userEnlarger->setAcquiredAt($overrides['acquiredAt']);
+        }
+        if (isset($overrides['notes'])) {
+            $userEnlarger->setNotes($overrides['notes']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $userEnlarger->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($userEnlarger);
+        $this->documentManager->flush();
+
+        return $userEnlarger;
+    }
+
+    protected function createUserEnlargerLens(array $overrides = []): UserEnlargerLens
+    {
+        $enlargerLens = $overrides['enlargerLens'] ?? $this->createEnlargerLens();
+
+        $userEnlargerLens = new UserEnlargerLens();
+        $userEnlargerLens->setEnlargerLens($enlargerLens)->setQuantity($overrides['quantity'] ?? 1);
+
+        if (isset($overrides['acquiredAt'])) {
+            $userEnlargerLens->setAcquiredAt($overrides['acquiredAt']);
+        }
+        if (isset($overrides['notes'])) {
+            $userEnlargerLens->setNotes($overrides['notes']);
+        }
+        if (isset($overrides['createdBy'])) {
+            $userEnlargerLens->setCreatedBy($overrides['createdBy']);
+        }
+
+        $this->documentManager->persist($userEnlargerLens);
+        $this->documentManager->flush();
+
+        return $userEnlargerLens;
     }
 
     protected function createTag(array $overrides = []): Tag
@@ -290,6 +441,12 @@ abstract class AbstractFilmTestCase extends ApiTestCase
         }
         if (isset($overrides['rating'])) {
             $developmentLog->setRating($overrides['rating']);
+        }
+        if (isset($overrides['binderId'])) {
+            $developmentLog->setBinderId($overrides['binderId']);
+        }
+        if (isset($overrides['contactSheetNumber'])) {
+            $developmentLog->setContactSheetNumber($overrides['contactSheetNumber']);
         }
         if (isset($overrides['createdBy'])) {
             $developmentLog->setCreatedBy($overrides['createdBy']);
@@ -426,6 +583,17 @@ abstract class AbstractFilmTestCase extends ApiTestCase
     //         $this->assertContains($expectedItem, $actual);
     //     }
     // }
+
+    // A "test mode" UploadedFile moves its source via rename() rather than
+    // copying it, so pointing it directly at the committed fixture would
+    // delete it on first use. Copy to a throwaway temp path per call instead.
+    protected function uploadedTestImage(string $originalName = 'photo.jpg'): UploadedFile
+    {
+        $tmpPath = tempnam(sys_get_temp_dir(), 'upload_test_');
+        copy(__DIR__ . '/../resources/test.jpg', $tmpPath);
+
+        return new UploadedFile($tmpPath, $originalName, 'image/jpeg', null, true);
+    }
 
     protected function assertUnauthorizedMissingToken(
         Client $client,

@@ -4,6 +4,7 @@ namespace FilmAnalogger\FilmAnaloggerApi\Tests\Api\DataApi;
 
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperBase;
 use FilmAnalogger\FilmAnaloggerApi\Constant\PaperSurface;
+use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Tests\Api\AbstractFilmTestCase;
 
 class PhotoPaperTest extends AbstractFilmTestCase
@@ -58,6 +59,10 @@ class PhotoPaperTest extends AbstractFilmTestCase
                 'paperBase' => 'rc',
                 'paperSurface' => 'matt',
                 'variableContrast' => false,
+                'grade' => '2',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'availableFormats' => ['9x13', '13x18'],
+                'officialDocumentationUrl' => 'https://www.foma.cz/en/photographic-paper/fomabrom',
             ],
         ]);
 
@@ -67,7 +72,68 @@ class PhotoPaperTest extends AbstractFilmTestCase
             'paperBase' => 'rc',
             'paperSurface' => 'matt',
             'variableContrast' => false,
+            'grade' => '2',
+            'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+            'availableFormats' => ['9x13', '13x18'],
+            'officialDocumentationUrl' => 'https://www.foma.cz/en/photographic-paper/fomabrom',
         ]);
+    }
+
+    public function testCreatePhotoPaperWithoutProcessFails(): void
+    {
+        $manufacturer = $this->createManufacturer();
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/photo_papers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'Multigrade RC Pearl',
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'paperBase' => 'rc',
+                'paperSurface' => 'pearl',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testCreatePhotoPaperWithInvalidProcessFails(): void
+    {
+        $manufacturer = $this->createManufacturer();
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/photo_papers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'Multigrade RC Pearl',
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'paperBase' => 'rc',
+                'paperSurface' => 'pearl',
+                'process' => 'C-41',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testCreatePhotoPaperWithInvalidAvailableFormatFails(): void
+    {
+        $manufacturer = $this->createManufacturer();
+
+        $client = self::loggedClientAdmin();
+        $client->request('POST', '/photo_papers', [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'Multigrade RC Pearl',
+                'manufacturer' => '/manufacturers/' . $manufacturer->getId(),
+                'paperBase' => 'rc',
+                'paperSurface' => 'pearl',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
+                'availableFormats' => ['not-a-format'],
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
     }
 
     public function testCreatePhotoPaperWithoutNameFails(): void
@@ -150,6 +216,7 @@ class PhotoPaperTest extends AbstractFilmTestCase
                 'paperBase' => 'rc',
                 'paperSurface' => 'other',
                 'paperSurfaceOther' => 'semi-matte maison',
+                'process' => ProcessConstants::CHEMISTRY_BW_PRINT,
             ],
         ]);
 

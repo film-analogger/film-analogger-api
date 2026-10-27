@@ -3,6 +3,8 @@
 namespace FilmAnalogger\FilmAnaloggerApi\Document;
 
 use ApiPlatform\Doctrine\Odm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
@@ -32,7 +34,24 @@ use Symfony\Component\Validator\Constraints as Assert;
 // session page renders from a single request. Scoped to this
 // item Get only — see the no-PRINT_SESSION_ITEM_READ_GROUP
 // note above the class for why GetCollection must not do this.
+// GetCollection does embed the enlarger, though: a session
+// list has exactly one enlarger per row (not a collection like
+// prints/chemistry), so the extra lookup per session is cheap
+// and it lets a session list render the enlarger name without
+// a second call per row.
 #[ApiFilter(DateFilter::class, properties: ['date'])]
+#[
+    ApiFilter(
+        SearchFilter::class,
+        properties: [
+            'lab' => 'ipartial',
+            'enlarger' => 'exact',
+            'chemicalBaths.chemistry.name' => 'ipartial',
+            'notes' => 'ipartial',
+        ],
+    ),
+]
+#[ApiFilter(OrderFilter::class, properties: ['date', 'number'])]
 #[ODM\Document(repositoryClass: PrintSessionRepository::class)]
 #[
     ApiResource(
@@ -75,6 +94,16 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ),
             ),
             new GetCollection(
+                normalizationContext: [
+                    'skip_null_values' => false,
+                    'groups' => [
+                        SerializationGroups::PRINT_SESSION_READ_GROUP,
+                        SerializationGroups::TIMESTAMPABLE_BLAMEABLE_READ_GROUP,
+                        SerializationGroups::ENLARGER_READ_GROUP,
+                        SerializationGroups::TRANSLATABLE_READ_GROUP,
+                        SerializationGroups::CATALOG_STATUS_READ_GROUP,
+                    ],
+                ],
                 security: 'is_granted("' . KeycloakRoles::DATA_READER . '")',
                 openapi: new Model\Operation(
                     responses: [
@@ -175,7 +204,7 @@ class PrintSession
     ]
     public int $number;
 
-    #[ODM\ReferenceOne(targetDocument: Enlarger::class)]
+    #[ODM\ReferenceOne(targetDocument: Enlarger::class, storeAs: 'id')]
     #[Assert\NotNull(message: 'Enlarger must be set.')]
     #[
         Groups([

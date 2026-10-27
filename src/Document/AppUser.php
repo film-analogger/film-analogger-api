@@ -14,6 +14,7 @@ use FilmAnalogger\FilmAnaloggerApi\Repository\AppUserRepository;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use FilmAnalogger\FilmAnaloggerApi\State\AvatarUploadProcessor;
+use FilmAnalogger\FilmAnaloggerApi\State\CurrentUserProvider;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -41,6 +42,19 @@ use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
                     responses: [
                         '401' => AuthenticationErrorResponse::RESPONSE_401,
                         '403' => AuthenticationErrorResponse::RESPONSE_403,
+                    ],
+                ),
+            ),
+            new Get(
+                uriTemplate: '/me',
+                name: 'me',
+                provider: CurrentUserProvider::class,
+                security: 'is_granted("IS_AUTHENTICATED_FULLY")',
+                openapi: new Model\Operation(
+                    summary: 'Get the current user',
+                    description: 'Returns the profile of the currently authenticated user.',
+                    responses: [
+                        '401' => AuthenticationErrorResponse::RESPONSE_401,
                     ],
                 ),
             ),

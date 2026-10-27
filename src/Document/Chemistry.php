@@ -8,6 +8,7 @@ use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TimestampableBlameableTrait;
 use FilmAnalogger\FilmAnaloggerApi\Document\Trait\TranslatableTrait;
 use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -20,6 +21,7 @@ use FilmAnalogger\FilmAnaloggerApi\Constant\ProcessConstants;
 use FilmAnalogger\FilmAnaloggerApi\Security\KeycloakRoles;
 use FilmAnalogger\FilmAnaloggerApi\Serializer\SerializationGroups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\Translatable\Translatable;
@@ -145,6 +147,12 @@ class Chemistry implements Translatable
     ]
     public string $process;
 
+    // writableLink: false forces the OpenAPI write schema back to a plain
+    // IRI string. Without it, API Platform sees that ChemistryType::$status
+    // shares CATALOG_STATUS_WRITE_GROUP with this resource's own
+    // denormalizationContext and documents `chemistryType` as an
+    // embeddable object requiring `status`, even though only an IRI is
+    // ever needed.
     #[ODM\ReferenceOne(targetDocument: ChemistryType::class, inversedBy: 'chemistries')]
     #[
         Groups([
@@ -153,8 +161,11 @@ class Chemistry implements Translatable
         ]),
     ]
     #[Assert\NotNull(message: 'Chemistry type must be set.')]
+    #[ApiProperty(writableLink: false)]
     public ChemistryType $chemistryType;
 
+    // Same writableLink: false rationale as chemistryType above, this time
+    // because Manufacturer::$status shares the group too.
     #[ODM\ReferenceOne(targetDocument: Manufacturer::class, inversedBy: 'chemistries')]
     #[
         Groups([
@@ -163,6 +174,7 @@ class Chemistry implements Translatable
         ]),
     ]
     #[Assert\NotNull(message: 'Manufacturer must be set.')]
+    #[ApiProperty(writableLink: false)]
     public Manufacturer $manufacturer;
 
     #[ODM\Field(nullable: true)]
@@ -174,6 +186,37 @@ class Chemistry implements Translatable
         ]),
     ]
     private ?string $description = null;
+
+    // Reference temperature range this chemistry is designed to work at (°C), as given
+    // by the manufacturer's data sheet.
+    #[ODM\Field(nullable: true)]
+    #[
+        Groups([
+            SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::CHEMISTRY_WRITE_GROUP,
+        ]),
+    ]
+    public ?float $referenceTemperatureMin = null;
+
+    #[ODM\Field(nullable: true)]
+    #[
+        Groups([
+            SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::CHEMISTRY_WRITE_GROUP,
+        ]),
+    ]
+    public ?float $referenceTemperatureMax = null;
+
+    // Storage life once the bottle/packet has been opened, in days.
+    #[ODM\Field(nullable: true)]
+    #[Assert\PositiveOrZero]
+    #[
+        Groups([
+            SerializationGroups::CHEMISTRY_READ_GROUP,
+            SerializationGroups::CHEMISTRY_WRITE_GROUP,
+        ]),
+    ]
+    public ?int $openShelfLifeDays = null;
 
     #[ODM\EmbedMany(targetDocument: Dilution::class)]
     #[Assert\Valid]
@@ -259,6 +302,54 @@ class Chemistry implements Translatable
     {
         $this->description = $description;
         return $this;
+    }
+
+    public function getReferenceTemperatureMin(): ?float
+    {
+        return $this->referenceTemperatureMin;
+    }
+
+    public function setReferenceTemperatureMin(?float $referenceTemperatureMin): static
+    {
+        $this->referenceTemperatureMin = $referenceTemperatureMin;
+        return $this;
+    }
+
+    public function getReferenceTemperatureMax(): ?float
+    {
+        return $this->referenceTemperatureMax;
+    }
+
+    public function setReferenceTemperatureMax(?float $referenceTemperatureMax): static
+    {
+        $this->referenceTemperatureMax = $referenceTemperatureMax;
+        return $this;
+    }
+
+    public function getOpenShelfLifeDays(): ?int
+    {
+        return $this->openShelfLifeDays;
+    }
+
+    public function setOpenShelfLifeDays(?int $openShelfLifeDays): static
+    {
+        $this->openShelfLifeDays = $openShelfLifeDays;
+        return $this;
+    }
+
+    #[Assert\Callback]
+    public function validateReferenceTemperatureRange(ExecutionContextInterface $context): void
+    {
+        if (
+            null !== $this->referenceTemperatureMin &&
+            null !== $this->referenceTemperatureMax &&
+            $this->referenceTemperatureMin > $this->referenceTemperatureMax
+        ) {
+            $context
+                ->buildViolation('referenceTemperatureMin cannot be greater than referenceTemperatureMax.')
+                ->atPath('referenceTemperatureMin')
+                ->addViolation();
+        }
     }
 
     public function getDilutions(): Collection

@@ -155,4 +155,62 @@ class PrintWorkSecurityTest extends AbstractFilmTestCase
         $otherClient->request('GET', '/print_sessions/' . $sessionId . '/prints');
         $this->assertJsonContains(['hydra:totalItems' => 0]);
     }
+
+    private function photoUploadOptions(string $fieldName): array
+    {
+        return [
+            'headers' => ['Content-Type' => 'multipart/form-data'],
+            'extra' => ['files' => [$fieldName => $this->uploadedTestImage('photo.jpg')]],
+        ];
+    }
+
+    public function testOwnerWithPlainUserRoleCanUploadPrintAndMaskingSchemaPhotos(): void
+    {
+        [, $id] = $this->createPrintAsOwner();
+
+        $ownerAsPlainUser = self::loggedClientUser(preferred_username: 'owner_writer');
+
+        $ownerAsPlainUser->request('POST', '/prints/' . $id . '/photo', $this->photoUploadOptions('printPhotoFile'));
+        $this->assertResponseIsSuccessful();
+
+        $ownerAsPlainUser->request(
+            'POST',
+            '/prints/' . $id . '/masking_schema_photo',
+            $this->photoUploadOptions('maskingSchemaPhotoFile'),
+        );
+        $this->assertResponseIsSuccessful();
+    }
+
+    public function testOtherUserCannotUploadPhotosOnSomeoneElsesPrint(): void
+    {
+        [, $id] = $this->createPrintAsOwner();
+
+        $otherClient = self::loggedClientUser(preferred_username: 'other_user');
+
+        $this->assertForbiddenAccessDenied(
+            $otherClient,
+            'POST',
+            '/prints/' . $id . '/photo',
+            $this->photoUploadOptions('printPhotoFile'),
+        );
+        $this->assertForbiddenAccessDenied(
+            $otherClient,
+            'POST',
+            '/prints/' . $id . '/masking_schema_photo',
+            $this->photoUploadOptions('maskingSchemaPhotoFile'),
+        );
+    }
+
+    public function testNoConnectedUserCannotUploadPhotos(): void
+    {
+        $print = $this->createPrintWork();
+        $client = static::createClient();
+
+        $this->assertUnauthorizedMissingToken($client, 'POST', '/prints/' . $print->getId() . '/photo');
+        $this->assertUnauthorizedMissingToken(
+            $client,
+            'POST',
+            '/prints/' . $print->getId() . '/masking_schema_photo',
+        );
+    }
 }
