@@ -215,3 +215,5 @@ terraform-output.json
 **/public/contact_sheets/*
 **/public/print_photos/*
 **/public/masking_schemas/*
+
+out.json 
