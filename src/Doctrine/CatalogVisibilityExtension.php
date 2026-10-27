@@ -10,6 +10,7 @@ use FilmAnalogger\FilmAnaloggerApi\Document\Camera;
 use FilmAnalogger\FilmAnaloggerApi\Document\Chemistry;
 use FilmAnalogger\FilmAnaloggerApi\Document\ChemistryType;
 use FilmAnalogger\FilmAnaloggerApi\Document\Enlarger;
+use FilmAnalogger\FilmAnaloggerApi\Document\EnlargerLens;
 use FilmAnalogger\FilmAnaloggerApi\Document\Film;
 use FilmAnalogger\FilmAnaloggerApi\Document\Manufacturer;
 use FilmAnalogger\FilmAnaloggerApi\Document\PhotoPaper;
@@ -32,6 +33,7 @@ final class CatalogVisibilityExtension implements AggregationCollectionExtension
         Manufacturer::class,
         Camera::class,
         Enlarger::class,
+        EnlargerLens::class,
         PhotoPaper::class,
         Tag::class,
         Chemistry::class,

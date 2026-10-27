@@ -150,6 +150,27 @@ class EnlargerLensSecurityTest extends AbstractFilmTestCase
         );
     }
 
+    public function testUserSeesOfficialAndOwnEnlargerLensesInCollectionOnly(): void
+    {
+        $this->createEnlargerLens(['name' => 'Official one', 'status' => CatalogStatus::OFFICIAL]);
+        $this->createEnlargerLens([
+            'name' => 'My personal one',
+            'status' => CatalogStatus::PERSONAL,
+            'createdBy' => 'plain_user',
+        ]);
+        $this->createEnlargerLens([
+            'name' => "Someone else's personal one",
+            'status' => CatalogStatus::PERSONAL,
+            'createdBy' => 'other_user',
+        ]);
+
+        $client = self::loggedClientUser(preferred_username: 'plain_user');
+        $client->request('GET', '/enlarger_lenses');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJsonContains(['hydra:totalItems' => 2]);
+    }
+
     public function testDataWriterSeesEveryStatusAndCanApprovePending(): void
     {
         $enlargerLens = $this->createEnlargerLens([
